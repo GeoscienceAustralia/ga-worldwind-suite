@@ -45,6 +45,7 @@ import javax.swing.JFrame;
 import org.gdal.gdal.gdal;
 
 import au.gov.ga.worldwind.tiler.gdal.GDALTile;
+import au.gov.ga.worldwind.tiler.util.BufferUtil;
 import au.gov.ga.worldwind.tiler.util.FileFilters.DirectoryFileFilter;
 import au.gov.ga.worldwind.tiler.util.Util;
 
@@ -138,7 +139,9 @@ public class Previewer extends JFrame
 					int newLevel = left ? level + 1 : level - 1;
 					newLevel = Math.max(minlevel, Math.min(maxlevel, newLevel));
 					if (newLevel == level)
+					{
 						return;
+					}
 
 					level = newLevel;
 					if (left)
@@ -152,9 +155,13 @@ public class Previewer extends JFrame
 						ypos = tileY / 2 - yCount / 2;
 					}
 					if (xCount % 2 == 0)
+					{
 						xoffset = (int) (-tileW / 2);
+					}
 					if (yCount % 2 == 0)
+					{
 						yoffset = (int) (-tileH / 2);
+					}
 
 					loadImages();
 					repaint();
@@ -219,9 +226,13 @@ public class Previewer extends JFrame
 			{
 				int num = Integer.parseInt(dirs[i].getName());
 				if (num < minlevel)
+				{
 					minlevel = num;
+				}
 				if (num > maxlevel)
+				{
 					maxlevel = num;
+				}
 			}
 			catch (NumberFormatException e)
 			{
@@ -234,7 +245,9 @@ public class Previewer extends JFrame
 		setTitle("World Wind Tile Previewer - Level " + level + ", Position (" + xpos + "," + ypos + ")");
 
 		if (level == levelOld && xpos == xposOld && ypos == yposOld)
+		{
 			return;
+		}
 
 		int size = (xCount + 2) * (yCount + 2);
 		if (images == null)
@@ -388,7 +401,9 @@ public class Previewer extends JFrame
 		finally
 		{
 			if (g != null)
+			{
 				g.dispose();
+			}
 		}
 		bf.show();
 	}
@@ -396,7 +411,9 @@ public class Previewer extends JFrame
 	private BufferedImage loadImage(File file) throws IOException
 	{
 		if (!elevations)
+		{
 			return ImageIO.read(file);
+		}
 		else
 		{
 			FileInputStream fis = null;
@@ -414,7 +431,9 @@ public class Previewer extends JFrame
 			finally
 			{
 				if (fis != null)
+				{
 					fis.close();
+				}
 			}
 
 			double min = Double.MAX_VALUE, max = -Double.MAX_VALUE;
@@ -422,15 +441,23 @@ public class Previewer extends JFrame
 			{
 				double value = getBufferValue(bb);
 				if (nodata != null && value == nodata)
+				{
 					continue;
+				}
 				if (value < min)
+				{
 					min = value;
+				}
 				if (value > max)
+				{
 					max = value;
+				}
 			}
 
 			if (max == min)
+			{
 				max = min + 1;
+			}
 
 			int pixels = width * height;
 			int[] offsets = new int[4];
@@ -457,9 +484,13 @@ public class Previewer extends JFrame
 	private double getBufferValue(ByteBuffer buffer)
 	{
 		if (floatingPoint)
-			return GDALTile.getDoubleValue(buffer, type);
+		{
+			return BufferUtil.getDoubleValue(buffer, type);
+		}
 		else
-			return GDALTile.getLongValue(buffer, type);
+		{
+			return BufferUtil.getLongValue(buffer, type);
+		}
 	}
 
 	private class ImageView extends JDialog
