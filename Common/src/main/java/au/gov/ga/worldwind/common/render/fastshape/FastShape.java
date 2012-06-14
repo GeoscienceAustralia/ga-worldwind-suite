@@ -152,12 +152,7 @@ public class FastShape implements OrderedRenderable, Cacheable, Bounded, Wirefra
 		this.mode = mode;
 		setPositions(positions);
 		setIndices(indices);
-		if (firstShape == null)
-			firstShape = this;
 	}
-
-	@Deprecated
-	private static FastShape firstShape;
 
 	@Override
 	public double getDistanceFromEye()
@@ -846,7 +841,9 @@ public class FastShape implements OrderedRenderable, Cacheable, Bounded, Wirefra
 		}
 
 		if (boundingSphere != null)
+		{
 			eyePoint = eyePoint.subtract3(boundingSphere.getCenter());
+		}
 
 		if (mode == GL.GL_TRIANGLES)
 		{

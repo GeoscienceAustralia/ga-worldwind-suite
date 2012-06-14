@@ -31,6 +31,7 @@ import javax.media.opengl.GL;
 
 import au.gov.ga.worldwind.common.layers.point.types.UrlMarker;
 import au.gov.ga.worldwind.common.render.fastshape.FastShape;
+import au.gov.ga.worldwind.common.util.Validate;
 
 /**
  * Basic implementation of a {@link Borehole}.
@@ -44,6 +45,7 @@ public class BoreholeImpl extends UrlMarker implements Borehole, Renderable
 	private List<BoreholeSample> samples = new ArrayList<BoreholeSample>();
 
 	private FastShape fastShape;
+	private FastShape centreline;
 	private float[] boreholeColorBuffer;
 	private float[] pickingColorBuffer;
 
@@ -52,6 +54,10 @@ public class BoreholeImpl extends UrlMarker implements Borehole, Renderable
 	public BoreholeImpl(BoreholeLayer layer, Position position, MarkerAttributes attrs)
 	{
 		super(position, attrs);
+		
+		Validate.notNull(layer, "A borehole layer is required");
+		Validate.notNull(position, "A marker position is required");
+		
 		this.layer = layer;
 	}
 
@@ -66,8 +72,27 @@ public class BoreholeImpl extends UrlMarker implements Borehole, Renderable
 		this.samples = samples;
 	}
 
+	/**
+	 * Add a sample to this borehole.
+	 * <p/>
+	 * Threadsafe.
+	 * 
+	 * @param sample The sample to add. Null samples will be ignored.
+	 * 
+	 * @throw IllegalArgumentException If the provided sample is from the wrong borehole.
+	 */
 	public void addSample(BoreholeSample sample)
 	{
+		if (sample == null)
+		{
+			return;
+		}
+		
+		if (sample.getBorehole() != this)
+		{
+			throw new IllegalArgumentException("Sample added from wrong borehole: " + sample.getBorehole() == null ? "null" : sample.getBorehole().toString());
+		}
+		
 		synchronized (sampleLock)
 		{
 			samples.add(sample);
@@ -84,22 +109,41 @@ public class BoreholeImpl extends UrlMarker implements Borehole, Renderable
 		List<Position> positions = new ArrayList<Position>();
 		List<Color> colors = new ArrayList<Color>();
 
+		List<Position> centrelinePositions = new ArrayList<Position>();
+		
 		double latitude = getPosition().getLatitude().degrees;
 		double longitude = getPosition().getLongitude().degrees;
+		
 		for (BoreholeSample sample : getSamples())
 		{
-			positions.add(Position.fromDegrees(latitude, longitude, -sample.getDepthFrom()));
-			positions.add(Position.fromDegrees(latitude, longitude, -sample.getDepthTo()));
-			colors.add(sample.getColor());
-			colors.add(sample.getColor());
-		}
+			Position sampleTop = Position.fromDegrees(latitude, longitude, -sample.getDepthFrom());
+			Position sampleBottom = Position.fromDegrees(latitude, longitude, -sample.getDepthTo());
 
+			positions.add(sampleTop);
+			positions.add(sampleBottom);
+			
+			Color sampleColor = sample.getColor() == null ? this.layer.getDefaultSampleColor() : sample.getColor();
+			colors.add(sampleColor);
+			colors.add(sampleColor);
+		}
+		
+		if (!positions.isEmpty())
+		{
+			centrelinePositions.add(getPosition());
+			centrelinePositions.add(positions.get(positions.size() - 1));
+		}
+		
 		boreholeColorBuffer = FastShape.color3ToFloats(colors);
 		pickingColorBuffer = new float[colors.size() * 3];
 
 		fastShape = new FastShape(positions, GL.GL_LINES);
 		fastShape.setColorBuffer(boreholeColorBuffer);
 		fastShape.setFollowTerrain(true);
+		
+		centreline = new FastShape(centrelinePositions, GL.GL_LINES);
+		centreline.setColor(Color.LIGHT_GRAY);
+		centreline.setLineWidth(1.0);
+		centreline.setFollowTerrain(true);
 	}
 
 	@Override
@@ -118,7 +162,9 @@ public class BoreholeImpl extends UrlMarker implements Borehole, Renderable
 	public void render(DrawContext dc)
 	{
 		if (fastShape == null)
+		{
 			return;
+		}
 
 		//check if the borehole is within the minimum drawing distance; if not, don't draw
 		Extent extent = fastShape.getExtent();
@@ -126,19 +172,24 @@ public class BoreholeImpl extends UrlMarker implements Borehole, Renderable
 		{
 			double distanceToEye = extent.getCenter().distanceTo3(dc.getView().getEyePoint()) - extent.getRadius();
 			if (distanceToEye > layer.getMinimumDistance())
+			{
 				return;
+			}
 		}
 
 		if (!dc.isPickingMode())
 		{
 			fastShape.render(dc);
+			centreline.render(dc);
 		}
 		else
 		{
 			//Don't calculate the picking buffer if the shape isn't going to be rendered anyway.
 			//This check is also performed in the shape's render() function, so don't do it above.
 			if (extent != null && !dc.getView().getFrustumInModelCoordinates().intersects(extent))
+			{
 				return;
+			}
 
 			boolean oldDeepPicking = dc.isDeepPickingEnabled();
 			try
@@ -189,5 +240,15 @@ public class BoreholeImpl extends UrlMarker implements Borehole, Renderable
 				dc.setDeepPickingEnabled(oldDeepPicking);
 			}
 		}
+	}
+	
+	FastShape getSamplesShape()
+	{
+		return fastShape;
+	}
+	
+	FastShape getCentrelineShape()
+	{
+		return centreline;
 	}
 }

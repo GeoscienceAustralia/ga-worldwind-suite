@@ -1,11 +1,11 @@
 package au.gov.ga.worldwind.wmsbrowser;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
+import gov.nasa.worldwind.geom.Sector;
+import gov.nasa.worldwind.ogc.wms.WMSLayerCapabilities;
 
 import org.junit.Test;
 
-import gov.nasa.worldwind.geom.Sector;
-import gov.nasa.worldwind.ogc.wms.WMSLayerCapabilities;
 import au.gov.ga.worldwind.common.util.message.MessageSourceAccessor;
 import au.gov.ga.worldwind.wmsbrowser.WmsLayerInfoPanel.LayerInfoBuilder;
 
@@ -34,8 +34,6 @@ public class LayerInfoBuilderTest
 		String formattedString = classToBeTested.getFormattedString();
 		
 		assertNotNull(formattedString);
-		
-		System.out.println(formattedString);
 	}
 
 	/**

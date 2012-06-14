@@ -17,6 +17,9 @@ package au.gov.ga.worldwind.common.layers.borehole;
 
 import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.geom.Position;
+
+import java.awt.Color;
+
 import au.gov.ga.worldwind.common.layers.data.DataLayer;
 
 /**
@@ -49,4 +52,10 @@ public interface BoreholeLayer extends DataLayer
 	 *         should be rendered. If null, there's no minimum distance.
 	 */
 	Double getMinimumDistance();
+	
+	/**
+	 * @return The default colour to use when rendering samples that have no colour
+	 * 		   information available.
+	 */
+	Color getDefaultSampleColor();
 }
