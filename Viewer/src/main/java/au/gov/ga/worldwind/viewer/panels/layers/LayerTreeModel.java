@@ -836,31 +836,55 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 		return nodes;
 	}
 
-	protected void fireTreeNodesChanged(Object source, Object[] path, int[] childIndices, Object[] children)
+	protected void fireTreeNodesChanged(final Object source, final Object[] path, final int[] childIndices,
+			final Object[] children)
 	{
-		TreeModelEvent e = new TreeModelEvent(source, path, childIndices, children);
-		for (int i = listeners.size() - 1; i >= 0; i--)
+		SwingUtil.invokeLaterTaskOnEDT(new Runnable()
 		{
-			listeners.get(i).treeNodesChanged(e);
-		}
+			@Override
+			public void run()
+			{
+				TreeModelEvent e = new TreeModelEvent(source, path, childIndices, children);
+				for (int i = listeners.size() - 1; i >= 0; i--)
+				{
+					listeners.get(i).treeNodesChanged(e);
+				}
+			}
+		});
 	}
 
-	private void fireTreeNodesInserted(Object source, Object[] path, int[] childIndices, Object[] children)
+	private void fireTreeNodesInserted(final Object source, final Object[] path, final int[] childIndices,
+			final Object[] children)
 	{
-		TreeModelEvent e = new TreeModelEvent(source, path, childIndices, children);
-		for (int i = listeners.size() - 1; i >= 0; i--)
+		SwingUtil.invokeLaterTaskOnEDT(new Runnable()
 		{
-			listeners.get(i).treeNodesInserted(e);
-		}
+			@Override
+			public void run()
+			{
+				TreeModelEvent e = new TreeModelEvent(source, path, childIndices, children);
+				for (int i = listeners.size() - 1; i >= 0; i--)
+				{
+					listeners.get(i).treeNodesInserted(e);
+				}
+			}
+		});
 	}
 
-	private void fireTreeNodesRemoved(Object source, Object[] path, int[] childIndices, Object[] children)
+	private void fireTreeNodesRemoved(final Object source, final Object[] path, final int[] childIndices,
+			final Object[] children)
 	{
-		TreeModelEvent e = new TreeModelEvent(source, path, childIndices, children);
-		for (int i = listeners.size() - 1; i >= 0; i--)
+		SwingUtil.invokeLaterTaskOnEDT(new Runnable()
 		{
-			listeners.get(i).treeNodesRemoved(e);
-		}
+			@Override
+			public void run()
+			{
+				TreeModelEvent e = new TreeModelEvent(source, path, childIndices, children);
+				for (int i = listeners.size() - 1; i >= 0; i--)
+				{
+					listeners.get(i).treeNodesRemoved(e);
+				}
+			}
+		});
 	}
 
 	List<ILayerNode> getLayerNodes()

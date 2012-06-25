@@ -54,7 +54,9 @@ public class ThemeOpener
 			throw new IllegalArgumentException("Theme URL cannot be null");
 		}
 
-		final ProgressMonitor progress = new IndeterminateProgressMonitor(null, "Downloading theme", null);
+		boolean file = "file".equalsIgnoreCase(url.getProtocol());
+		final ProgressMonitor progress =
+				new IndeterminateProgressMonitor(null, file ? "Loading theme" : "Downloading theme", null);
 		progress.setMillisToDecideToPopup(0);
 		progress.setMillisToPopup(0);
 
