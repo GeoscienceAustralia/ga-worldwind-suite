@@ -1,19 +1,23 @@
 package au.gov.ga.worldwind.common.layers.styled;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.avlist.AVListImpl;
 import gov.nasa.worldwind.render.Material;
+import gov.nasa.worldwind.util.Logging;
 
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Point;
+import java.util.logging.Level;
 
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
-
-import au.gov.ga.worldwind.common.layers.styled.Style;
 
 /**
  * Unit tests for the {@link Style} class
@@ -23,6 +27,18 @@ public class StyleTest
 	private static final double ALLOWABLE_ERROR = 0.0001;
 	private Style classToTest;
 
+	@BeforeClass
+	public static void init()
+	{
+		Logging.logger().setLevel(Level.OFF);
+	}
+	
+	@AfterClass
+	public static void destroy()
+	{
+		Logging.logger().setLevel(Level.SEVERE);
+	}
+	
 	@Before
 	public void setup()
 	{
