@@ -16,18 +16,14 @@
 package au.gov.ga.worldwind.common.ui;
 
 /**
- * Shadow copy of SwingUtil that ignores the EDT and runs tasks in the current
- * Thread.
+ * Helper interface which allows running {@link Runnable}s on the EDT. Can be
+ * plugged-in to the {@link SwingUtil} class.
+ * 
+ * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
-public class SwingUtil
+public interface SwingEDTInvoker
 {
-	public static void invokeTaskOnEDT(Runnable task) throws SwingEDTException
-	{
-		task.run();
-	}
+	void invokeTaskOnEDT(Runnable task) throws SwingEDTException;
 
-	public static void invokeLaterTaskOnEDT(Runnable task)
-	{
-		task.run();
-	}
+	void invokeLaterTaskOnEDT(Runnable task);
 }

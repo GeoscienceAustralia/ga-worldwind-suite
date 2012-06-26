@@ -15,10 +15,6 @@
  ******************************************************************************/
 package au.gov.ga.worldwind.common.ui;
 
-import java.lang.reflect.InvocationTargetException;
-
-import javax.swing.SwingUtilities;
-
 /**
  * Utilities for working with Swing GUIs
  * 
@@ -26,6 +22,8 @@ import javax.swing.SwingUtilities;
  */
 public class SwingUtil
 {
+	private static SwingEDTInvoker invoker = new SwingEDTInvokerImpl();
+
 	/**
 	 * Invokes the provided runnable task on the EDT. Use to ensure GUI updates
 	 * are performed on the EDT, where they should be.
@@ -37,25 +35,7 @@ public class SwingUtil
 	 */
 	public static void invokeTaskOnEDT(Runnable task) throws SwingEDTException
 	{
-		try
-		{
-			if (SwingUtilities.isEventDispatchThread())
-			{
-				task.run();
-			}
-			else
-			{
-				SwingUtilities.invokeAndWait(task);
-			}
-		}
-		catch (InvocationTargetException e)
-		{
-			throw new SwingEDTException(e.getCause());
-		}
-		catch (InterruptedException e)
-		{
-			e.printStackTrace();
-		}
+		invoker.invokeTaskOnEDT(task);
 	}
 
 	/**
@@ -66,13 +46,25 @@ public class SwingUtil
 	 */
 	public static void invokeLaterTaskOnEDT(Runnable task)
 	{
-		if (SwingUtilities.isEventDispatchThread())
-		{
-			task.run();
-		}
-		else
-		{
-			SwingUtilities.invokeLater(task);
-		}
+		invoker.invokeLaterTaskOnEDT(task);
+	}
+
+	/**
+	 * @return The {@link SwingEDTInvoker} used by this class.
+	 */
+	public static SwingEDTInvoker getInvoker()
+	{
+		return invoker;
+	}
+
+	/**
+	 * Set the {@link SwingEDTInvoker} used by this class. Used for unit
+	 * testing.
+	 * 
+	 * @param invoker
+	 */
+	public static void setInvoker(SwingEDTInvoker invoker)
+	{
+		SwingUtil.invoker = invoker;
 	}
 }
