@@ -23,6 +23,10 @@ import javax.swing.event.TreeModelListener;
 import org.junit.Before;
 import org.junit.Test;
 
+import au.gov.ga.worldwind.common.ui.SwingEDTException;
+import au.gov.ga.worldwind.common.ui.SwingEDTInvoker;
+import au.gov.ga.worldwind.common.ui.SwingUtil;
+
 
 /**
  * Unit tests for the {@link LayerTreeModel} class
@@ -51,6 +55,21 @@ public class LayerTreeModelTest
 		
 		treeListener = new TreeModelTestListener();
 		classUnderTest.addTreeModelListener(treeListener);
+		
+		SwingUtil.setInvoker(new SwingEDTInvoker()
+		{
+			@Override
+			public void invokeTaskOnEDT(Runnable task) throws SwingEDTException
+			{
+				task.run();
+			}
+			
+			@Override
+			public void invokeLaterTaskOnEDT(Runnable task)
+			{
+				task.run();
+			}
+		});
 	}
 	
 	@Test
