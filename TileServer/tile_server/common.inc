@@ -260,15 +260,15 @@
 			String levelPath = "";
 			if (L != null)
 				levelPath += L + "/";
-			String namePath = "";
-			if (rowDirectory != null)
-				namePath += rowDirectory + "/";
-			namePath += filename + "." + extension;
+			String rowPath = "";
+			if(rowDirectory != null)
+				rowPath += rowDirectory + "/";
+			String namePath = filename + "." + extension;
 
 			File parent = new File(parentPath);
 			if (parent.isDirectory())
 			{
-				File file = new File(parent, levelPath + namePath);
+				File file = new File(parent, levelPath + rowPath + namePath);
 				if (file.isFile())
 				{
 					return new ExtensionInputStream(new FileInputStream(file), extension, null);
@@ -276,10 +276,19 @@
 				
 				if(L != null)
 				{
-					File levelParent = new File(parentPath, L + ".zip");
+					File levelParent = new File(parent, L + ".zip");
 					if(levelParent.isFile())
 					{
-						return getFileFromZip(levelParent, namePath, extension, useJavaZip);
+						return getFileFromZip(levelParent, rowPath + namePath, extension, useJavaZip);
+					}
+					
+					if(rowDirectory != null)
+					{
+						File rowParent = new File(parentPath + "/" + L, rowDirectory + ".zip");
+						if(rowParent.isFile())
+						{
+							return getFileFromZip(rowParent, namePath, extension, useJavaZip);
+						}
 					}
 				}
 			}
@@ -290,7 +299,7 @@
 
 				if (parent.isFile())
 				{
-					return getFileFromZip(parent, levelPath + namePath, extension, useJavaZip);
+					return getFileFromZip(parent, levelPath + rowPath + namePath, extension, useJavaZip);
 				}
 			}
 		}
