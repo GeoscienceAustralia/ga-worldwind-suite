@@ -50,6 +50,7 @@ public class GDALRasterModelProviderTest
 	private GDALRasterModelProvider classUnderTest;
 	private Mockery mockContext;
 	private ModelLayer modelLayer;
+	private FastShapeMatcher matcher;
 
 	// Test raster properties (in WGS84 lat/lon)
 	private static final List<RasterProperties> TEST_RASTERS = new ArrayList<RasterProperties>();
@@ -71,6 +72,26 @@ public class GDALRasterModelProviderTest
 					height = 52;
 					minValue = -2558.0;
 					maxValue = -699.0;
+				}
+			}
+		});
+		
+		TEST_RASTERS.add(new RasterProperties()
+		{
+			{
+				{
+					name = "testgrid.asc";
+					testBand = 1;
+					maxLat = 300;
+					minLat = 0;
+					minLon = 0;
+					maxLon = 200;
+					xCellSize = 50.0;
+					yCellSize = 50.0;
+					width = 4;
+					height = 6;
+					minValue = 100;
+					maxValue = 1;
 				}
 			}
 		});
@@ -117,7 +138,7 @@ public class GDALRasterModelProviderTest
 	}
 
 	@Test
-	public void loadWithNullUrl()
+	public void testLoadWithNullUrl()
 	{
 		try
 		{
@@ -131,7 +152,7 @@ public class GDALRasterModelProviderTest
 	}
 
 	@Test
-	public void loadWithNullLayer()
+	public void testLoadWithNullLayer()
 	{
 		try
 		{
@@ -146,20 +167,10 @@ public class GDALRasterModelProviderTest
 	}
 
 	@Test
-	public void loadValidUrl() throws Exception
+	public void testLoadValidUrl() throws Exception
 	{
 		RasterProperties testRaster = TEST_RASTERS.get(0);
-		URL url = getClass().getResource(testRaster.name);
-
-		final FastShapeMatcher matcher = new FastShapeMatcher();
-		mockContext.checking(new Expectations()
-		{
-			{
-				{
-					allowing(modelLayer).addShape(with(matcher));
-				}
-			}
-		});
+		URL url = setupTestWithRaster(testRaster);
 
 		boolean dataLoaded = classUnderTest.doLoadData(url, modelLayer);
 		FastShape shape = matcher.shape;
@@ -192,6 +203,111 @@ public class GDALRasterModelProviderTest
 		assertEquals(testRaster.maxLat, sector.getMaxLatitude().degrees, 0.0001);
 	}
 
+	@Test
+	public void testOffset()
+	{
+		final float scale = 1.0f;
+		final float offset = -100f;
+		
+		doScaleOffsetTest(scale, offset);
+	}
+	
+	@Test
+	public void testScale()
+	{
+		final float scale = 10.0f;
+		final float offset = 0f;
+		
+		doScaleOffsetTest(scale, offset);
+	}
+	
+	@Test
+	public void testScaleWithOffset()
+	{
+		final float scale = 10.0f;
+		final float offset = -100f;
+		
+		doScaleOffsetTest(scale, offset);
+	}
+
+	private void doScaleOffsetTest(final float scale, final float offset)
+	{
+		RasterProperties testRaster = TEST_RASTERS.get(1);
+		URL url = setupTestWithRaster(testRaster);
+		
+		GDALRasterModelParameters params = new GDALRasterModelParameters();
+		params.setCoordinateSystem("EPSG:4326");
+		params.setOffset((double)offset);
+		params.setScaleFactor((double)scale);
+		classUnderTest = new GDALRasterModelProvider(params);
+		
+		boolean dataLoaded = classUnderTest.doLoadData(url, modelLayer);
+		FastShape shape = matcher.shape;
+
+		assertTrue("Data did not load as expected", dataLoaded);
+		assertNotNull("Shape is null", shape);
+		
+		// With MaxVariance = 0 we expect every pixel to have a corresponding position
+		List<Position> positions = shape.getPositions();
+		assertNotNull(positions);
+		assertEquals(testRaster.width * testRaster.height, positions.size());
+		
+		// Expected behaviour:
+		// - NODATA values will be set to last 'good' value
+		// - Elevation values will be offset by offset amount (-100)
+		float[] raw = {
+				-9999, -9999, 5, 2,
+				2, 20, 100, 36,
+				3, 8, 35, 10,
+				32, 42, 50, 6,
+				88, 75, 27, 9,
+				13, 5, 1, 1,
+		};
+		float[] expected = adjustRawValue(raw, offset, scale);
+		
+		assertElevationsAsExpected(positions, expected, testRaster);
+	}
+	
+	private void assertElevationsAsExpected(List<Position> positions, float[] expected, RasterProperties testRaster)
+	{
+		for (int v = 0; v < testRaster.height; v++)
+		{
+			for (int u = 0; u < testRaster.width; u++)
+			{
+				Position p = positions.get(v*testRaster.width + u);
+				Float e = expected[v*testRaster.width + u];
+				assertEquals(e, p.elevation, 0.001);
+			}
+		}
+	}
+	
+	private float[] adjustRawValue(float[] raw, float offset, float scale)
+	{
+		float[] result = new float[raw.length];
+		for (int i = 0; i < result.length; i++)
+		{
+			result[i] = offset + (scale * raw[i]);
+		}
+		return result;
+	}
+	
+	private URL setupTestWithRaster(RasterProperties raster)
+	{
+		URL url = getClass().getResource(raster.name);
+
+		matcher = new FastShapeMatcher();
+		mockContext.checking(new Expectations()
+		{
+			{
+				{
+					allowing(modelLayer).addShape(with(matcher));
+				}
+			}
+		});
+		
+		return url;
+	}
+	
 	/** A simple properties class that holds raster details for use in tests */
 	private static class RasterProperties
 	{

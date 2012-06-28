@@ -126,6 +126,7 @@ public class ModelLayerFactory
 		WWXML.checkAndSetStringParam(domElement, params, AVKeyMore.PAINTED_VARIABLE, "PaintedVariable", xpath);
 		
 		WWXML.checkAndSetDoubleParam(domElement, params, AVKeyMore.SCALE, "ScaleFactor", xpath);
+		WWXML.checkAndSetDoubleParam(domElement, params, AVKeyMore.OFFSET, "Offset", xpath);
 
 		setupModelProvider(domElement, xpath, params);
 

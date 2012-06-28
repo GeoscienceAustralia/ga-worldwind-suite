@@ -30,6 +30,9 @@ public class GDALRasterModelParameters
 	/** A scale factor to use to scale Z values as appropriate */
 	private Double scaleFactor;
 	
+	/** An offset applied to Z values as appropriate */
+	private Double offset;
+	
 	/** 
 	 * The coordinate system of the raster. 
 	 * Used to provide a coordinate system for raster formats that do not store it (ASCII grids etc.) 
@@ -38,7 +41,7 @@ public class GDALRasterModelParameters
 	
 	public GDALRasterModelParameters()
 	{
-		//use defaults
+		this(null);
 	}
 
 	/**
@@ -48,6 +51,11 @@ public class GDALRasterModelParameters
 	 */
 	public GDALRasterModelParameters(AVList params)
 	{
+		if (params == null)
+		{
+			return;
+		}
+		
 		ColorMap cm = (ColorMap) params.getValue(AVKeyMore.COLOR_MAP);
 		if (cm != null)
 		{
@@ -77,6 +85,13 @@ public class GDALRasterModelParameters
 		{
 			setScaleFactor(d);
 		}
+		
+		d = (Double) params.getValue(AVKeyMore.OFFSET);
+		if (d != null)
+		{
+			setOffset(d);
+		}
+				
 	}
 
 	/**
@@ -173,5 +188,21 @@ public class GDALRasterModelParameters
 	public void setScaleFactor(Double scaleFactor)
 	{
 		this.scaleFactor = scaleFactor;
+	}
+	
+	/**
+	 * @return the offset
+	 */
+	public Double getOffset()
+	{
+		return offset;
+	}
+	
+	/**
+	 * @param offset the offset to set
+	 */
+	public void setOffset(Double offset)
+	{
+		this.offset = offset;
 	}
 }

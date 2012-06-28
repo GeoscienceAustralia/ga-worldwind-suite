@@ -118,7 +118,7 @@ public class GDALRasterModelProvider extends AbstractDataProvider<ModelLayer> im
 	 * Reads the values from the provided dataset into:
 	 * <ul>
 	 * 	<li>The provided positions list <code>(lat,lon,elevation)</code>
-	 *  <li>The provided values array <code>values[x,y] = elevation</code>
+	 *  <li>The provided values array <code>values[x,y] = elevation | NaN (nodata)</code>
 	 * </ul>
 	 */
 	private void readValuesFromDataset(Dataset gdalDataset, List<Position> positions, float[][] values, float[] minmax)
@@ -132,10 +132,11 @@ public class GDALRasterModelProvider extends AbstractDataProvider<ModelLayer> im
 		buffer.order(ByteOrder.nativeOrder()); // @see Band.ReadRaster_Direct
 		buffer.rewind();
 		
-		float nodata = getModelBandNodata(gdalDataset);
 		
 		double elevationOffset = getOffset(band);
 		double elevationScale = getScale(band);
+		
+		float nodata = getModelBandNodata(gdalDataset);
 		
 		double[] geoTransform = gdalDataset.GetGeoTransform();
 		CoordinateTransformation coordinateTransformation = getCoordinateTransformation(gdalDataset);
@@ -150,21 +151,29 @@ public class GDALRasterModelProvider extends AbstractDataProvider<ModelLayer> im
 				double elevation = toElevation(elevationOffset, elevationScale, datasetValue);
 				
 				double[] transformedCoords = transformCoordinates(geoTransform, x, y);
-				
-				Position position = new PositionWithCoord(projectCoordinates(coordinateTransformation, transformedCoords[0], transformedCoords[1], elevation), x, y);
-				
-				values[x][y] = (float)position.elevation;
-				
-				if (!isNoData(nodata, (float)position.elevation))
+				Position projectedCoordinates = projectCoordinates(coordinateTransformation, transformedCoords[0], transformedCoords[1], elevation);
+
+				Position position;
+				if (isNoData(nodata, (float)datasetValue))
 				{
-					if (position.elevation < minmax[0])
+					// 'Smooth' out the mesh by setting nodata elevations to the last 'real' elevation value if available
+					// This avoids nodata values 'falling' to the centre of the globe
+					if (positions.size() > 0)
 					{
-						minmax[0] = (float)position.elevation;
+						position = new PositionWithCoord(projectedCoordinates.latitude, projectedCoordinates.longitude, positions.get(positions.size() - 1).elevation, x, y);
 					}
-					if (position.elevation > minmax[1])
+					else
 					{
-						minmax[1] = (float)position.elevation;
+						position = new PositionWithCoord(projectedCoordinates, x, y);
 					}
+					values[x][y] = Float.NaN;
+				}
+				else
+				{
+					position = new PositionWithCoord(projectedCoordinates, x, y);
+					minmax[0] = Math.min((float)position.elevation, minmax[0]);
+					minmax[1] = Math.max((float)position.elevation, minmax[1]);
+					values[x][y] = (float)position.elevation;
 				}
 				
 				positions.add(position);
@@ -270,6 +279,11 @@ public class GDALRasterModelProvider extends AbstractDataProvider<ModelLayer> im
 	 */
 	private double getOffset(Band band)
 	{
+		if (modelParameters.getOffset() != null)
+		{
+			return modelParameters.getOffset();
+		}
+		
 		Double[] vals = new Double[1];
 		band.GetOffset(vals);
 		return vals[0] != null ? vals[0] : 0.0;
@@ -361,8 +375,6 @@ public class GDALRasterModelProvider extends AbstractDataProvider<ModelLayer> im
 	 */
 	private float[] createColorBufferForDataset(List<Position> positions, float[][] values, float[] minmax, Dataset gdalDataset)
 	{
-		float nodata = getModelBandNodata(gdalDataset);
-		
 		FloatBuffer colorBuffer = FloatBuffer.allocate(positions.size() * COLOR_BUFFER_ELEMENT_SIZE);
 		for (Position position : positions)
 		{
@@ -372,9 +384,8 @@ public class GDALRasterModelProvider extends AbstractDataProvider<ModelLayer> im
 			int v = pwv.v;
 			
 			float[] adjacentValues = getAdjacentValues(values, u, v);
-			
 			//check all values around the current position for NODATA; if NODATA, use a transparent color
-			if (isNoData(nodata, adjacentValues))
+			if (isNaN(adjacentValues))
 			{
 				for (int i = 0; i < COLOR_BUFFER_ELEMENT_SIZE; i++)
 				{
@@ -435,6 +446,21 @@ public class GDALRasterModelProvider extends AbstractDataProvider<ModelLayer> im
 		for (float f : values)
 		{
 			if (f == nodata)
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	/**
+	 * @return <code>true</code> if any value in the provided values is NaN
+	 */
+	private boolean isNaN(float... values)
+	{
+		for (float f : values)
+		{
+			if (Float.isNaN(f))
 			{
 				return true;
 			}
