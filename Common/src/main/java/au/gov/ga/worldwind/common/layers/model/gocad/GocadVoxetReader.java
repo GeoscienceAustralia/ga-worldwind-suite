@@ -36,6 +36,8 @@ import org.gdal.osr.CoordinateTransformation;
 import au.gov.ga.worldwind.common.render.fastshape.FastShape;
 import au.gov.ga.worldwind.common.util.HSLColor;
 import au.gov.ga.worldwind.common.util.Validate;
+import au.gov.ga.worldwind.common.util.io.FloatReader;
+import au.gov.ga.worldwind.common.util.io.FloatReader.FloatFormat;
 
 /**
  * {@link GocadReader} implementation for reading Voxet GOCAD files.
@@ -243,10 +245,12 @@ public class GocadVoxetReader implements GocadReader<FastShape>
 		{
 			URL fileUrl = new URL(context, file);
 			InputStream is = new BufferedInputStream(fileUrl.openStream());
-			is.skip(offset);
-
-			boolean ieee = "IEEE".equals(etype);
-
+			FloatReader reader = FloatReader.Builder.newFloatReaderForStream(is)
+													.withOffset(offset)
+													.withFormat("IEEE".equals(etype) ? FloatFormat.IEEE : FloatFormat.IBM)
+													.withByteOrder(parameters.getByteOrder())
+													.build();
+			float[] floatValue = new float[1];
 			if (parameters.isBilinearMinification())
 			{
 				//contains the number of values summed
@@ -261,8 +265,8 @@ public class GocadVoxetReader implements GocadReader<FastShape>
 						int vRegion = (v / strideV) * uSamples;
 						for (int u = 0; u < nu; u++)
 						{
-							float value = readNextFloat(is, parameters.getByteOrder(), ieee);
-							if (!Float.isNaN(value) && value != noDataValue)
+							reader.readNextValues(floatValue);
+							if (!Float.isNaN(floatValue[0]) && floatValue[0] != noDataValue)
 							{
 								int uRegion = (u / strideU);
 								int valueIndex = wRegion + vRegion + uRegion;
@@ -270,11 +274,11 @@ public class GocadVoxetReader implements GocadReader<FastShape>
 								//if this is the first value for this region, set it, otherwise add it
 								if (count[valueIndex] == 0)
 								{
-									values[valueIndex] = value;
+									values[valueIndex] = floatValue[0];
 								}
 								else
 								{
-									values[valueIndex] += value;
+									values[valueIndex] += floatValue[0];
 								}
 								count[valueIndex]++;
 							}
@@ -340,12 +344,12 @@ public class GocadVoxetReader implements GocadReader<FastShape>
 						Vec4 vAdd = axisVStride.multiply3(v);
 						for (int u = 0; u < nu; u += strideU)
 						{
-							float value = readNextFloat(is, parameters.getByteOrder(), ieee);
-							if (!Float.isNaN(value) && value != noDataValue)
+							reader.readNextValues(floatValue);
+							if (!Float.isNaN(floatValue[0]) && floatValue[0] != noDataValue)
 							{
-								values[valueIndex] = value;
-								min = Math.min(min, value);
-								max = Math.max(max, value);
+								values[valueIndex] = floatValue[0];
+								min = Math.min(min, floatValue[0]);
+								max = Math.max(max, floatValue[0]);
 
 								Vec4 uAdd = axisUStride.multiply3(u);
 								Vec4 p =
@@ -362,11 +366,11 @@ public class GocadVoxetReader implements GocadReader<FastShape>
 								}
 							}
 							valueIndex++;
-							skipBytes(is, esize * Math.min(strideU - 1, nu - u - 1));
+							reader.skip(esize * Math.min(strideU - 1, nu - u - 1));
 						}
-						skipBytes(is, esize * nu * Math.min(strideV - 1, nv - v - 1));
+						reader.skip(esize * nu * Math.min(strideV - 1, nv - v - 1));
 					}
-					skipBytes(is, esize * nu * nv * Math.min(strideW - 1, nw - w - 1));
+					reader.skip(esize * nu * nv * Math.min(strideW - 1, nw - w - 1));
 				}
 			}
 		}

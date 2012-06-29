@@ -138,6 +138,19 @@ public class FloatReader
 	}
 	
 	/**
+	 * Skip ahead by the provided number of bytes, or to the end of the stream if there are fewer bytes in the stream
+	 * than are to be skipped.
+	 * 
+	 * @param numBytes The number of bytes to skip
+	 * 
+	 * @throws IOException If there is a problem accessing the underling stream
+	 */
+	synchronized public void skip(long numBytes) throws IOException
+	{
+		is.skip(numBytes);
+	}
+	
+	/**
 	 * @return The next float value in the stream
 	 */
 	private float readFloat() throws IOException
@@ -167,7 +180,7 @@ public class FloatReader
 	{
 		if (groupValueGap > 0)
 		{
-			is.skip(groupValueGap);
+			skip(groupValueGap);
 		}
 	}
 	
@@ -178,7 +191,7 @@ public class FloatReader
 	{
 		if (groupSeparation > 0)
 		{
-			is.skip(groupSeparation);
+			skip(groupSeparation);
 		}
 	}
 	
@@ -187,7 +200,7 @@ public class FloatReader
 	 */
 	private void skipToStart() throws IOException
 	{
-		is.skip(offset);
+		skip(offset);
 	}
 	
 	/** An enumeration of supported floating point formats */ 

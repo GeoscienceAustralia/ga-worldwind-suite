@@ -137,6 +137,32 @@ public class FloatReaderTest
 		assertTrue(Float.isNaN(values[100]));
 	}
 	
+	@Test
+	public void testSkipWithLessThanRemainingBytes() throws Exception
+	{
+		FloatReader classUnderTest = new FloatReader(is);
+		
+		classUnderTest.skip(40);
+		
+		float[] value = new float[1];
+		classUnderTest.readNextValues(value);
+		
+		assertEquals(3.0f, value[0], 0.001);
+	}
+	
+	@Test
+	public void testSkipWithMoreThanRemainingBytes() throws Exception
+	{
+		FloatReader classUnderTest = new FloatReader(is);
+		
+		classUnderTest.skip(440);
+		
+		float[] value = new float[1];
+		classUnderTest.readNextValues(value);
+		
+		assertTrue(Float.isNaN(value[0]));
+	}
+	
 	private void assertPatternCorrect(FloatReader classUnderTest, int offset, int groupSize, int groupSeparation, int groupValueGap, FloatFormat format, ByteOrder order)
 	{
 		assertEquals(offset, classUnderTest.getOffset());
