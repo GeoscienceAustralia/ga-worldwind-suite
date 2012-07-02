@@ -37,6 +37,8 @@ import java.util.zip.ZipFile;
 import org.gdal.osr.CoordinateTransformation;
 
 import au.gov.ga.worldwind.common.util.URLUtil;
+import au.gov.ga.worldwind.common.util.io.FloatReader;
+import au.gov.ga.worldwind.common.util.io.FloatReader.FloatFormat;
 
 /**
  * {@link VolumeDataProvider} implementation which reads volume data from a
@@ -54,251 +56,53 @@ public class SGridVolumeDataProvider extends AbstractVolumeDataProvider
 	private final static Pattern pointsFilePattern = Pattern.compile("POINTS_FILE\\s+([^\\s]*)\\s*");
 	private final static Pattern flagsOffsetPattern = Pattern.compile("FLAGS_OFFSET\\s+(\\d+)");
 	private final static Pattern flagsFilePattern = Pattern.compile("FLAGS_FILE\\s+([^\\s]*)\\s*");
+	private final static Pattern propertyOffsetPattern = Pattern.compile("PROP_OFFSET\\s+(\\d+)");
+	private final static Pattern propertyFilePattern = Pattern.compile("PROP_FILE\\s+(\\d+)\\s+([^\\s]*)\\s*");
+	private final static Pattern propertyFormatPattern = Pattern.compile("PROP_FORMAT\\s+(\\d+)\\s+([^\\s]*)\\s*");
+	private final static Pattern propertySizePattern = Pattern.compile("PROP_ESIZE\\s+(\\d+)\\s+([^\\s]*)\\s*");
+	private final static Pattern propertyTypePattern = Pattern.compile("PROP_ETYPE\\s+(\\d+)\\s+([^\\s]*)\\s*");
 	private final static Pattern propertyNamePattern = Pattern.compile("PROPERTY\\s+(\\d+)\\s+\"?(.*?)\"?\\s*");
 	private final static Pattern propertyNoDataPattern = Pattern.compile("PROP_NO_DATA_VALUE\\s+(\\d+)\\s+([\\d.\\-]+)\\s*");
 
 	private String asciiDataFile;
+	private String pointsDataFile;
+	private int pointsOffset = 0;
+	private String flagsDataFile;
+	private int flagsOffset = 0;
 	private String paintedVariableName;
 	private int paintedVariableId;
 	private boolean cellCentered;
+	
+	private String propertyDataFile;
+	private int propertyOffset = 0;
+	private int propertySize = 4;
+	private String propertyType = "IEEE";
+	private String propertyFormat = "RAW";
 
 	@Override
 	protected boolean doLoadData(URL url, VolumeLayer layer)
 	{
-		ZipFile zip = null;
+		Object source = null;
 		try
 		{
-			File file = URLUtil.urlToFile(url);
-
-			InputStream sgInputStream = null;
-			try
+			source = openSource(url);
+			if (source == null)
 			{
-				if (file.getName().toLowerCase().endsWith(".zip"))
-				{
-					zip = new ZipFile(file);
-					Enumeration<? extends ZipEntry> entries = zip.entries();
-					ZipEntry sgEntry = null;
-					while (entries.hasMoreElements())
-					{
-						ZipEntry entry = entries.nextElement();
-						if (entry.getName().toLowerCase().endsWith(".sg"))
-						{
-							sgEntry = entry;
-							break;
-						}
-					}
-
-					if (sgEntry == null)
-					{
-						throw new IOException("Could not find .sg file in zip");
-					}
-
-					sgInputStream = zip.getInputStream(sgEntry);
-				}
-				else
-				{
-					sgInputStream = new FileInputStream(file);
-				}
-
-				BufferedReader reader = new BufferedReader(new InputStreamReader(sgInputStream));
-				String line;
-				while ((line = reader.readLine()) != null)
-				{
-					parseLine(line);
-				}
+				throw new IOException("Unable to load SGrid from URL " + url);
 			}
-			finally
-			{
-				if (sgInputStream != null)
-				{
-					sgInputStream.close();
-				}
-			}
+			
+			parseHeaderFile(source);
 
-			if (asciiDataFile == null)
-			{
-				throw new IOException("Data file not specified");
-			}
-			if (cellCentered)
-			{
-				xSize--;
-				ySize--;
-				zSize--;
-			}
-			if (xSize == 0 || ySize == 0 || zSize == 0)
-			{
-				throw new IOException("Volume dimensions are 0");
-			}
+			validateDataFileSpecified();
+			
+			adjustForCellCentredData();
+			validateNonZeroDimensions();
 
-			InputStream dataInputStream = null;
-			try
-			{
-				if (zip != null)
-				{
-					ZipEntry dataEntry = zip.getEntry(asciiDataFile);
-					dataInputStream = zip.getInputStream(dataEntry);
-				}
-				if (dataInputStream == null)
-				{
-					File data = new File(file.getParent(), asciiDataFile);
-					if (data.exists())
-					{
-						dataInputStream = new FileInputStream(data);
-					}
-				}
-				if (dataInputStream == null)
-				{
-					throw new IOException("Data file '" + asciiDataFile + "' not found");
-				}
+			readSGridData(source, layer);
 
-				//TODO add support for SGrid binary property files
-
-				//setup data variables
-				sector = null;
-				double[] transformed = new double[3];
-				CoordinateTransformation transformation = layer.getCoordinateTransformation();
-				positions = new ArrayList<Position>(xSize * ySize);
-				int positionIndex = 0;
-				double firstXValue = 0, firstYValue = 0, firstZValue = 0;
-				data = FloatBuffer.allocate(xSize * ySize * zSize);
-				top = 0;
-				minValue = Float.MAX_VALUE;
-				maxValue = -Float.MAX_VALUE;
-
-				//setup the ASCII data file line regex
-				String doublePattern = "([\\d.\\-]+)";
-				String nonCapturingDoublePattern = "(?:[\\d.\\-]+)";
-				String spacerPattern = "\\s+";
-				//regex for coordinates
-				String lineRegex =
-						"\\s*" + doublePattern + spacerPattern + doublePattern + spacerPattern + doublePattern;
-				for (int property = 1; property < paintedVariableId; property++)
-				{
-					//ignore all properties in between coordinates and painted property
-					lineRegex += spacerPattern + nonCapturingDoublePattern;
-				}
-				//only capture the painted property
-				lineRegex += spacerPattern + doublePattern + ".*";
-				Pattern linePattern = Pattern.compile(lineRegex);
-
-				//read the ASCII data file
-				BufferedReader reader = new BufferedReader(new InputStreamReader(dataInputStream));
-				String line;
-				while ((line = reader.readLine()) != null)
-				{
-					Matcher matcher = linePattern.matcher(line);
-					if (matcher.matches())
-					{
-						double x = Double.parseDouble(matcher.group(1));
-						double y = Double.parseDouble(matcher.group(2));
-						double z = Double.parseDouble(matcher.group(3));
-						float value = Float.parseFloat(matcher.group(4));
-
-						//transform the point;
-						if (transformation != null)
-						{
-							transformation.TransformPoint(transformed, x, y, z);
-							x = transformed[0];
-							y = transformed[1];
-							z = transformed[2];
-						}
-
-						//only store the first width*height positions (the rest are evenly spaced at different depths)
-						if (positionIndex < xSize * ySize)
-						{
-							Position position = Position.fromDegrees(y, x, z);
-							positions.add(position);
-							top += z / (xSize * ySize);
-
-							//update the sector to include this latitude/longitude
-							if (sector == null)
-							{
-								sector =
-										new Sector(position.latitude, position.latitude, position.longitude,
-												position.longitude);
-							}
-							else
-							{
-								sector = sector.union(position.latitude, position.longitude);
-							}
-						}
-
-						if (positionIndex == 0)
-						{
-							firstXValue = x;
-							firstYValue = y;
-							firstZValue = z;
-						}
-						else if (positionIndex == 1)
-						{
-							//second x value
-							reverseX = x < firstXValue;
-						}
-						else if (positionIndex == xSize)
-						{
-							//second y value
-							reverseY = y < firstYValue;
-						}
-						else if (positionIndex == xSize * ySize * (zSize - 1))
-						{
-							//positionIndex is the same x/y as 0, but at the bottom elevation instead of top,
-							//so we can calculate the depth as the difference between the two elevations
-							reverseZ = z > firstZValue;
-							depth = reverseZ ? z - firstZValue : firstZValue - z;
-							top += reverseZ ? depth : 0;
-						}
-
-						//put the data into the floatbuffer
-						data.put(value);
-						minValue = Math.min(minValue, value);
-						maxValue = Math.max(maxValue, value);
-						positionIndex++;
-					}
-				}
-
-				if (positions.size() != xSize * ySize)
-				{
-					throw new IOException("Data file doesn't contain the correct number of positions");
-				}
-
-				if (reverseX || reverseY || reverseZ)
-				{
-					//if the z-axis is reversed, bring all the positions up to the
-					//top depth (they are currently at the bottom depth)
-					if (reverseZ)
-					{
-						List<Position> oldPositions = positions;
-						positions = new ArrayList<Position>(oldPositions.size());
-						for (Position position : oldPositions)
-						{
-							positions.add(new Position(position, position.elevation + depth));
-						}
-					}
-
-					//if the x-axis or y-axis are reversed, mirror them
-					if (reverseX || reverseY)
-					{
-						List<Position> oldPositions = positions;
-						positions = new ArrayList<Position>(oldPositions.size());
-						for (int y = 0; y < ySize; y++)
-						{
-							int ry = reverseY ? ySize - y - 1 : y;
-							for (int x = 0; x < xSize; x++)
-							{
-								int rx = reverseX ? xSize - x - 1 : x;
-								positions.add(oldPositions.get(rx + ry * xSize));
-							}
-						}
-					}
-				}
-			}
-			finally
-			{
-				if (dataInputStream != null)
-				{
-					dataInputStream.close();
-				}
-			}
+			validateDataFileLoadedCorrectly();
+			
+			correctForReversedAxes();
 		}
 		catch (IOException e)
 		{
@@ -307,43 +111,483 @@ public class SGridVolumeDataProvider extends AbstractVolumeDataProvider
 		}
 		finally
 		{
-			if (zip != null)
-			{
-				try
-				{
-					zip.close();
-				}
-				catch (IOException e)
-				{
-				}
-			}
+			closeSource(source);
 		}
-
-		/*try
-		{
-			ArrayVolumeDataProvider.saveVolumeDataProviderToArrayFile(this,
-					URLUtil.urlToFile(new URL(url.toExternalForm() + ".array")));
-		}
-		catch (MalformedURLException e)
-		{
-			e.printStackTrace();
-		}*/
-		
-		/*try
-		{
-			ArrayWithPositionsVolumeDataProvider.saveVolumeDataProviderToArrayFile(this,
-					URLUtil.urlToFile(new URL(url.toExternalForm() + ".array.zip")));
-		}
-		catch (MalformedURLException e)
-		{
-			e.printStackTrace();
-		}*/
 
 		layer.dataAvailable(this);
 		return true;
 	}
 
-	protected void parseLine(String line)
+
+	/**
+	 * Load the sgrid data from the specified data file(s)
+	 */
+	private void readSGridData(Object source, VolumeLayer layer) throws IOException
+	{
+		initialiseDataVariables();
+		
+		//TODO add support for SGrid binary property files
+		if (asciiDataFile != null)
+		{
+			readAsciiDataFile(source, layer);
+		}
+		else
+		{
+			readBinaryDataFile(source, layer);
+		}
+	}
+	
+	/**
+	 * Load sgrid data from an ASCII data file
+	 */
+	private void readAsciiDataFile(Object source, VolumeLayer layer) throws IOException
+	{
+		InputStream dataInputStream = null;
+		try
+		{
+			dataInputStream = openSGridDataStream(source, asciiDataFile);
+		
+			Pattern linePattern = createAsciiLineMatchingPattern();
+	
+			CoordinateTransformation transformation = layer.getCoordinateTransformation();
+			double firstXValue = 0, firstYValue = 0, firstZValue = 0;
+			double[] transformed = new double[3];
+			int positionIndex = 0;
+			String line;
+			BufferedReader reader = new BufferedReader(new InputStreamReader(dataInputStream));
+			while ((line = reader.readLine()) != null)
+			{
+				Matcher matcher = linePattern.matcher(line);
+				if (!matcher.matches())
+				{
+					continue;
+				}
+				
+				double x = Double.parseDouble(matcher.group(1));
+				double y = Double.parseDouble(matcher.group(2));
+				double z = Double.parseDouble(matcher.group(3));
+				float value = Float.parseFloat(matcher.group(4));
+
+				//transform the point;
+				if (transformation != null)
+				{
+					transformation.TransformPoint(transformed, x, y, z);
+					x = transformed[0];
+					y = transformed[1];
+					z = transformed[2];
+				}
+
+				//only store the first width*height positions (the rest are evenly spaced at different depths)
+				if (positionIndex < xSize * ySize)
+				{
+					Position position = Position.fromDegrees(y, x, z);
+					positions.add(position);
+					top += z / (xSize * ySize);
+
+					//update the sector to include this latitude/longitude
+					updateSectorToIncludePosition(position);
+				}
+
+				if (positionIndex == 0)
+				{
+					firstXValue = x;
+					firstYValue = y;
+					firstZValue = z;
+				}
+				else if (positionIndex == 1)
+				{
+					//second x value
+					reverseX = x < firstXValue;
+				}
+				else if (positionIndex == xSize)
+				{
+					//second y value
+					reverseY = y < firstYValue;
+				}
+				else if (positionIndex == xSize * ySize * (zSize - 1))
+				{
+					//positionIndex is the same x/y as 0, but at the bottom elevation instead of top,
+					//so we can calculate the depth as the difference between the two elevations
+					reverseZ = z > firstZValue;
+					depth = reverseZ ? z - firstZValue : firstZValue - z;
+					top += reverseZ ? depth : 0;
+				}
+
+				//put the data into the floatbuffer
+				data.put(value);
+				minValue = Math.min(minValue, value);
+				maxValue = Math.max(maxValue, value);
+				positionIndex++;
+				
+				if (positionIndex >= totalNumberDataPoints())
+				{
+					break;
+				}
+			}
+		}
+		finally
+		{
+			if (dataInputStream != null)
+			{
+				try
+				{
+					dataInputStream.close();
+				}
+				catch (IOException e)
+				{
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+
+
+	/**
+	 * Load SGrid data from binary points and flags files
+	 */
+	private void readBinaryDataFile(Object source, VolumeLayer layer) throws IOException
+	{
+		InputStream pointsInputStream = null;
+		InputStream propertiesInputStream = null;
+		try
+		{
+			pointsInputStream = openSGridDataStream(source, pointsDataFile);
+			FloatReader pointsReader = FloatReader.Builder.newFloatReaderForStream(pointsInputStream)
+														  .withGroupSize(3)
+														  .withOffset(pointsOffset)
+														  .build();
+			
+			propertiesInputStream = openSGridDataStream(source, propertyDataFile);
+			FloatReader propertiesReader = FloatReader.Builder.newFloatReaderForStream(propertiesInputStream)
+															  .withGroupSize(1)
+															  .withOffset(propertyOffset)
+															  .withFormat(FloatFormat.valueOf(propertyType))
+															  .withGroupSeparation(0)
+															  .build();
+			
+			CoordinateTransformation transformation = layer.getCoordinateTransformation();
+			double firstXValue = 0, firstYValue = 0, firstZValue = 0;
+			double[] transformed = new double[3];
+			float[] coords = new float[3];
+			float[] value = new float[1];
+			
+			for (int positionIndex = 0; positionIndex < totalNumberDataPoints(); positionIndex++)
+			{
+				pointsReader.readNextValues(coords);
+				propertiesReader.readNextValues(value);
+				
+				//transform the point;
+				if (transformation != null)
+				{
+					transformation.TransformPoint(transformed, coords[0], coords[1], coords[2]);
+					coords[0] = (float)transformed[0];
+					coords[1] = (float)transformed[1];
+					coords[2] = (float)transformed[2];
+				}
+
+				//only store the first width*height positions (the rest are evenly spaced at different depths)
+				if (positionIndex < xSize * ySize)
+				{
+					Position position = Position.fromDegrees(coords[0], coords[1], coords[2]);
+					positions.add(position);
+					top += coords[2] / (xSize * ySize);
+
+					//update the sector to include this latitude/longitude
+					updateSectorToIncludePosition(position);
+				}
+
+				if (positionIndex == 0)
+				{
+					firstXValue = coords[0];
+					firstYValue = coords[1];
+					firstZValue = coords[2];
+				}
+				else if (positionIndex == 1)
+				{
+					//second x value
+					reverseX = coords[0] < firstXValue;
+				}
+				else if (positionIndex == xSize)
+				{
+					//second y value
+					reverseY = coords[1] < firstYValue;
+				}
+				else if (positionIndex == xSize * ySize * (zSize - 1))
+				{
+					//positionIndex is the same x/y as 0, but at the bottom elevation instead of top,
+					//so we can calculate the depth as the difference between the two elevations
+					reverseZ = coords[2] > firstZValue;
+					depth = reverseZ ? coords[2] - firstZValue : firstZValue - coords[2];
+					top += reverseZ ? depth : 0;
+				}
+
+				//put the data into the floatbuffer
+				data.put(value[0]);
+				minValue = Math.min(minValue, value[0]);
+				maxValue = Math.max(maxValue, value[0]);
+				
+				if (positionIndex >= totalNumberDataPoints())
+				{
+					break;
+				}
+			}
+		}
+		finally
+		{
+			if (pointsInputStream != null)
+			{
+				pointsInputStream.close();
+			}
+			if (propertiesInputStream != null)
+			{
+				propertiesInputStream.close();
+			}
+		}
+	}
+	
+	/**
+	 * Create a regex pattern that matches ASCII data file lines, with a capturing group matching the painted variable.
+	 */
+	private Pattern createAsciiLineMatchingPattern()
+	{
+		final String doublePattern = "([\\d.\\-]+)";
+		final String nonCapturingDoublePattern = "(?:[\\d.\\-]+)";
+		final String spacerPattern = "\\s+";
+		
+		//regex for coordinates
+		String lineRegex = "\\s*" + doublePattern + spacerPattern + doublePattern + spacerPattern + doublePattern;
+		for (int property = 1; property < paintedVariableId; property++)
+		{
+			//ignore all properties in between coordinates and painted property
+			lineRegex += spacerPattern + nonCapturingDoublePattern;
+		}
+		//only capture the painted property
+		lineRegex += spacerPattern + doublePattern + ".*";
+		
+		return Pattern.compile(lineRegex);
+	}
+
+
+	private void initialiseDataVariables()
+	{
+		sector = null;
+		positions = new ArrayList<Position>(xSize * ySize);
+		data = FloatBuffer.allocate(totalNumberDataPoints());
+		top = 0;
+		minValue = Float.MAX_VALUE;
+		maxValue = -Float.MAX_VALUE;
+	}
+
+	private void validateDataFileSpecified() throws IOException
+	{
+		if (asciiDataFile == null && 
+				(pointsDataFile == null || propertyDataFile == null || flagsDataFile == null))
+		{
+			throw new IOException("Data file not specified");
+		}
+	}
+
+	private void validateNonZeroDimensions() throws IOException
+	{
+		if (xSize == 0 || ySize == 0 || zSize == 0)
+		{
+			throw new IOException("Volume dimensions are 0");
+		}
+	}
+
+	private void adjustForCellCentredData()
+	{
+		if (cellCentered)
+		{
+			xSize--;
+			ySize--;
+			zSize--;
+		}
+	}
+	
+	private void validateDataFileLoadedCorrectly() throws IOException
+	{
+		if (positions.size() != xSize * ySize)
+		{
+			throw new IOException("Data file doesn't contain the correct number of positions. Contains " + positions.size() + ". Expected " + xSize * ySize);
+		}
+	}
+
+	/**
+	 * Load the source file. If the source is contained within a ZIP file, will return a {@link ZipFile} instance.
+	 * Otherwise, returns the .sg {@link File}
+	 */
+	private Object openSource(URL url) throws IOException
+	{
+		File file = URLUtil.urlToFile(url);
+		if (file == null)
+		{
+			// Note a file:// url
+			// TODO: Support HTTP etc.
+			return null;
+		}
+		
+		if (file.getName().toLowerCase().endsWith(".zip"))
+		{
+			return new ZipFile(file);
+		}
+		return file;
+	}
+	
+	/**
+	 * Parse the contents of the SGrid header file referred to by the provided source object.
+	 */
+	private void parseHeaderFile(Object source) throws IOException
+	{
+		InputStream sgInputStream = null;
+		try
+		{
+			sgInputStream = openSGridHeaderStream(source);
+			BufferedReader reader = new BufferedReader(new InputStreamReader(sgInputStream));
+			String line;
+			while ((line = reader.readLine()) != null)
+			{
+				parseLine(line);
+			}
+		}
+		finally
+		{
+			if (sgInputStream != null)
+			{
+				sgInputStream.close();
+			}
+		}
+	}
+
+	/** 
+	 * Open an input stream that reads from the SGrid header file.
+	 * Supports loading .sg files from within Zip archives. 
+	 */
+	private InputStream openSGridHeaderStream(Object source) throws IOException
+	{
+		if (source instanceof ZipFile)
+		{
+			ZipFile zip = (ZipFile)source;
+			Enumeration<? extends ZipEntry> entries = zip.entries();
+			ZipEntry sgEntry = null;
+			while (entries.hasMoreElements())
+			{
+				ZipEntry entry = entries.nextElement();
+				if (entry.getName().toLowerCase().endsWith(".sg"))
+				{
+					sgEntry = entry;
+					break;
+				}
+			}
+
+			if (sgEntry == null)
+			{
+				throw new IOException("Could not find .sg file in zip");
+			}
+
+			return zip.getInputStream(sgEntry);
+		}
+		else
+		{
+			return new FileInputStream(((File)source));
+		}
+	}
+	
+	/**
+	 * Open an input stream that reads from the named data file
+	 */
+	private InputStream openSGridDataStream(Object source, String file) throws IOException
+	{
+		if (source instanceof ZipFile)
+		{
+			ZipFile zip = (ZipFile)source;
+			ZipEntry dataEntry = zip.getEntry(file);
+			return zip.getInputStream(dataEntry);
+		}
+		else
+		{
+			File data = new File(((File)source).getParent(), file);
+			if (data.exists())
+			{
+				return new FileInputStream(data);
+			}
+		}
+		throw new IOException("Data file '" + file + "' not found");
+	}
+	
+	/** Close the source file as appropriate */
+	private void closeSource(Object source)
+	{
+		if (source instanceof ZipFile)
+		{
+			try
+			{
+				((ZipFile) source).close();
+			}
+			catch (IOException e)
+			{
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	/** Grow the volume sector to include the provided position */
+	private void updateSectorToIncludePosition(Position position)
+	{
+		if (sector == null)
+		{
+			sector = new Sector(position.latitude, position.latitude, position.longitude, position.longitude);
+		}
+		else
+		{
+			sector = sector.union(position.latitude, position.longitude);
+		}
+	}
+
+	/** Reverse coordinate axes as appropriate */
+	private void correctForReversedAxes()
+	{
+		if (reverseX || reverseY || reverseZ)
+		{
+			//if the z-axis is reversed, bring all the positions up to the
+			//top depth (they are currently at the bottom depth)
+			if (reverseZ)
+			{
+				List<Position> oldPositions = positions;
+				positions = new ArrayList<Position>(oldPositions.size());
+				for (Position position : oldPositions)
+				{
+					positions.add(new Position(position, position.elevation + depth));
+				}
+			}
+
+			//if the x-axis or y-axis are reversed, mirror them
+			if (reverseX || reverseY)
+			{
+				List<Position> oldPositions = positions;
+				positions = new ArrayList<Position>(oldPositions.size());
+				for (int y = 0; y < ySize; y++)
+				{
+					int ry = reverseY ? ySize - y - 1 : y;
+					for (int x = 0; x < xSize; x++)
+					{
+						int rx = reverseX ? xSize - x - 1 : x;
+						positions.add(oldPositions.get(rx + ry * xSize));
+					}
+				}
+			}
+		}
+	}
+	
+	private int totalNumberDataPoints()
+	{
+		return xSize * ySize * zSize;
+	}
+
+	/**
+	 * Parse a single line from the SGrid header file and update properties as appropriate
+	 */
+	private void parseLine(String line)
 	{
 		Matcher matcher = paintedVariablePattern.matcher(line);
 		if (matcher.matches())
@@ -379,7 +623,70 @@ public class SGridVolumeDataProvider extends AbstractVolumeDataProvider
 			asciiDataFile = matcher.group(1);
 			return;
 		}
+		
+		matcher = pointsFilePattern.matcher(line);
+		if (matcher.matches())
+		{
+			pointsDataFile = matcher.group(1);
+			return;
+		}
 
+		matcher = pointsOffsetPattern.matcher(line);
+		if (matcher.matches())
+		{
+			pointsOffset = Integer.parseInt(matcher.group(1));
+			return;
+		}
+		
+		matcher = flagsFilePattern.matcher(line);
+		if (matcher.matches())
+		{
+			flagsDataFile = matcher.group(1);
+			return;
+		}
+
+		matcher = flagsOffsetPattern.matcher(line);
+		if (matcher.matches())
+		{
+			flagsOffset = Integer.parseInt(matcher.group(1));
+			return;
+		}
+		
+		matcher = propertyFilePattern.matcher(line);
+		if (matcher.matches())
+		{
+			propertyDataFile = matcher.group(2);
+			return;
+		}
+
+		matcher = propertyOffsetPattern.matcher(line);
+		if (matcher.matches())
+		{
+			propertyOffset = Integer.parseInt(matcher.group(1));
+			return;
+		}
+		
+		matcher = propertySizePattern.matcher(line);
+		if (matcher.matches())
+		{
+			propertySize = Integer.parseInt(matcher.group(2));
+			return;
+		}
+		
+		matcher = propertyFormatPattern.matcher(line);
+		if (matcher.matches())
+		{
+			propertyFormat = matcher.group(2);
+			return;
+		}
+		
+		matcher = propertyTypePattern.matcher(line);
+		if (matcher.matches())
+		{
+			propertyType = matcher.group(2);
+			return;
+		}
+		
 		matcher = propertyNamePattern.matcher(line);
 		if (matcher.matches())
 		{

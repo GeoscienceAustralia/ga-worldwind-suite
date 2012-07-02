@@ -100,6 +100,11 @@ public abstract class AbstractVolumeDataProvider extends AbstractDataProvider<Vo
 	 */
 	protected float maxValue;
 
+	protected FloatBuffer getData()
+	{
+		return data;
+	}
+	
 	@Override
 	public int getXSize()
 	{
