@@ -47,13 +47,15 @@ import au.gov.ga.worldwind.common.util.URLUtil;
 public class SGridVolumeDataProvider extends AbstractVolumeDataProvider
 {
 	private final static Pattern paintedVariablePattern = Pattern.compile("\\*painted\\*variable:\\s*(.*?)\\s*");
-	private final static Pattern axisPattern = Pattern
-			.compile("AXIS_(\\S+)\\s+([\\d.\\-]+)\\s+([\\d.\\-]+)\\s+([\\d.\\-]+).*");
+	private final static Pattern axisPattern = Pattern.compile("AXIS_(\\S+)\\s+([\\d.\\-]+)\\s+([\\d.\\-]+)\\s+([\\d.\\-]+).*");
 	private final static Pattern propAlignmentPattern = Pattern.compile("PROP_ALIGNMENT\\s+(.*?)\\s*");
 	private final static Pattern asciiDataFilePattern = Pattern.compile("ASCII_DATA_FILE\\s+(.*?)\\s*");
+	private final static Pattern pointsOffsetPattern = Pattern.compile("POINTS_OFFSET\\s+(\\d+)");
+	private final static Pattern pointsFilePattern = Pattern.compile("POINTS_FILE\\s+([^\\s]*)\\s*");
+	private final static Pattern flagsOffsetPattern = Pattern.compile("FLAGS_OFFSET\\s+(\\d+)");
+	private final static Pattern flagsFilePattern = Pattern.compile("FLAGS_FILE\\s+([^\\s]*)\\s*");
 	private final static Pattern propertyNamePattern = Pattern.compile("PROPERTY\\s+(\\d+)\\s+\"?(.*?)\"?\\s*");
-	private final static Pattern propertyNoDataPattern = Pattern
-			.compile("PROP_NO_DATA_VALUE\\s+(\\d+)\\s+([\\d.\\-]+)\\s*");
+	private final static Pattern propertyNoDataPattern = Pattern.compile("PROP_NO_DATA_VALUE\\s+(\\d+)\\s+([\\d.\\-]+)\\s*");
 
 	private String asciiDataFile;
 	private String paintedVariableName;
@@ -192,7 +194,7 @@ public class SGridVolumeDataProvider extends AbstractVolumeDataProvider
 						double z = Double.parseDouble(matcher.group(3));
 						float value = Float.parseFloat(matcher.group(4));
 
-						//transform the point
+						//transform the point;
 						if (transformation != null)
 						{
 							transformation.TransformPoint(transformed, x, y, z);
@@ -206,7 +208,7 @@ public class SGridVolumeDataProvider extends AbstractVolumeDataProvider
 						{
 							Position position = Position.fromDegrees(y, x, z);
 							positions.add(position);
-							top += z / (double) (xSize * ySize);
+							top += z / (xSize * ySize);
 
 							//update the sector to include this latitude/longitude
 							if (sector == null)
