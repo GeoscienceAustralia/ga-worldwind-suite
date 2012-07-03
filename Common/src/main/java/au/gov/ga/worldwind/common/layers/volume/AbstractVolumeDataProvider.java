@@ -36,46 +36,55 @@ import au.gov.ga.worldwind.common.render.fastshape.FastShape;
  * 
  * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
-public abstract class AbstractVolumeDataProvider extends AbstractDataProvider<VolumeLayer> implements
-		VolumeDataProvider
+public abstract class AbstractVolumeDataProvider extends AbstractDataProvider<VolumeLayer> implements VolumeDataProvider
 {
+	
 	/**
 	 * Number of samples in the volume data along the x-axis.
 	 */
 	protected int xSize;
+	
 	/**
 	 * Number of samples in the volume data along the y-axis;
 	 */
 	protected int ySize;
+	
 	/**
 	 * Number of samples in the volume data along the z-axis;
 	 */
 	protected int zSize;
+	
 	/**
 	 * Approximate sector containing the volume data.
 	 */
 	protected Sector sector = null;
+	
 	/**
 	 * Average top elevation of the volume data (in meters).
 	 */
 	protected double top;
+	
 	/**
 	 * Depth (distance between top and bottom slice) of the volume data (in
 	 * meters).
 	 */
 	protected double depth;
+	
 	/**
 	 * Value in the data that represents NODATA.
 	 */
 	protected float noDataValue;
+	
 	/**
 	 * Is the volume data reversed along the x-axis?
 	 */
 	protected boolean reverseX = false;
+	
 	/**
 	 * Is the volume data reversed along the y-axis?
 	 */
 	protected boolean reverseY = false;
+	
 	/**
 	 * Is the volume data reversed along the z-axis?
 	 */
@@ -87,19 +96,27 @@ public abstract class AbstractVolumeDataProvider extends AbstractDataProvider<Vo
 	 * increment first.
 	 */
 	protected List<Position> positions;
+	
 	/**
 	 * Float array that contains the volume data.
 	 */
 	protected FloatBuffer data;
+	
 	/**
 	 * The minimum volume data value.
 	 */
 	protected float minValue;
+	
 	/**
 	 * The maximum volume data value.
 	 */
 	protected float maxValue;
-
+	
+	/**
+	 * Whether the volume data is cell-centred
+	 */
+	protected boolean cellCentred;
+	
 	protected FloatBuffer getData()
 	{
 		return data;
@@ -151,6 +168,12 @@ public abstract class AbstractVolumeDataProvider extends AbstractDataProvider<Vo
 			z = zSize - z - 1;
 		}
 		return data.get(x + y * xSize + z * xSize * ySize);
+	}
+	
+	@Override
+	public boolean isCellCentred()
+	{
+		return cellCentred;
 	}
 
 	@Override

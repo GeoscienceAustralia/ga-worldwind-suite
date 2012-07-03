@@ -21,6 +21,7 @@ import gov.nasa.worldwind.geom.Sector;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -46,11 +47,13 @@ import au.gov.ga.worldwind.common.util.io.FloatReader.FloatFormat;
  * 
  * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
+// TODO: Some properties are being read but not used
+@SuppressWarnings("unused")
 public class SGridVolumeDataProvider extends AbstractVolumeDataProvider
 {
 	private final static Pattern paintedVariablePattern = Pattern.compile("\\*painted\\*variable:\\s*(.*?)\\s*");
 	private final static Pattern axisPattern = Pattern.compile("AXIS_(\\S+)\\s+([\\d.\\-]+)\\s+([\\d.\\-]+)\\s+([\\d.\\-]+).*");
-	private final static Pattern propAlignmentPattern = Pattern.compile("PROP_ALIGNMENT\\s+(.*?)\\s*");
+	private final static Pattern propAlignmentPattern = Pattern.compile("PROP_ALIGNMENT.+?(CELLS|POINTS)\\s*");
 	private final static Pattern asciiDataFilePattern = Pattern.compile("ASCII_DATA_FILE\\s+(.*?)\\s*");
 	private final static Pattern pointsOffsetPattern = Pattern.compile("POINTS_OFFSET\\s+(\\d+)");
 	private final static Pattern pointsFilePattern = Pattern.compile("POINTS_FILE\\s+([^\\s]*)\\s*");
@@ -71,7 +74,6 @@ public class SGridVolumeDataProvider extends AbstractVolumeDataProvider
 	private int flagsOffset = 0;
 	private String paintedVariableName;
 	private int paintedVariableId;
-	private boolean cellCentered;
 	
 	private String propertyDataFile;
 	private int propertyOffset = 0;
@@ -95,7 +97,6 @@ public class SGridVolumeDataProvider extends AbstractVolumeDataProvider
 
 			validateDataFileSpecified();
 			
-			adjustForCellCentredData();
 			validateNonZeroDimensions();
 
 			readSGridData(source, layer);
@@ -126,7 +127,6 @@ public class SGridVolumeDataProvider extends AbstractVolumeDataProvider
 	{
 		initialiseDataVariables();
 		
-		//TODO add support for SGrid binary property files
 		if (asciiDataFile != null)
 		{
 			readAsciiDataFile(source, layer);
@@ -143,6 +143,7 @@ public class SGridVolumeDataProvider extends AbstractVolumeDataProvider
 	private void readAsciiDataFile(Object source, VolumeLayer layer) throws IOException
 	{
 		InputStream dataInputStream = null;
+		FileWriter w = new FileWriter("c:/temp/ascii.txt");
 		try
 		{
 			dataInputStream = openSGridDataStream(source, asciiDataFile);
@@ -213,17 +214,16 @@ public class SGridVolumeDataProvider extends AbstractVolumeDataProvider
 					top += reverseZ ? depth : 0;
 				}
 
-				//put the data into the floatbuffer
-				data.put(value);
+				if (putDataValue(positionIndex, value))
+				{
+					w.write("" + value + "\n");
+				}
 				minValue = Math.min(minValue, value);
 				maxValue = Math.max(maxValue, value);
 				positionIndex++;
-				
-				if (positionIndex >= totalNumberDataPoints())
-				{
-					break;
-				}
 			}
+			w.flush();
+			w.close();
 		}
 		finally
 		{
@@ -242,6 +242,31 @@ public class SGridVolumeDataProvider extends AbstractVolumeDataProvider
 	}
 
 
+	private boolean putDataValue(int positionIndex, float value)
+	{
+		if (!cellCentred)
+		{
+			// For point-centred data store all values
+			data.put(value);
+			return true;
+		}
+		
+		// For cell centred data, only store the 'real' values
+		// Re-create the (x,y,z) coords of the vertex from the position index
+		int x = positionIndex % xSize;
+		int y = ((positionIndex - x) / ySize) % ySize;
+		int z = positionIndex / (xSize * ySize);
+		
+		// Ignore property values at the edges of the volume
+		if ((x < xSize - 1) && (y < ySize - 1) && (z < zSize - 1))
+		{
+			data.put(value);
+			return true;
+		}
+		return false;
+	}
+
+
 	/**
 	 * Load SGrid data from binary points and flags files
 	 */
@@ -249,6 +274,8 @@ public class SGridVolumeDataProvider extends AbstractVolumeDataProvider
 	{
 		InputStream pointsInputStream = null;
 		InputStream propertiesInputStream = null;
+		
+		FileWriter w = new FileWriter("c:/temp/binary.txt");
 		try
 		{
 			pointsInputStream = openSGridDataStream(source, pointsDataFile);
@@ -323,14 +350,14 @@ public class SGridVolumeDataProvider extends AbstractVolumeDataProvider
 
 				//put the data into the floatbuffer
 				data.put(value[0]);
+				
+				w.write("" + value[0] + "\n");
+				
 				minValue = Math.min(minValue, value[0]);
 				maxValue = Math.max(maxValue, value[0]);
-				
-				if (positionIndex >= totalNumberDataPoints())
-				{
-					break;
-				}
 			}
+			w.flush();
+			w.close();
 		}
 		finally
 		{
@@ -381,7 +408,7 @@ public class SGridVolumeDataProvider extends AbstractVolumeDataProvider
 	private void validateDataFileSpecified() throws IOException
 	{
 		if (asciiDataFile == null && 
-				(pointsDataFile == null || propertyDataFile == null || flagsDataFile == null))
+				(pointsDataFile == null || propertyDataFile == null))
 		{
 			throw new IOException("Data file not specified");
 		}
@@ -395,16 +422,6 @@ public class SGridVolumeDataProvider extends AbstractVolumeDataProvider
 		}
 	}
 
-	private void adjustForCellCentredData()
-	{
-		if (cellCentered)
-		{
-			xSize--;
-			ySize--;
-			zSize--;
-		}
-	}
-	
 	private void validateDataFileLoadedCorrectly() throws IOException
 	{
 		if (positions.size() != xSize * ySize)
@@ -581,6 +598,10 @@ public class SGridVolumeDataProvider extends AbstractVolumeDataProvider
 	
 	private int totalNumberDataPoints()
 	{
+		if (isCellCentred())
+		{
+			return (xSize - 1) * (ySize - 1) * (zSize - 1);
+		}
 		return xSize * ySize * zSize;
 	}
 
@@ -613,7 +634,7 @@ public class SGridVolumeDataProvider extends AbstractVolumeDataProvider
 		if (matcher.matches())
 		{
 			String propAlignment = matcher.group(1);
-			cellCentered = propAlignment.toLowerCase().equals("cells");
+			cellCentred = propAlignment.toLowerCase().equals("cells");
 			return;
 		}
 

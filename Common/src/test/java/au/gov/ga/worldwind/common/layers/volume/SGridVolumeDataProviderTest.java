@@ -93,7 +93,7 @@ public class SGridVolumeDataProviderTest
 		assertEquals((Integer)0, TestUtils.getField(classUnderTest, "propertyOffset", Integer.class));
 		assertEquals("layer", TestUtils.getField(classUnderTest, "paintedVariableName", String.class));
 		assertEquals((Integer)1, TestUtils.getField(classUnderTest, "paintedVariableId", Integer.class));
-		assertEquals(false, TestUtils.getField(classUnderTest, "cellCentered", Boolean.class));
+		assertEquals(true, TestUtils.getField(classUnderTest, "cellCentred", Boolean.class));
 		assertEquals(Float.valueOf(-99999.0f), TestUtils.getField(classUnderTest, "noDataValue", Float.class));
 	}
 	
@@ -104,6 +104,7 @@ public class SGridVolumeDataProviderTest
 		
 		float[] zipData = classUnderTest.getData().array();
 		
+		setup();
 		classUnderTest.doLoadData(ASCII_FILE, parentLayer);
 		
 		float[] normalData = classUnderTest.getData().array();
@@ -136,7 +137,7 @@ public class SGridVolumeDataProviderTest
 		assertEquals("RAW", TestUtils.getField(classUnderTest, "propertyFormat", String.class));
 		assertEquals("layer", TestUtils.getField(classUnderTest, "paintedVariableName", String.class));
 		assertEquals((Integer)1, TestUtils.getField(classUnderTest, "paintedVariableId", Integer.class));
-		assertEquals(false, TestUtils.getField(classUnderTest, "cellCentered", Boolean.class));
+		assertEquals(true, TestUtils.getField(classUnderTest, "cellCentred", Boolean.class));
 		assertEquals(Float.valueOf(-99999.0f), TestUtils.getField(classUnderTest, "noDataValue", Float.class));
 	}
 	
@@ -148,6 +149,7 @@ public class SGridVolumeDataProviderTest
 		
 		float[] asciiData = classUnderTest.getData().array();
 		
+		setup();
 		classUnderTest.doLoadData(BINARY_FILE, parentLayer);
 		
 		float[] binaryData = classUnderTest.getData().array();
@@ -159,13 +161,15 @@ public class SGridVolumeDataProviderTest
 	{
 		assertTrue(result);
 		
+		assertTrue(classUnderTest.isCellCentred());
+		
 		assertEquals(6, classUnderTest.getXSize());
 		assertEquals(6, classUnderTest.getYSize());
 		assertEquals(6, classUnderTest.getZSize());
 		
 		FloatBuffer data = classUnderTest.getData();
 		assertNotNull(data);
-		assertEquals(6*6*6, data.capacity());
+		assertEquals(5*5*5, data.capacity());
 		assertDataPopulated(data.array());
 	}
 	

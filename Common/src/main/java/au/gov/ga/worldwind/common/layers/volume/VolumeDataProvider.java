@@ -56,7 +56,11 @@ public interface VolumeDataProvider extends DataProvider<VolumeLayer>
 	double getTop();
 
 	/**
-	 * The value of the volume at the given (x,y,z) point.
+	 * The value of the volume data at the given (x,y,z) point.
+	 * <p/>
+	 * Note that the meaning of (x,y,z) will depend on whether the volume is cell-centred or vertex-centred.
+	 * If cell-centred, (x,y,z) will index a cell in the volume. If the volume is vertex-centred the point will
+	 * index a vertex in the volume.
 	 * 
 	 * @param x
 	 *            x-coordinate
@@ -64,10 +68,23 @@ public interface VolumeDataProvider extends DataProvider<VolumeLayer>
 	 *            y-coordinate
 	 * @param z
 	 *            z-coordinate
-	 * @return The (x,y,z) value of the volume.
+	 *            
+	 * @return The (x,y,z) value of the volume data.
+	 * 
+	 * @see #isCellCentred()
 	 */
 	float getValue(int x, int y, int z);
 
+	/**
+	 * Returns whether the data in the volume is cell-centred (i.e. data stored per-cell) or 
+	 * vertex-centred (i.e. data stored per-vertex).
+	 * <p/>
+	 * If the volume is cell-centred the data array will have dimenions <code>(XSize-1)*(YSize-1)*(ZSize-1)</code>
+	 * 
+	 * @return <code>true</code> if the volume data is cell-centred; <code>false</code> otherwise.
+	 */
+	boolean isCellCentred();
+	
 	/**
 	 * @return The minimum value in the volume data.
 	 */
