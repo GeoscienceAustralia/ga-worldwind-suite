@@ -167,10 +167,26 @@ public class SGridVolumeDataProviderTest
 		assertEquals(6, classUnderTest.getYSize());
 		assertEquals(6, classUnderTest.getZSize());
 		
+		assertEquals(1, classUnderTest.getMinValue(), 0.001);
+		assertEquals(5, classUnderTest.getMaxValue(), 0.001);
+		
 		FloatBuffer data = classUnderTest.getData();
 		assertNotNull(data);
 		assertEquals(5*5*5, data.capacity());
 		assertDataPopulated(data.array());
+		
+		// Check that cell-centred clamping etc. is working
+		for (int z = 0; z < classUnderTest.getZSize(); z++)
+		{
+			for (int y = 0; y < classUnderTest.getYSize(); y++)
+			{
+				for (int x = 0; x < classUnderTest.getXSize(); x++)
+				{
+					float expectedProperty = Math.min(z + 1, classUnderTest.getZSize() - 1);
+					assertEquals(expectedProperty, classUnderTest.getValue(x, y, z), 0.001);
+				}
+			}
+		}
 	}
 	
 	private void assertDataPopulated(float[] data)

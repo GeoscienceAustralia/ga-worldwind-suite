@@ -167,7 +167,20 @@ public abstract class AbstractVolumeDataProvider extends AbstractDataProvider<Vo
 		{
 			z = zSize - z - 1;
 		}
-		return data.get(x + y * xSize + z * xSize * ySize);
+		
+		if (!cellCentred)
+		{
+			return data.get(x + y * xSize + z * xSize * ySize);
+		}
+		else
+		{
+			// Clamp cell-centred data to vertex coordinates
+			int clampedX = Math.min(x, xSize - 2);
+			int clampedY = Math.min(y, ySize - 2);
+			int clampedZ = Math.min(z, zSize - 2);
+			int index = clampedX + clampedY * (xSize - 1) + clampedZ * (xSize - 1) * (ySize - 1);
+			return data.get(index);
+		}
 	}
 	
 	@Override
@@ -224,10 +237,8 @@ public abstract class AbstractVolumeDataProvider extends AbstractDataProvider<Vo
 		for (int y = 0; y < ySize; y++)
 		{
 			Position position = getPosition(x, y);
-			TopBottomPosition top =
-					new TopBottomPosition(position.latitude, position.longitude, position.elevation, false);
-			TopBottomPosition bottom =
-					new TopBottomPosition(position.latitude, position.longitude, position.elevation, true);
+			TopBottomPosition top = new TopBottomPosition(position.latitude, position.longitude, position.elevation, false);
+			TopBottomPosition bottom = new TopBottomPosition(position.latitude, position.longitude, position.elevation, true);
 			positions.add(top);
 			positions.add(bottom);
 			float u = y / (float) Math.max(1, ySize - 1);
@@ -250,10 +261,8 @@ public abstract class AbstractVolumeDataProvider extends AbstractDataProvider<Vo
 		for (int x = 0; x < xSize; x++)
 		{
 			Position position = getPosition(x, y);
-			TopBottomPosition top =
-					new TopBottomPosition(position.latitude, position.longitude, position.elevation, false);
-			TopBottomPosition bottom =
-					new TopBottomPosition(position.latitude, position.longitude, position.elevation, true);
+			TopBottomPosition top = new TopBottomPosition(position.latitude, position.longitude, position.elevation, false);
+			TopBottomPosition bottom = new TopBottomPosition(position.latitude, position.longitude, position.elevation, true);
 			positions.add(top);
 			positions.add(bottom);
 			float u = x / (float) Math.max(1, xSize - 1);

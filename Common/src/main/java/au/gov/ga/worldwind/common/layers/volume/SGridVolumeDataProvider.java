@@ -21,7 +21,6 @@ import gov.nasa.worldwind.geom.Sector;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -143,7 +142,6 @@ public class SGridVolumeDataProvider extends AbstractVolumeDataProvider
 	private void readAsciiDataFile(Object source, VolumeLayer layer) throws IOException
 	{
 		InputStream dataInputStream = null;
-		FileWriter w = new FileWriter("c:/temp/ascii.txt");
 		try
 		{
 			dataInputStream = openSGridDataStream(source, asciiDataFile);
@@ -216,14 +214,12 @@ public class SGridVolumeDataProvider extends AbstractVolumeDataProvider
 
 				if (putDataValue(positionIndex, value))
 				{
-					w.write("" + value + "\n");
+					minValue = Math.min(minValue, value);
+					maxValue = Math.max(maxValue, value);
 				}
-				minValue = Math.min(minValue, value);
-				maxValue = Math.max(maxValue, value);
+				
 				positionIndex++;
 			}
-			w.flush();
-			w.close();
 		}
 		finally
 		{
@@ -274,8 +270,6 @@ public class SGridVolumeDataProvider extends AbstractVolumeDataProvider
 	{
 		InputStream pointsInputStream = null;
 		InputStream propertiesInputStream = null;
-		
-		FileWriter w = new FileWriter("c:/temp/binary.txt");
 		try
 		{
 			pointsInputStream = openSGridDataStream(source, pointsDataFile);
@@ -351,13 +345,9 @@ public class SGridVolumeDataProvider extends AbstractVolumeDataProvider
 				//put the data into the floatbuffer
 				data.put(value[0]);
 				
-				w.write("" + value[0] + "\n");
-				
 				minValue = Math.min(minValue, value[0]);
 				maxValue = Math.max(maxValue, value[0]);
 			}
-			w.flush();
-			w.close();
 		}
 		finally
 		{
