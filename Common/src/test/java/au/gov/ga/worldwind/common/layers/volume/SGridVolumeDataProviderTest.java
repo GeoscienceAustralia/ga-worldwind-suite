@@ -187,6 +187,10 @@ public class SGridVolumeDataProviderTest
 				}
 			}
 		}
+		
+		assertEquals(12500, classUnderTest.getTop(), 0.01);
+		assertEquals(12500+112500, classUnderTest.getDepth(), 0.01);
+		
 	}
 	
 	private void assertDataPopulated(float[] data)

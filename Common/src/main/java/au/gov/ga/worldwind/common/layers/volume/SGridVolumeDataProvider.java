@@ -18,6 +18,7 @@ package au.gov.ga.worldwind.common.layers.volume;
 import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.geom.Sector;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -278,24 +279,13 @@ public class SGridVolumeDataProvider extends AbstractVolumeDataProvider
 														  .withOffset(pointsOffset)
 														  .build();
 			
-			propertiesInputStream = openSGridDataStream(source, propertyDataFile);
-			FloatReader propertiesReader = FloatReader.Builder.newFloatReaderForStream(propertiesInputStream)
-															  .withGroupSize(1)
-															  .withOffset(propertyOffset)
-															  .withFormat(FloatFormat.valueOf(propertyType))
-															  .withGroupSeparation(0)
-															  .build();
-			
 			CoordinateTransformation transformation = layer.getCoordinateTransformation();
 			double firstXValue = 0, firstYValue = 0, firstZValue = 0;
 			double[] transformed = new double[3];
 			float[] coords = new float[3];
-			float[] value = new float[1];
-			
-			for (int positionIndex = 0; positionIndex < totalNumberDataPoints(); positionIndex++)
+			for (int positionIndex = 0; positionIndex < totalNumberOfPositions(); positionIndex++)
 			{
 				pointsReader.readNextValues(coords);
-				propertiesReader.readNextValues(value);
 				
 				//transform the point;
 				if (transformation != null)
@@ -309,7 +299,7 @@ public class SGridVolumeDataProvider extends AbstractVolumeDataProvider
 				//only store the first width*height positions (the rest are evenly spaced at different depths)
 				if (positionIndex < xSize * ySize)
 				{
-					Position position = Position.fromDegrees(coords[0], coords[1], coords[2]);
+					Position position = Position.fromDegrees(coords[1], coords[0], coords[2]);
 					positions.add(position);
 					top += coords[2] / (xSize * ySize);
 
@@ -341,8 +331,22 @@ public class SGridVolumeDataProvider extends AbstractVolumeDataProvider
 					depth = reverseZ ? coords[2] - firstZValue : firstZValue - coords[2];
 					top += reverseZ ? depth : 0;
 				}
-
-				//put the data into the floatbuffer
+			}
+			
+			// Read the painted property from the nominated property file
+			propertiesInputStream = openSGridDataStream(source, propertyDataFile);
+			FloatReader propertiesReader = FloatReader.Builder.newFloatReaderForStream(propertiesInputStream)
+															  .withGroupSize(1)
+															  .withOffset(propertyOffset)
+															  .withFormat(FloatFormat.valueOf(propertyType))
+															  .withGroupSeparation(0)
+															  .build();
+			
+			float[] value = new float[1];
+			for (int positionIndex = 0; positionIndex < totalNumberDataPoints(); positionIndex++)
+			{
+				propertiesReader.readNextValues(value);
+				
 				data.put(value[0]);
 				
 				minValue = Math.min(minValue, value[0]);
@@ -509,14 +513,14 @@ public class SGridVolumeDataProvider extends AbstractVolumeDataProvider
 		{
 			ZipFile zip = (ZipFile)source;
 			ZipEntry dataEntry = zip.getEntry(file);
-			return zip.getInputStream(dataEntry);
+			return new BufferedInputStream(zip.getInputStream(dataEntry));
 		}
 		else
 		{
 			File data = new File(((File)source).getParent(), file);
 			if (data.exists())
 			{
-				return new FileInputStream(data);
+				return new BufferedInputStream(new FileInputStream(data));
 			}
 		}
 		throw new IOException("Data file '" + file + "' not found");
@@ -584,6 +588,11 @@ public class SGridVolumeDataProvider extends AbstractVolumeDataProvider
 				}
 			}
 		}
+	}
+	
+	private int totalNumberOfPositions()
+	{
+		return xSize * ySize * zSize;
 	}
 	
 	private int totalNumberDataPoints()
