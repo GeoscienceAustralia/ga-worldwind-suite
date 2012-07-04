@@ -19,12 +19,15 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.URL;
 
+import org.junit.Ignore;
+
 /**
  * An abstract base class for unit test classes exercising subclasses 
  * of the {@link GocadReader}.
  * 
  * @author James Navin (james.navin@ga.gov.au)
  */
+@Ignore
 public abstract class AbstractGocadReaderTest<T>
 {
 
