@@ -77,6 +77,7 @@ public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wire
 	protected Double minimumDistance;
 	protected double maxVariance = 0;
 	protected CoordinateTransformation coordinateTransformation;
+	protected String paintedVariable;
 	protected ColorMap colorMap;
 	protected Color noDataColor;
 	protected boolean reverseNormals = false;
@@ -136,6 +137,12 @@ public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wire
 		if (s != null)
 		{
 			coordinateTransformation = CoordinateTransformationUtil.getTransformationToWGS84(s);
+		}
+		
+		s = (String) params.getValue(AVKeyMore.PAINTED_VARIABLE);
+		if (s != null)
+		{
+			paintedVariable = s;
 		}
 
 		Integer i = (Integer) params.getValue(AVKeyMore.INITIAL_OFFSET_MIN_U);
@@ -759,6 +766,12 @@ public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wire
 		return coordinateTransformation;
 	}
 
+	@Override
+	public String getPaintedVariableName()
+	{
+		return paintedVariable;
+	}
+	
 	@Override
 	protected void doPick(DrawContext dc, Point point)
 	{

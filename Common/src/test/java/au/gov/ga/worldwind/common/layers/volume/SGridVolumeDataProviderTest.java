@@ -59,6 +59,7 @@ public class SGridVolumeDataProviderTest
 		
 		mockContext.checking(new Expectations(){{
 			allowing(parentLayer).getCoordinateTransformation();will(returnValue(null));
+			allowing(parentLayer).getPaintedVariableName();will(returnValue(null));
 			allowing(parentLayer).dataAvailable(with(classUnderTest));
 		}});
 	}
@@ -89,12 +90,15 @@ public class SGridVolumeDataProviderTest
 		assertEquals((Integer)0, TestUtils.getField(classUnderTest, "pointsOffset", Integer.class));
 		assertEquals("test_sgrid_ascii__flags@@", TestUtils.getField(classUnderTest, "flagsDataFile", String.class));
 		assertEquals((Integer)0, TestUtils.getField(classUnderTest, "flagsOffset", Integer.class));
-		assertEquals(null, TestUtils.getField(classUnderTest, "propertyDataFile", String.class));
-		assertEquals((Integer)0, TestUtils.getField(classUnderTest, "propertyOffset", Integer.class));
-		assertEquals("layer", TestUtils.getField(classUnderTest, "paintedVariableName", String.class));
-		assertEquals((Integer)1, TestUtils.getField(classUnderTest, "paintedVariableId", Integer.class));
-		assertEquals(true, TestUtils.getField(classUnderTest, "cellCentred", Boolean.class));
-		assertEquals(Float.valueOf(-99999.0f), TestUtils.getField(classUnderTest, "noDataValue", Float.class));
+		
+		GocadPropertyDefinition paintedProperty = TestUtils.getField(classUnderTest, "paintedProperty", GocadPropertyDefinition.class);
+		assertNotNull(paintedProperty);
+		assertEquals(null, paintedProperty.getFile());
+		assertEquals(0, paintedProperty.getOffset());
+		assertEquals("layer", paintedProperty.getName());
+		assertEquals(1, paintedProperty.getId());
+		assertEquals(-99999, paintedProperty.getNoDataValue(), 0.001);
+		assertEquals(true, paintedProperty.isCellCentred());
 	}
 	
 	@Test
@@ -130,17 +134,18 @@ public class SGridVolumeDataProviderTest
 		assertEquals((Integer)0, TestUtils.getField(classUnderTest, "pointsOffset", Integer.class));
 		assertEquals("test_sgrid_binary__flags@@", TestUtils.getField(classUnderTest, "flagsDataFile", String.class));
 		assertEquals((Integer)0, TestUtils.getField(classUnderTest, "flagsOffset", Integer.class));
-		assertEquals("test_sgrid_binary__layer@@", TestUtils.getField(classUnderTest, "propertyDataFile", String.class));
-		assertEquals((Integer)0, TestUtils.getField(classUnderTest, "propertyOffset", Integer.class));
-		assertEquals("IEEE", TestUtils.getField(classUnderTest, "propertyType", String.class));
-		assertEquals((Integer)4, TestUtils.getField(classUnderTest, "propertySize", Integer.class));
-		assertEquals("RAW", TestUtils.getField(classUnderTest, "propertyFormat", String.class));
-		assertEquals("layer", TestUtils.getField(classUnderTest, "paintedVariableName", String.class));
-		assertEquals((Integer)1, TestUtils.getField(classUnderTest, "paintedVariableId", Integer.class));
-		assertEquals(true, TestUtils.getField(classUnderTest, "cellCentred", Boolean.class));
-		assertEquals(Float.valueOf(-99999.0f), TestUtils.getField(classUnderTest, "noDataValue", Float.class));
+		
+		GocadPropertyDefinition paintedProperty = TestUtils.getField(classUnderTest, "paintedProperty", GocadPropertyDefinition.class);
+		assertNotNull(paintedProperty);
+		assertEquals("test_sgrid_binary__layer@@", paintedProperty.getFile());
+		assertEquals(0, paintedProperty.getOffset());
+		assertEquals("layer", paintedProperty.getName());
+		assertEquals("IEEE", paintedProperty.getType());
+		assertEquals("RAW", paintedProperty.getFormat());
+		assertEquals(1, paintedProperty.getId());
+		assertEquals(-99999, paintedProperty.getNoDataValue(), 0.001);
+		assertEquals(true, paintedProperty.isCellCentred());
 	}
-	
 	
 	@Test
 	public void testBinaryReadsSameDataAsAscii() throws Exception

@@ -42,4 +42,10 @@ public interface VolumeLayer extends DataLayer
 	 *         required.
 	 */
 	CoordinateTransformation getCoordinateTransformation();
+	
+	/**
+	 * @return The name of the variable used to colour this volume layer, as specified in the layer definition file. 
+	 * If <code>null</code>, default colouring behaviour is to be followed as per the volume data provider. 
+	 */
+	String getPaintedVariableName();
 }

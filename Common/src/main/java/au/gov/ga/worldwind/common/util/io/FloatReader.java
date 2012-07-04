@@ -118,7 +118,7 @@ public class FloatReader
 				skipToNextValueInGroup();
 			}
 		}
-		skipToNextGroup();
+		skipToStartOfNextGroup();
 	}
 
 	/**
@@ -135,6 +135,20 @@ public class FloatReader
 		float[] values = new float[groupSize];
 		readNextValues(values);
 		return values;
+	}
+	
+	/**
+	 * Skip ahead to the start of the next value group.
+	 * <p/>
+	 * Has the same effect as {@link #readNextValues(float[])} except no 
+	 * values are read from the input stream.
+	 * 
+	 * @throws IOException if there is a problem reading from the underlying stream
+	 */
+	synchronized public void skipToNextGroup() throws IOException
+	{
+		int skipCount = groupSize * 4 + (groupSize - 1) * groupValueGap + groupSeparation;
+		skip(skipCount);
 	}
 	
 	/**
@@ -187,7 +201,7 @@ public class FloatReader
 	/**
 	 * Skip forward to the start of the next value group
 	 */
-	private void skipToNextGroup() throws IOException
+	private void skipToStartOfNextGroup() throws IOException
 	{
 		if (groupSeparation > 0)
 		{

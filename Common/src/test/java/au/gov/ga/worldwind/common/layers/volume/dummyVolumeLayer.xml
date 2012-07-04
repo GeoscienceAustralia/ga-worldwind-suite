@@ -10,6 +10,8 @@
 	<LastUpdate></LastUpdate>
 	<DataCacheName>data.array</DataCacheName>
 	
+	<PaintedVariable>var1</PaintedVariable>
+	
 	<MinimumDistance>1e5</MinimumDistance>
 	<MaxVariance>1</MaxVariance>
 	

@@ -53,37 +53,40 @@ public class SGridVolumeDataProvider extends AbstractVolumeDataProvider
 {
 	private final static Pattern paintedVariablePattern = Pattern.compile("\\*painted\\*variable:\\s*(.*?)\\s*");
 	private final static Pattern axisPattern = Pattern.compile("AXIS_(\\S+)\\s+([\\d.\\-]+)\\s+([\\d.\\-]+)\\s+([\\d.\\-]+).*");
-	private final static Pattern propAlignmentPattern = Pattern.compile("PROP_ALIGNMENT.+?(CELLS|POINTS)\\s*");
 	private final static Pattern asciiDataFilePattern = Pattern.compile("ASCII_DATA_FILE\\s+(.*?)\\s*");
 	private final static Pattern pointsOffsetPattern = Pattern.compile("POINTS_OFFSET\\s+(\\d+)");
 	private final static Pattern pointsFilePattern = Pattern.compile("POINTS_FILE\\s+([^\\s]*)\\s*");
 	private final static Pattern flagsOffsetPattern = Pattern.compile("FLAGS_OFFSET\\s+(\\d+)");
 	private final static Pattern flagsFilePattern = Pattern.compile("FLAGS_FILE\\s+([^\\s]*)\\s*");
+	
+	private final static Pattern propertyDefinition = Pattern.compile("(?:PROPERTY|PROP_).*?(\\d).*");
+	private final static Pattern propertyNamePattern = Pattern.compile("PROPERTY\\s+(\\d+)\\s+\"?(.*?)\"?\\s*");
 	private final static Pattern propertyOffsetPattern = Pattern.compile("PROP_OFFSET\\s+(\\d+)");
+	private final static Pattern propertyAlignmentPattern = Pattern.compile("PROP_ALIGNMENT.+?(CELLS|POINTS)\\s*");
 	private final static Pattern propertyFilePattern = Pattern.compile("PROP_FILE\\s+(\\d+)\\s+([^\\s]*)\\s*");
 	private final static Pattern propertyFormatPattern = Pattern.compile("PROP_FORMAT\\s+(\\d+)\\s+([^\\s]*)\\s*");
 	private final static Pattern propertySizePattern = Pattern.compile("PROP_ESIZE\\s+(\\d+)\\s+([^\\s]*)\\s*");
 	private final static Pattern propertyTypePattern = Pattern.compile("PROP_ETYPE\\s+(\\d+)\\s+([^\\s]*)\\s*");
-	private final static Pattern propertyNamePattern = Pattern.compile("PROPERTY\\s+(\\d+)\\s+\"?(.*?)\"?\\s*");
 	private final static Pattern propertyNoDataPattern = Pattern.compile("PROP_NO_DATA_VALUE\\s+(\\d+)\\s+([\\d.\\-]+)\\s*");
 
+	private VolumeLayer layer;
+	
 	private String asciiDataFile;
 	private String pointsDataFile;
 	private int pointsOffset = 0;
 	private String flagsDataFile;
 	private int flagsOffset = 0;
+
 	private String paintedVariableName;
-	private int paintedVariableId;
 	
-	private String propertyDataFile;
-	private int propertyOffset = 0;
-	private int propertySize = 4;
-	private String propertyType = "IEEE";
-	private String propertyFormat = "RAW";
+	private List<GocadPropertyDefinition> properties;
+	private GocadPropertyDefinition paintedProperty;
 
 	@Override
 	protected boolean doLoadData(URL url, VolumeLayer layer)
 	{
+		this.layer = layer;
+		
 		Object source = null;
 		try
 		{
@@ -95,11 +98,11 @@ public class SGridVolumeDataProvider extends AbstractVolumeDataProvider
 			
 			parseHeaderFile(source);
 
+			validatePaintedPropertyAvailable();
 			validateDataFileSpecified();
-			
 			validateNonZeroDimensions();
 
-			readSGridData(source, layer);
+			readSGridData(source);
 
 			validateDataFileLoadedCorrectly();
 			
@@ -123,31 +126,31 @@ public class SGridVolumeDataProvider extends AbstractVolumeDataProvider
 	/**
 	 * Load the sgrid data from the specified data file(s)
 	 */
-	private void readSGridData(Object source, VolumeLayer layer) throws IOException
+	private void readSGridData(Object source) throws IOException
 	{
 		initialiseDataVariables();
 		
 		if (asciiDataFile != null)
 		{
-			readAsciiDataFile(source, layer);
+			readAsciiDataFile(source);
 		}
 		else
 		{
-			readBinaryDataFile(source, layer);
+			readBinaryDataFile(source);
 		}
 	}
 	
 	/**
 	 * Load sgrid data from an ASCII data file
 	 */
-	private void readAsciiDataFile(Object source, VolumeLayer layer) throws IOException
+	private void readAsciiDataFile(Object source) throws IOException
 	{
 		InputStream dataInputStream = null;
 		try
 		{
 			dataInputStream = openSGridDataStream(source, asciiDataFile);
 		
-			Pattern linePattern = createAsciiLineMatchingPattern();
+			Pattern linePattern = createAsciiLineMatchingPattern(getPaintedProperty());
 	
 			CoordinateTransformation transformation = layer.getCoordinateTransformation();
 			double firstXValue = 0, firstYValue = 0, firstZValue = 0;
@@ -163,56 +166,60 @@ public class SGridVolumeDataProvider extends AbstractVolumeDataProvider
 					continue;
 				}
 				
-				double x = Double.parseDouble(matcher.group(1));
-				double y = Double.parseDouble(matcher.group(2));
-				double z = Double.parseDouble(matcher.group(3));
+				// Only need to look at positions in the first slice of the volume or in the first position of the top slice
+				if ((positionIndex < xSize * ySize) || (positionIndex == xSize * ySize * (zSize - 1)))
+				{
+					double x = Double.parseDouble(matcher.group(1));
+					double y = Double.parseDouble(matcher.group(2));
+					double z = Double.parseDouble(matcher.group(3));
+					
+					//transform the point;
+					if (transformation != null)
+					{
+						transformation.TransformPoint(transformed, x, y, z);
+						x = transformed[0];
+						y = transformed[1];
+						z = transformed[2];
+					}
+	
+					//only store the first width*height positions (the rest are evenly spaced at different depths)
+					if (positionIndex < xSize * ySize)
+					{
+						Position position = Position.fromDegrees(y, x, z);
+						positions.add(position);
+						top += z / (xSize * ySize);
+	
+						//update the sector to include this latitude/longitude
+						updateSectorToIncludePosition(position);
+					}
+	
+					if (positionIndex == 0)
+					{
+						firstXValue = x;
+						firstYValue = y;
+						firstZValue = z;
+					}
+					else if (positionIndex == 1)
+					{
+						//second x value
+						reverseX = x < firstXValue;
+					}
+					else if (positionIndex == xSize)
+					{
+						//second y value
+						reverseY = y < firstYValue;
+					}
+					else if (positionIndex == xSize * ySize * (zSize - 1))
+					{
+						//positionIndex is the same x/y as 0, but at the bottom elevation instead of top,
+						//so we can calculate the depth as the difference between the two elevations
+						reverseZ = z > firstZValue;
+						depth = reverseZ ? z - firstZValue : firstZValue - z;
+						top += reverseZ ? depth : 0;
+					}
+				}
+				
 				float value = Float.parseFloat(matcher.group(4));
-
-				//transform the point;
-				if (transformation != null)
-				{
-					transformation.TransformPoint(transformed, x, y, z);
-					x = transformed[0];
-					y = transformed[1];
-					z = transformed[2];
-				}
-
-				//only store the first width*height positions (the rest are evenly spaced at different depths)
-				if (positionIndex < xSize * ySize)
-				{
-					Position position = Position.fromDegrees(y, x, z);
-					positions.add(position);
-					top += z / (xSize * ySize);
-
-					//update the sector to include this latitude/longitude
-					updateSectorToIncludePosition(position);
-				}
-
-				if (positionIndex == 0)
-				{
-					firstXValue = x;
-					firstYValue = y;
-					firstZValue = z;
-				}
-				else if (positionIndex == 1)
-				{
-					//second x value
-					reverseX = x < firstXValue;
-				}
-				else if (positionIndex == xSize)
-				{
-					//second y value
-					reverseY = y < firstYValue;
-				}
-				else if (positionIndex == xSize * ySize * (zSize - 1))
-				{
-					//positionIndex is the same x/y as 0, but at the bottom elevation instead of top,
-					//so we can calculate the depth as the difference between the two elevations
-					reverseZ = z > firstZValue;
-					depth = reverseZ ? z - firstZValue : firstZValue - z;
-					top += reverseZ ? depth : 0;
-				}
-
 				if (putDataValue(positionIndex, value))
 				{
 					minValue = Math.min(minValue, value);
@@ -267,7 +274,7 @@ public class SGridVolumeDataProvider extends AbstractVolumeDataProvider
 	/**
 	 * Load SGrid data from binary points and flags files
 	 */
-	private void readBinaryDataFile(Object source, VolumeLayer layer) throws IOException
+	private void readBinaryDataFile(Object source) throws IOException
 	{
 		InputStream pointsInputStream = null;
 		InputStream propertiesInputStream = null;
@@ -285,6 +292,15 @@ public class SGridVolumeDataProvider extends AbstractVolumeDataProvider
 			float[] coords = new float[3];
 			for (int positionIndex = 0; positionIndex < totalNumberOfPositions(); positionIndex++)
 			{
+			
+				// We only care about a specific subset of points (bottom slice and first point on the top slice).
+				// All other points can be ignored
+				if ((positionIndex >= xSize * ySize) && (positionIndex != xSize * ySize * (zSize - 1)))
+				{
+					pointsReader.skipToNextGroup();
+					continue;
+				}
+				
 				pointsReader.readNextValues(coords);
 				
 				//transform the point;
@@ -295,7 +311,7 @@ public class SGridVolumeDataProvider extends AbstractVolumeDataProvider
 					coords[1] = (float)transformed[1];
 					coords[2] = (float)transformed[2];
 				}
-
+				
 				//only store the first width*height positions (the rest are evenly spaced at different depths)
 				if (positionIndex < xSize * ySize)
 				{
@@ -332,14 +348,14 @@ public class SGridVolumeDataProvider extends AbstractVolumeDataProvider
 					top += reverseZ ? depth : 0;
 				}
 			}
-			
+
 			// Read the painted property from the nominated property file
-			propertiesInputStream = openSGridDataStream(source, propertyDataFile);
+			GocadPropertyDefinition paintedProperty = getPaintedProperty();
+			propertiesInputStream = openSGridDataStream(source, paintedProperty.getFile());
 			FloatReader propertiesReader = FloatReader.Builder.newFloatReaderForStream(propertiesInputStream)
 															  .withGroupSize(1)
-															  .withOffset(propertyOffset)
-															  .withFormat(FloatFormat.valueOf(propertyType))
-															  .withGroupSeparation(0)
+															  .withOffset(paintedProperty.getOffset())
+															  .withFormat(FloatFormat.valueOf(paintedProperty.getType()))
 															  .build();
 			
 			float[] value = new float[1];
@@ -369,7 +385,7 @@ public class SGridVolumeDataProvider extends AbstractVolumeDataProvider
 	/**
 	 * Create a regex pattern that matches ASCII data file lines, with a capturing group matching the painted variable.
 	 */
-	private Pattern createAsciiLineMatchingPattern()
+	private Pattern createAsciiLineMatchingPattern(GocadPropertyDefinition paintedProperty)
 	{
 		final String doublePattern = "([\\d.\\-]+)";
 		final String nonCapturingDoublePattern = "(?:[\\d.\\-]+)";
@@ -377,7 +393,7 @@ public class SGridVolumeDataProvider extends AbstractVolumeDataProvider
 		
 		//regex for coordinates
 		String lineRegex = "\\s*" + doublePattern + spacerPattern + doublePattern + spacerPattern + doublePattern;
-		for (int property = 1; property < paintedVariableId; property++)
+		for (int property = 1; property < paintedProperty.getId(); property++)
 		{
 			//ignore all properties in between coordinates and painted property
 			lineRegex += spacerPattern + nonCapturingDoublePattern;
@@ -399,10 +415,18 @@ public class SGridVolumeDataProvider extends AbstractVolumeDataProvider
 		maxValue = -Float.MAX_VALUE;
 	}
 
+	private void validatePaintedPropertyAvailable() throws IOException
+	{
+		if (getPaintedProperty() == null)
+		{
+			throw new IOException("No property found for painting");
+		}
+	}
+	
 	private void validateDataFileSpecified() throws IOException
 	{
 		if (asciiDataFile == null && 
-				(pointsDataFile == null || propertyDataFile == null))
+				(pointsDataFile == null || getPaintedProperty().getFile() == null))
 		{
 			throw new IOException("Data file not specified");
 		}
@@ -445,31 +469,6 @@ public class SGridVolumeDataProvider extends AbstractVolumeDataProvider
 		return file;
 	}
 	
-	/**
-	 * Parse the contents of the SGrid header file referred to by the provided source object.
-	 */
-	private void parseHeaderFile(Object source) throws IOException
-	{
-		InputStream sgInputStream = null;
-		try
-		{
-			sgInputStream = openSGridHeaderStream(source);
-			BufferedReader reader = new BufferedReader(new InputStreamReader(sgInputStream));
-			String line;
-			while ((line = reader.readLine()) != null)
-			{
-				parseLine(line);
-			}
-		}
-		finally
-		{
-			if (sgInputStream != null)
-			{
-				sgInputStream.close();
-			}
-		}
-	}
-
 	/** 
 	 * Open an input stream that reads from the SGrid header file.
 	 * Supports loading .sg files from within Zip archives. 
@@ -496,11 +495,11 @@ public class SGridVolumeDataProvider extends AbstractVolumeDataProvider
 				throw new IOException("Could not find .sg file in zip");
 			}
 
-			return zip.getInputStream(sgEntry);
+			return new BufferedInputStream(zip.getInputStream(sgEntry));
 		}
 		else
 		{
-			return new FileInputStream(((File)source));
+			return new BufferedInputStream(new FileInputStream(((File)source)));
 		}
 	}
 	
@@ -603,7 +602,70 @@ public class SGridVolumeDataProvider extends AbstractVolumeDataProvider
 		}
 		return xSize * ySize * zSize;
 	}
+	
+	/**
+	 * @return The property definition for the painted property
+	 */
+	private GocadPropertyDefinition getPaintedProperty()
+	{
+		if (paintedProperty != null)
+		{
+			return paintedProperty;
+		}
+		
+		if (properties.isEmpty())
+		{
+			return null;
+		}
+		
+		// Layer definition overrides gocad header definition
+		String thePaintedVariableName = layer.getPaintedVariableName() == null ? paintedVariableName : layer.getPaintedVariableName();
+		
+		// If none specified, use the first property
+		if (thePaintedVariableName == null)
+		{
+			paintedProperty = properties.get(0);
+			return paintedProperty;
+		}
+		
+		// Otherwise match by property name
+		for (GocadPropertyDefinition d : properties)
+		{
+			if (thePaintedVariableName.equalsIgnoreCase(d.getName()))
+			{
+				paintedProperty = d;
+				return paintedProperty;
+			}
+		}
+		return null;
+	}
 
+	/**
+	 * Parse the contents of the SGrid header file referred to by the provided source object.
+	 */
+	private void parseHeaderFile(Object source) throws IOException
+	{
+		properties = new ArrayList<GocadPropertyDefinition>();
+		InputStream sgInputStream = null;
+		try
+		{
+			sgInputStream = openSGridHeaderStream(source);
+			BufferedReader reader = new BufferedReader(new InputStreamReader(sgInputStream));
+			String line;
+			while ((line = reader.readLine()) != null)
+			{
+				parseLine(line);
+			}
+		}
+		finally
+		{
+			if (sgInputStream != null)
+			{
+				sgInputStream.close();
+			}
+		}
+	}
+	
 	/**
 	 * Parse a single line from the SGrid header file and update properties as appropriate
 	 */
@@ -629,7 +691,15 @@ public class SGridVolumeDataProvider extends AbstractVolumeDataProvider
 			return;
 		}
 
-		matcher = propAlignmentPattern.matcher(line);
+		matcher = propertyDefinition.matcher(line);
+		if (matcher.matches())
+		{
+			int index = Integer.valueOf(matcher.group(1));
+			parsePropertyDefinition(line, index - 1);
+			return;
+		}
+		
+		matcher = propertyAlignmentPattern.matcher(line);
 		if (matcher.matches())
 		{
 			String propAlignment = matcher.group(1);
@@ -672,62 +742,70 @@ public class SGridVolumeDataProvider extends AbstractVolumeDataProvider
 			return;
 		}
 		
-		matcher = propertyFilePattern.matcher(line);
+	}
+	
+	private void parsePropertyDefinition(String line, int definitionIndex)
+	{
+		GocadPropertyDefinition definition;
+		if (definitionIndex >= properties.size())
+		{
+			definition = new GocadPropertyDefinition();
+			// TODO: Support property-specific alignment specification
+			definition.setCellCentred(cellCentred);
+			definition.setId(definitionIndex + 1);
+			properties.add(definition);
+		}
+		else
+		{
+			definition = properties.get(definitionIndex);
+		}
+		
+		Matcher matcher = propertyFilePattern.matcher(line);
 		if (matcher.matches())
 		{
-			propertyDataFile = matcher.group(2);
+			definition.setFile(matcher.group(2));
 			return;
 		}
 
 		matcher = propertyOffsetPattern.matcher(line);
 		if (matcher.matches())
 		{
-			propertyOffset = Integer.parseInt(matcher.group(1));
+			definition.setOffset(Integer.parseInt(matcher.group(1)));
 			return;
 		}
 		
 		matcher = propertySizePattern.matcher(line);
 		if (matcher.matches())
 		{
-			propertySize = Integer.parseInt(matcher.group(2));
+			definition.setBytes(Integer.parseInt(matcher.group(2)));
 			return;
 		}
 		
 		matcher = propertyFormatPattern.matcher(line);
 		if (matcher.matches())
 		{
-			propertyFormat = matcher.group(2);
+			definition.setFormat(matcher.group(2));
 			return;
 		}
 		
 		matcher = propertyTypePattern.matcher(line);
 		if (matcher.matches())
 		{
-			propertyType = matcher.group(2);
+			definition.setType(matcher.group(2));
 			return;
 		}
 		
 		matcher = propertyNamePattern.matcher(line);
 		if (matcher.matches())
 		{
-			int propertyId = Integer.parseInt(matcher.group(1));
-			String propertyName = matcher.group(2);
-			if (propertyName.equals(paintedVariableName))
-			{
-				paintedVariableId = propertyId;
-			}
+			definition.setName(matcher.group(2));
 			return;
 		}
 
 		matcher = propertyNoDataPattern.matcher(line);
 		if (matcher.matches())
 		{
-			int propertyId = Integer.parseInt(matcher.group(1));
-			float noDataValue = Float.parseFloat(matcher.group(2));
-			if (propertyId == paintedVariableId)
-			{
-				this.noDataValue = noDataValue;
-			}
+			definition.setNoDataValue(Float.parseFloat(matcher.group(2)));
 			return;
 		}
 	}
