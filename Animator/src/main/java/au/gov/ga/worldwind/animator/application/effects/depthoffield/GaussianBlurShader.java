@@ -22,7 +22,7 @@ import java.io.InputStream;
 
 import javax.media.opengl.GL;
 
-import au.gov.ga.worldwind.animator.application.effects.Shader;
+import au.gov.ga.worldwind.common.render.Shader;
 
 /**
  * Gaussian blur shader that blurs the input in a single direction (must be

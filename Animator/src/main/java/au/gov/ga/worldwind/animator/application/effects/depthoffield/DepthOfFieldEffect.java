@@ -35,7 +35,7 @@ import au.gov.ga.worldwind.animator.animation.io.AnimationIOConstants;
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 import au.gov.ga.worldwind.animator.application.effects.Effect;
 import au.gov.ga.worldwind.animator.application.effects.EffectBase;
-import au.gov.ga.worldwind.animator.application.render.FrameBuffer;
+import au.gov.ga.worldwind.common.render.FrameBuffer;
 
 /**
  * {@link Effect} implementation that provides a depth-of-field effect, with
@@ -207,14 +207,8 @@ public class DepthOfFieldEffect extends EffectBase
 	{
 		GL gl = dc.getGL();
 
-		if (!depthOfFieldShader.isCreated())
-		{
-			depthOfFieldShader.create(gl);
-		}
-		if (!gaussianBlurShader.isCreated())
-		{
-			gaussianBlurShader.create(gl);
-		}
+		depthOfFieldShader.createIfRequired(gl);
+		gaussianBlurShader.createIfRequired(gl);
 
 		try
 		{
@@ -232,9 +226,9 @@ public class DepthOfFieldEffect extends EffectBase
 
 				//draw the scene, blurring vertically first, then horizontally
 				gaussianBlurShader.use(dc, blurFrameBuffer.getDimensions(), false);
-				FrameBuffer.renderTexturedQuad(gl, frameBuffer.getTextureId());
+				FrameBuffer.renderTexturedQuad(gl, frameBuffer.getTexture().getId());
 				gaussianBlurShader.use(dc, blurFrameBuffer.getDimensions(), true);
-				FrameBuffer.renderTexturedQuad(gl, blurFrameBuffer.getTextureId());
+				FrameBuffer.renderTexturedQuad(gl, blurFrameBuffer.getTexture().getId());
 				gaussianBlurShader.unuse(gl);
 			}
 			finally
@@ -250,8 +244,8 @@ public class DepthOfFieldEffect extends EffectBase
 		try
 		{
 			depthOfFieldShader.use(dc, frameBuffer.getDimensions(), (float) focus, (float) near, (float) far, 1f / 4f);
-			FrameBuffer.renderTexturedQuad(gl, frameBuffer.getTextureId(), frameBuffer.getDepthId(),
-					blurFrameBuffer.getTextureId());
+			FrameBuffer.renderTexturedQuad(gl, frameBuffer.getTextures()[0].getId(), frameBuffer.getDepth().getId(),
+					blurFrameBuffer.getTextures()[0].getId());
 		}
 		finally
 		{
@@ -263,17 +257,8 @@ public class DepthOfFieldEffect extends EffectBase
 	protected void releaseEffect(DrawContext dc)
 	{
 		GL gl = dc.getGL();
-		if (depthOfFieldShader.isCreated())
-		{
-			depthOfFieldShader.delete(gl);
-		}
-		if (gaussianBlurShader.isCreated())
-		{
-			gaussianBlurShader.delete(gl);
-		}
-		if (blurFrameBuffer.isCreated())
-		{
-			blurFrameBuffer.delete(gl);
-		}
+		depthOfFieldShader.deleteIfCreated(gl);
+		gaussianBlurShader.deleteIfCreated(gl);
+		blurFrameBuffer.deleteIfCreated(gl);
 	}
 }
