@@ -22,7 +22,8 @@ import java.awt.Dimension;
 import au.gov.ga.worldwind.animator.animation.Animatable;
 import au.gov.ga.worldwind.animator.animation.Animation;
 import au.gov.ga.worldwind.animator.animation.io.AnimationIOConstants;
-import au.gov.ga.worldwind.animator.application.render.FrameBuffer;
+import au.gov.ga.worldwind.common.render.FrameBuffer;
+import au.gov.ga.worldwind.common.render.Shader;
 
 /**
  * Interface that defines an {@link Animatable} full-screen effect.

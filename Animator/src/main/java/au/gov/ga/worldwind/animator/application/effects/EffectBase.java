@@ -28,7 +28,7 @@ import javax.media.opengl.GL;
 import au.gov.ga.worldwind.animator.animation.AnimatableBase;
 import au.gov.ga.worldwind.animator.animation.Animation;
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
-import au.gov.ga.worldwind.animator.application.render.FrameBuffer;
+import au.gov.ga.worldwind.common.render.FrameBuffer;
 import au.gov.ga.worldwind.common.util.Validate;
 
 /**
@@ -47,7 +47,7 @@ public abstract class EffectBase extends AnimatableBase implements Effect
 	/**
 	 * The frame buffer to draw to for this effect.
 	 */
-	protected final FrameBuffer frameBuffer = new FrameBuffer();
+	protected final FrameBuffer frameBuffer = new FrameBuffer(1, true);
 
 	public EffectBase(String name, Animation animation)
 	{
@@ -96,7 +96,7 @@ public abstract class EffectBase extends AnimatableBase implements Effect
 		GL gl = dc.getGL();
 
 		//this will create the framebuffer if it doesn't exist
-		frameBuffer.resize(gl, dimensions, true);
+		frameBuffer.resize(gl, dimensions);
 		resizeExtraFrameBuffers(dc, dimensions);
 		frameBuffer.bind(gl);
 	}
@@ -128,10 +128,7 @@ public abstract class EffectBase extends AnimatableBase implements Effect
 	@Override
 	public final void releaseResources(DrawContext dc)
 	{
-		if (frameBuffer.isCreated())
-		{
-			frameBuffer.delete(dc.getGL());
-		}
+		frameBuffer.deleteIfCreated(dc.getGL());
 		releaseEffect(dc);
 	}
 

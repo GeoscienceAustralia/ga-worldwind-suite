@@ -21,6 +21,9 @@ import gov.nasa.worldwind.util.OGLRenderToTextureSupport;
 
 import javax.media.opengl.GL;
 
+import au.gov.ga.worldwind.common.render.FrameBuffer;
+import au.gov.ga.worldwind.common.render.FrameBufferStack;
+
 /**
  * This {@link SurfaceObjectTileBuilder} subclass uses the
  * {@link FrameBufferStack} when binding the framebuffer used to render surface
