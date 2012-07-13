@@ -67,8 +67,7 @@ public class VolumeLayerFactory
 
 		WWXML.checkAndSetStringParam(domElement, params, AVKey.URL, "URL", xpath);
 		WWXML.checkAndSetLongParam(domElement, params, AVKey.EXPIRY_TIME, "ExpiryTime", xpath);
-		WWXML.checkAndSetDateTimeParam(domElement, params, AVKey.EXPIRY_TIME, "LastUpdate",
-				DataLayerFactory.DATE_TIME_PATTERN, xpath);
+		WWXML.checkAndSetDateTimeParam(domElement, params, AVKey.EXPIRY_TIME, "LastUpdate", DataLayerFactory.DATE_TIME_PATTERN, xpath);
 		WWXML.checkAndSetStringParam(domElement, params, AVKey.DATA_CACHE_NAME, "DataCacheName", xpath);
 
 		WWXML.checkAndSetDoubleParam(domElement, params, AVKeyMore.MAX_VARIANCE, "MaxVariance", xpath);
@@ -86,6 +85,8 @@ public class VolumeLayerFactory
 
 		WWXML.checkAndSetBooleanParam(domElement, params, AVKeyMore.REVERSE_NORMALS, "ReverseNormals", xpath);
 		WWXML.checkAndSetBooleanParam(domElement, params, AVKeyMore.ORDERED_RENDERING, "OrderedRendering", xpath);
+		
+		WWXML.checkAndSetStringParam(domElement, params, AVKeyMore.PAINTED_VARIABLE, "PaintedVariable", xpath);
 
 		ColorMap colorMap = XMLUtil.getColorMap(domElement, "ColorMap", xpath);
 		params.setValue(AVKeyMore.COLOR_MAP, colorMap);

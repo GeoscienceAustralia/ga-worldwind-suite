@@ -42,5 +42,9 @@ public class VolumeLayerFactoryTest
 		
 		assertNotNull(params.getValue(AVKeyMore.DATA_LAYER_PROVIDER));
 		assertTrue(params.getValue(AVKeyMore.DATA_LAYER_PROVIDER) instanceof ArrayVolumeDataProvider);
+		
+		assertNotNull(params.getValue(AVKeyMore.PAINTED_VARIABLE));
+		assertEquals("var1", params.getValue(AVKeyMore.PAINTED_VARIABLE));
+		assertEquals(layer.getPaintedVariableName(), "var1");
 	}
 }

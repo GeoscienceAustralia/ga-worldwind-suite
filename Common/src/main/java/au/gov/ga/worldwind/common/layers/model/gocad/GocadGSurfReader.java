@@ -24,6 +24,7 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.List;
@@ -427,7 +428,7 @@ public class GocadGSurfReader implements GocadReader<FastShape>
 				int vRegion = (v / strideV) * uSamples;
 				for (int u = 0; u < nu; u++)
 				{
-					float value = GocadVoxetReader.readNextFloat(eis, parameters.getByteOrder(), ieee);
+					float value = readNextFloat(eis, parameters.getByteOrder(), ieee);
 					if (!Float.isNaN(value) && (noDataValue == null || value != noDataValue))
 					{
 						int uRegion = (u / strideU);
@@ -504,7 +505,7 @@ public class GocadGSurfReader implements GocadReader<FastShape>
 					Vec4 uAdd = axisUStride.multiply3(u);
 					Vec4 p;
 
-					float value = GocadVoxetReader.readNextFloat(eis, parameters.getByteOrder(), ieee);
+					float value = readNextFloat(eis, parameters.getByteOrder(), ieee);
 					boolean valid = !Float.isNaN(value) && (noDataValue == null || value != noDataValue);
 					if (valid)
 					{
@@ -540,9 +541,9 @@ public class GocadGSurfReader implements GocadReader<FastShape>
 					}
 
 					valueIndex++;
-					GocadVoxetReader.skipBytes(eis, esize * Math.min(strideU - 1, nu - u - 1));
+					skipBytes(eis, esize * Math.min(strideU - 1, nu - u - 1));
 				}
-				GocadVoxetReader.skipBytes(eis, esize * nu * Math.min(strideV - 1, nv - v - 1));
+				skipBytes(eis, esize * nu * Math.min(strideV - 1, nv - v - 1));
 			}
 		}
 	}
@@ -562,6 +563,67 @@ public class GocadGSurfReader implements GocadReader<FastShape>
 		public static PositionWithCoord fromDegrees(double latitude, double longitude, double elevation, int u, int v)
 		{
 			return new PositionWithCoord(Angle.fromDegrees(latitude), Angle.fromDegrees(longitude), elevation, u, v);
+		}
+	}
+	
+	public static void skipBytes(InputStream is, long n) throws IOException
+	{
+		while (n > 0)
+		{
+			long skipped = is.skip(n);
+			if (skipped < 0)
+			{
+				throw new IOException("Error skipping in InputStream");
+			}
+			n -= skipped;
+		}
+	}
+
+	public static float readNextFloat(InputStream is, ByteOrder byteOrder, boolean ieee) throws IOException
+	{
+		int b0, b1, b2, b3;
+		if (byteOrder == ByteOrder.LITTLE_ENDIAN)
+		{
+			b3 = is.read();
+			b2 = is.read();
+			b1 = is.read();
+			b0 = is.read();
+		}
+		else
+		{
+			b0 = is.read();
+			b1 = is.read();
+			b2 = is.read();
+			b3 = is.read();
+		}
+		return bytesToFloat(b0, b1, b2, b3, ieee);
+	}
+
+	private static float bytesToFloat(int b0, int b1, int b2, int b3, boolean ieee)
+	{
+		if (ieee)
+		{
+			return Float.intBitsToFloat((b0) | (b1 << 8) | (b2 << 16) | b3 << 24);
+		}
+		else
+		{
+			//ibm
+			byte S = (byte) ((b3 & 0x80) >> 7);
+			int E = (b3 & 0x7f);
+			long F = (b2 << 16) + (b1 << 8) + b0;
+
+			if (S == 0 && E == 0 && F == 0)
+			{
+				return 0;
+			}
+
+			double A = 16.0;
+			double B = 64.0;
+			double e24 = 16777216.0; // 2^24
+			double M = F / e24;
+
+			double F1 = S == 0 ? 1.0 : -1.0;
+			return (float) (F1 * M * Math.pow(A, E - B));
 		}
 	}
 }

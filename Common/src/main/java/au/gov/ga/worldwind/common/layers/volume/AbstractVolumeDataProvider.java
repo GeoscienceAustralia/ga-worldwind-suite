@@ -36,46 +36,55 @@ import au.gov.ga.worldwind.common.render.fastshape.FastShape;
  * 
  * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
-public abstract class AbstractVolumeDataProvider extends AbstractDataProvider<VolumeLayer> implements
-		VolumeDataProvider
+public abstract class AbstractVolumeDataProvider extends AbstractDataProvider<VolumeLayer> implements VolumeDataProvider
 {
+	
 	/**
 	 * Number of samples in the volume data along the x-axis.
 	 */
 	protected int xSize;
+	
 	/**
 	 * Number of samples in the volume data along the y-axis;
 	 */
 	protected int ySize;
+	
 	/**
 	 * Number of samples in the volume data along the z-axis;
 	 */
 	protected int zSize;
+	
 	/**
 	 * Approximate sector containing the volume data.
 	 */
 	protected Sector sector = null;
+	
 	/**
 	 * Average top elevation of the volume data (in meters).
 	 */
 	protected double top;
+	
 	/**
 	 * Depth (distance between top and bottom slice) of the volume data (in
 	 * meters).
 	 */
 	protected double depth;
+	
 	/**
 	 * Value in the data that represents NODATA.
 	 */
 	protected float noDataValue;
+	
 	/**
 	 * Is the volume data reversed along the x-axis?
 	 */
 	protected boolean reverseX = false;
+	
 	/**
 	 * Is the volume data reversed along the y-axis?
 	 */
 	protected boolean reverseY = false;
+	
 	/**
 	 * Is the volume data reversed along the z-axis?
 	 */
@@ -87,19 +96,32 @@ public abstract class AbstractVolumeDataProvider extends AbstractDataProvider<Vo
 	 * increment first.
 	 */
 	protected List<Position> positions;
+	
 	/**
 	 * Float array that contains the volume data.
 	 */
 	protected FloatBuffer data;
+	
 	/**
 	 * The minimum volume data value.
 	 */
 	protected float minValue;
+	
 	/**
 	 * The maximum volume data value.
 	 */
 	protected float maxValue;
-
+	
+	/**
+	 * Whether the volume data is cell-centred
+	 */
+	protected boolean cellCentred;
+	
+	protected FloatBuffer getData()
+	{
+		return data;
+	}
+	
 	@Override
 	public int getXSize()
 	{
@@ -145,7 +167,26 @@ public abstract class AbstractVolumeDataProvider extends AbstractDataProvider<Vo
 		{
 			z = zSize - z - 1;
 		}
-		return data.get(x + y * xSize + z * xSize * ySize);
+		
+		if (!cellCentred)
+		{
+			return data.get(x + y * xSize + z * xSize * ySize);
+		}
+		else
+		{
+			// Clamp cell-centred data to vertex coordinates
+			int clampedX = Math.min(x, xSize - 2);
+			int clampedY = Math.min(y, ySize - 2);
+			int clampedZ = Math.min(z, zSize - 2);
+			int index = clampedX + clampedY * (xSize - 1) + clampedZ * (xSize - 1) * (ySize - 1);
+			return data.get(index);
+		}
+	}
+	
+	@Override
+	public boolean isCellCentred()
+	{
+		return cellCentred;
 	}
 
 	@Override
@@ -196,10 +237,8 @@ public abstract class AbstractVolumeDataProvider extends AbstractDataProvider<Vo
 		for (int y = 0; y < ySize; y++)
 		{
 			Position position = getPosition(x, y);
-			TopBottomPosition top =
-					new TopBottomPosition(position.latitude, position.longitude, position.elevation, false);
-			TopBottomPosition bottom =
-					new TopBottomPosition(position.latitude, position.longitude, position.elevation, true);
+			TopBottomPosition top = new TopBottomPosition(position.latitude, position.longitude, position.elevation, false);
+			TopBottomPosition bottom = new TopBottomPosition(position.latitude, position.longitude, position.elevation, true);
 			positions.add(top);
 			positions.add(bottom);
 			float u = y / (float) Math.max(1, ySize - 1);
@@ -222,10 +261,8 @@ public abstract class AbstractVolumeDataProvider extends AbstractDataProvider<Vo
 		for (int x = 0; x < xSize; x++)
 		{
 			Position position = getPosition(x, y);
-			TopBottomPosition top =
-					new TopBottomPosition(position.latitude, position.longitude, position.elevation, false);
-			TopBottomPosition bottom =
-					new TopBottomPosition(position.latitude, position.longitude, position.elevation, true);
+			TopBottomPosition top = new TopBottomPosition(position.latitude, position.longitude, position.elevation, false);
+			TopBottomPosition bottom = new TopBottomPosition(position.latitude, position.longitude, position.elevation, true);
 			positions.add(top);
 			positions.add(bottom);
 			float u = x / (float) Math.max(1, xSize - 1);
