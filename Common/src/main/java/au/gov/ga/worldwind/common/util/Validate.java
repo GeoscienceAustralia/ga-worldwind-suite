@@ -15,6 +15,8 @@
  ******************************************************************************/
 package au.gov.ga.worldwind.common.util;
 
+import java.util.Collection;
+
 /**
  * Util class that provides some commonly used validation methods.
  * <p/>
@@ -26,6 +28,7 @@ public class Validate
 {
 
 	private static final String DEFAULT_NOT_NULL_MSG = "Value cannot be null";
+	private static final String DEFAULT_NOT_EMPTY_MSG = "Value cannot be empty";
 	private static final String DEFAULT_IS_TRUE_MSG = "Value is false when expected true";
 	private static final String DEFAULT_NOT_BLANK_MSG = "Value cannot be blank";
 
@@ -68,6 +71,22 @@ public class Validate
 		}
 	}
 
+	/**
+	 * Validate that the provided collection is not <code>null</code> or empty.
+	 * 
+	 * @param value The value to validate
+	 * @param msg The message to include in any generated exceptions
+	 * 
+	 * @throws IllegalArgumentException If the provided collection is <code>null</code> or empty
+	 */
+	public static void notEmpty(Collection<?> value, String msg) throws IllegalArgumentException
+	{
+		if (value == null || value.isEmpty())
+		{
+			throw new IllegalArgumentException(msg == null ? DEFAULT_NOT_EMPTY_MSG : msg);
+		}
+	}
+	
 	/**
 	 * Validate that the provided string contains non-whitespace characters.
 	 * 
