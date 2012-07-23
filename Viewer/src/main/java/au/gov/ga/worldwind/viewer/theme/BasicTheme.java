@@ -42,6 +42,8 @@ public class BasicTheme implements Theme
 	private boolean menuBar;
 	private boolean toolBar;
 	private boolean statusBar;
+	private boolean sideBar = true;
+	private boolean fullscreen = false;
 	private boolean allowWms = true;
 
 	private boolean persistLayers;
@@ -183,6 +185,28 @@ public class BasicTheme implements Theme
 	public void setStatusBar(boolean statusBar)
 	{
 		this.statusBar = statusBar;
+	}
+	
+	@Override
+	public boolean hasSideBar()
+	{
+		return sideBar;
+	}
+
+	public void setSideBar(boolean sideBar)
+	{
+		this.sideBar = sideBar;
+	}
+
+	@Override
+	public boolean isFullscreen()
+	{
+		return fullscreen;
+	}
+
+	public void setFullscreen(boolean fullscreen)
+	{
+		this.fullscreen = fullscreen;
 	}
 
 	@Override

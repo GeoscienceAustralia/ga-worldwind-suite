@@ -54,6 +54,8 @@ public class ThemeFactory
 		theme.setMenuBar(XMLUtil.getBoolean(element, "MenuBar", false));
 		theme.setToolBar(XMLUtil.getBoolean(element, "ToolBar", false));
 		theme.setStatusBar(XMLUtil.getBoolean(element, "StatusBar", false));
+		theme.setSideBar(XMLUtil.getBoolean(element, "SideBar", true));
+		theme.setFullscreen(XMLUtil.getBoolean(element, "Fullscreen", false));
 		theme.setHasWms(XMLUtil.getBoolean(element, "WmsBrowser", true));
 
 		theme.setPersistLayers(XMLUtil.getBoolean(element, "PersistLayers", true));

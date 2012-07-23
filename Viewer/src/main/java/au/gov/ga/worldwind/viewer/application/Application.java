@@ -19,7 +19,6 @@ import static au.gov.ga.worldwind.common.util.message.CommonMessageConstants.get
 import static au.gov.ga.worldwind.common.util.message.CommonMessageConstants.getVideocardFailureTitleKey;
 import static au.gov.ga.worldwind.common.util.message.MessageSourceAccessor.getMessage;
 import static au.gov.ga.worldwind.viewer.util.message.ViewerMessageConstants.*;
-import gov.nasa.worldwind.BasicModel;
 import gov.nasa.worldwind.Configuration;
 import gov.nasa.worldwind.Model;
 import gov.nasa.worldwind.WorldWind;
@@ -160,9 +159,9 @@ public class Application
 			System.setProperty("apple.awt.brushMetalLook", "true");
 		}
 		else if (Configuration.isWindowsOS())
-        {
-            System.setProperty("sun.awt.noerasebackground", "true"); // prevents flashing during window resizing
-        }
+		{
+			System.setProperty("sun.awt.noerasebackground", "true"); // prevents flashing during window resizing
+		}
 
 		try
 		{
@@ -184,6 +183,11 @@ public class Application
 	}
 
 	public static void main(String[] args)
+	{
+		startWithArgs(args);
+	}
+
+	public static Application startWithArgs(String[] args)
 	{
 		//first parse the command line options
 
@@ -257,20 +261,20 @@ public class Application
 		ThemeOpenDelegate delegate = new ThemeOpenDelegate()
 		{
 			@Override
-			public void opened(Theme theme, Element themeElement, URL themeUrl)
+			public Application opened(Theme theme, Element themeElement, URL themeUrl)
 			{
 				Application.themeElement = themeElement;
 				Application.themeUrl = themeUrl;
-				start(theme, false, true);
+				return start(theme, theme.isFullscreen(), true);
 			}
 		};
 		if (themeUrl == null)
 		{
-			ThemeOpener.openDefault(delegate);
+			return ThemeOpener.openDefault(delegate);
 		}
 		else
 		{
-			ThemeOpener.openTheme(themeUrl, delegate);
+			return ThemeOpener.openTheme(themeUrl, delegate);
 		}
 	}
 
@@ -369,7 +373,9 @@ public class Application
 		frame.setIconImage(Icons.earth32.getIcon().getImage());
 
 		// show splashscreen
-		final SplashScreen splashScreen = showSplashScreen ? new SplashScreen(frame, SplashScreen.class.getResource("/images/viewer-splash-400x230.png")) : null;
+		final SplashScreen splashScreen =
+				showSplashScreen ? new SplashScreen(frame,
+						SplashScreen.class.getResource("/images/viewer-splash-400x230.png")) : null;
 
 		// create worldwind stuff
 		if (Settings.get().isHardwareStereoEnabled())
@@ -383,7 +389,7 @@ public class Application
 			splashScreen.addRenderingListener(wwd);
 		}
 
-		Model model = new BasicModel();
+		Model model = (Model) WorldWind.createConfigurationComponent(AVKey.MODEL_CLASS_NAME);
 		model.setLayers(new SectionListLayerList());
 		model.getGlobe().setElevationModel(new SectionListCompoundElevationModel());
 		wwd.setModel(model);
@@ -515,7 +521,7 @@ public class Application
 		splitPane.setOneTouchExpandable(true);
 		loadSplitLocation();
 
-		boolean anyPanels = !theme.getPanels().isEmpty();
+		boolean anyPanels = !theme.getPanels().isEmpty() && theme.hasSideBar();
 		if (anyPanels)
 		{
 			sideBar = new SideBar(theme, splitPane);
@@ -590,29 +596,6 @@ public class Application
 		catch (Exception e)
 		{
 		}
-
-		wmsBrowser = new WmsBrowser(getMessage(getApplicationTitleKey()));
-		wmsBrowser.registerLayerReceiver(new WmsLayerReceiver()
-		{
-			@Override
-			public void receive(WMSLayerInfo layerInfo)
-			{
-				addWmsLayer(layerInfo);
-			}
-		});
-
-		//		try
-		//		{
-		//			MutableScreenOverlayAttributesImpl attributes = new MutableScreenOverlayAttributesImpl(new URL("file:/c:/temp/demoSlide.html"));
-		//			attributes.setMinWidth("960px");
-		//			attributes.setMinHeight("720px");
-		//			ScreenOverlayLayer textLayer = new ScreenOverlayLayer(attributes);
-		//			wwd.getModel().getLayers().add(textLayer);
-		//		}
-		//		catch (Exception e)
-		//		{
-		//			
-		//		}
 	}
 
 	private void createActions()
@@ -1159,10 +1142,17 @@ public class Application
 				@Override
 				public void run()
 				{
-					quit(false);
-					Application application = restart(fullscreen);
-					copyStateBetweenWorldWindows(wwd, application.wwd);
-					dialog.dispose();
+					if (theme.isFullscreen())
+					{
+						quit(true);
+					}
+					else
+					{
+						quit(false);
+						Application application = restart(fullscreen);
+						copyStateBetweenWorldWindows(wwd, application.wwd);
+						dialog.dispose();
+					}
 				}
 			});
 			thread.start();
@@ -1500,6 +1490,18 @@ public class Application
 
 	private void showWmsBrowser()
 	{
+		if (wmsBrowser == null)
+		{
+			wmsBrowser = new WmsBrowser(getMessage(getApplicationTitleKey()));
+			wmsBrowser.registerLayerReceiver(new WmsLayerReceiver()
+			{
+				@Override
+				public void receive(WMSLayerInfo layerInfo)
+				{
+					addWmsLayer(layerInfo);
+				}
+			});
+		}
 		wmsBrowser.show();
 	}
 

@@ -70,6 +70,16 @@ public interface Theme extends Disposable
 	boolean hasStatusBar();
 
 	/**
+	 * @return Should the side bar be displayed?
+	 */
+	boolean hasSideBar();
+
+	/**
+	 * @return Should the viewer be started in fullscreen mode?
+	 */
+	boolean isFullscreen();
+
+	/**
 	 * @return Should the WMS browser be enabled?
 	 */
 	boolean hasWms();

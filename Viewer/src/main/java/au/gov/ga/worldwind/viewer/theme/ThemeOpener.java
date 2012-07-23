@@ -28,6 +28,7 @@ import au.gov.ga.worldwind.common.downloader.Downloader;
 import au.gov.ga.worldwind.common.downloader.HttpException;
 import au.gov.ga.worldwind.common.downloader.RetrievalResult;
 import au.gov.ga.worldwind.common.util.XMLUtil;
+import au.gov.ga.worldwind.viewer.application.Application;
 
 /**
  * Helper class that downloads a {@link Theme} from a url, and notifies a
@@ -47,7 +48,7 @@ public class ThemeOpener
 	 * @param delegate
 	 *            Delegate to notify
 	 */
-	public static void openTheme(final URL url, final ThemeOpenDelegate delegate)
+	public static Application openTheme(final URL url, final ThemeOpenDelegate delegate)
 	{
 		if (url == null)
 		{
@@ -60,67 +61,49 @@ public class ThemeOpener
 		progress.setMillisToDecideToPopup(0);
 		progress.setMillisToPopup(0);
 
-		final ThemeOpenDelegate innerDelegate = new ThemeOpenDelegate()
+		try
 		{
-			@Override
-			public void opened(Theme theme, Element themeElement, URL themeUrl)
+			RetrievalResult result = Downloader.downloadImmediatelyIfModified(url, true);
+			if (progress.isCanceled())
 			{
-				delegate.opened(theme, themeElement, themeUrl);
+				return null;
 			}
-		};
 
-		Runnable runnable = new Runnable()
+			InputStream is = result.getAsInputStream();
+			Element element = XMLUtil.getElementFromSource(is);
+			Theme theme = ThemeFactory.createFromXML(element, url);
+			if (theme == null)
+			{
+				throw new Exception("Could not create theme from XML document");
+			}
+
+			progress.close();
+			return delegate.opened(theme, element, url);
+		}
+		catch (Exception e)
 		{
-			@Override
-			public void run()
-			{
-				try
-				{
-					RetrievalResult result = Downloader.downloadImmediatelyIfModified(url, true);
-					if (progress.isCanceled())
-					{
-						return;
-					}
+			progress.close();
 
-					InputStream is = result.getAsInputStream();
-					Element element = XMLUtil.getElementFromSource(is);
-					Theme theme = ThemeFactory.createFromXML(element, url);
-					if (theme == null)
-					{
-						throw new Exception("Could not create theme from XML document");
-					}
+			//TODO if response is 403 (forbidden) or 407 (authentication required), allow setting of proxy?
+			//for now, just display a message
 
-					progress.close();
-					innerDelegate.opened(theme, element, url);
-				}
-				catch (Exception e)
-				{
-					progress.close();
-
-					//TODO if response is 403 (forbidden) or 407 (authentication required), allow setting of proxy?
-					//for now, just display a message
-
-					int response = (e instanceof HttpException) ? ((HttpException) e).getResponseCode() : -1;
-					boolean forbidden = response == 403 || response == 407;
-					String message =
-							"Could not open theme "
-									+ url
-									+ ": "
-									+ e.getLocalizedMessage()
-									+ ".\n\nUsing default theme."
-									+ (forbidden
-											? " If you are behind a proxy server, please setup the proxy in Options/Preferences/Network."
-											: "");
-					JOptionPane.showMessageDialog(null, message, "Error", JOptionPane.ERROR_MESSAGE);
-					openDefault(innerDelegate);
-				}
-			}
-		};
-		Thread thread = new Thread(runnable);
-		thread.start();
+			int response = (e instanceof HttpException) ? ((HttpException) e).getResponseCode() : -1;
+			boolean forbidden = response == 403 || response == 407;
+			String message =
+					"Could not open theme "
+							+ url
+							+ ": "
+							+ e.getLocalizedMessage()
+							+ ".\n\nUsing default theme."
+							+ (forbidden
+									? " If you are behind a proxy server, please setup the proxy in Options/Preferences/Network."
+									: "");
+			JOptionPane.showMessageDialog(null, message, "Error", JOptionPane.ERROR_MESSAGE);
+			return openDefault(delegate);
+		}
 	}
 
-	public static void openDefault(ThemeOpenDelegate delegate)
+	public static Application openDefault(ThemeOpenDelegate delegate)
 	{
 		URL url = ThemeOpener.class.getResource("/config/DefaultTheme.xml");
 		try
@@ -132,19 +115,20 @@ public class ThemeOpener
 			{
 				throw new Exception("Could not create theme from XML document");
 			}
-			delegate.opened(theme, element, url);
+			return delegate.opened(theme, element, url);
 		}
 		catch (Exception e)
 		{
 			e.printStackTrace();
 			JOptionPane.showMessageDialog(null, "Could not open default theme: " + e.getLocalizedMessage(), "Error",
 					JOptionPane.ERROR_MESSAGE);
+			return null;
 		}
 	}
 
 	public static interface ThemeOpenDelegate
 	{
-		void opened(Theme theme, Element themeElement, URL themeUrl);
+		Application opened(Theme theme, Element themeElement, URL themeUrl);
 	}
 
 	public static class IndeterminateProgressMonitor extends ProgressMonitor
