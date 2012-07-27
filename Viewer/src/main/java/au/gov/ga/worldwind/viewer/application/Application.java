@@ -21,6 +21,7 @@ import static au.gov.ga.worldwind.common.util.message.MessageSourceAccessor.getM
 import static au.gov.ga.worldwind.viewer.util.message.ViewerMessageConstants.*;
 import gov.nasa.worldwind.Configuration;
 import gov.nasa.worldwind.Model;
+import gov.nasa.worldwind.SceneController;
 import gov.nasa.worldwind.WorldWind;
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.awt.WorldWindowGLCanvas;
@@ -149,6 +150,8 @@ public class Application
 	private static URL themeUrl;
 	private static Element themeElement;
 
+	private static Class<? extends SceneController> sceneControllerClass = StereoSceneController.class;
+
 	static
 	{
 		if (Configuration.isMacOS())
@@ -173,13 +176,22 @@ public class Application
 
 		Configuration.setValue(AVKey.LAYER_FACTORY, ViewerLayerFactory.class.getName());
 		Configuration.setValue(AVKey.ELEVATION_MODEL_FACTORY, ElevationModelFactory.class.getName());
-		Configuration.setValue(AVKey.SCENE_CONTROLLER_CLASS_NAME, StereoSceneController.class.getName());
 		Configuration.setValue(AVKey.VIEW_CLASS_NAME, StereoOrbitView.class.getName());
 		Configuration.setValue(AVKey.LAYERS_CLASS_NAMES, "");
 		Configuration.setValue(AVKey.RETRIEVAL_SERVICE_CLASS_NAME, ExtendedRetrievalService.class.getName());
 		Configuration.setValue(AVKey.TESSELLATOR_CLASS_NAME, WireframeRectangularTessellator.class.getName());
 
 		GDALDataHelper.init();
+	}
+
+	public static Class<? extends SceneController> getSceneControllerClass()
+	{
+		return sceneControllerClass;
+	}
+
+	public static void setSceneControllerClass(Class<? extends SceneController> sceneControllerClass)
+	{
+		Application.sceneControllerClass = sceneControllerClass;
 	}
 
 	public static void main(String[] args)
@@ -189,8 +201,9 @@ public class Application
 
 	public static Application startWithArgs(String[] args)
 	{
-		//first parse the command line options
+		Configuration.setValue(AVKey.SCENE_CONTROLLER_CLASS_NAME, getSceneControllerClass().getName());
 
+		//first parse the command line options
 		CmdLineParser parser = new CmdLineParser();
 		CmdLineParser.Option urlRegexOption = parser.addStringOption('u', "url-regex");
 		CmdLineParser.Option urlReplacementOption = parser.addStringOption('r', "url-replacement");
@@ -319,11 +332,11 @@ public class Application
 	}
 
 	private final boolean fullscreen;
-	private Theme theme;
-	private JFrame frame;
+	private final Theme theme;
+	private final JFrame frame;
 	private JFrame fullscreenFrame;
 
-	private WorldWindowGLCanvas wwd;
+	private final WorldWindowGLCanvas wwd;
 	private MouseLayer mouseLayer;
 
 	private SideBar sideBar;
@@ -1512,5 +1525,15 @@ public class Application
 		{
 			panel.addWmsLayer(layerInfo);
 		}
+	}
+
+	public Theme getTheme()
+	{
+		return theme;
+	}
+
+	public WorldWindowGLCanvas getWwd()
+	{
+		return wwd;
 	}
 }
