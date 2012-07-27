@@ -427,6 +427,11 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 		return layerURLmap.containsKey(layer.getLayerURL());
 	}
 
+	public boolean containsLayer(URL layerURL)
+	{
+		return layerURLmap.containsKey(layerURL);
+	}
+
 	private void addAnyLayers(INode node, boolean rebuildLayersList)
 	{
 		boolean changed = addAnyLayersBelow(node);
@@ -590,13 +595,11 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 
 	public void insertNodeInto(INode newNode, INode parentNode, int index, boolean rebuildLayersList)
 	{
-		parentNode.insertChild(index, newNode);
-
 		if (newNode instanceof WmsRootNode)
 		{
 			this.wmsRootFolderNode = (WmsRootNode) newNode;
 		}
-
+		parentNode.insertChild(index, newNode);
 		nodeWasInserted(parentNode, index);
 		addAnyLayers(newNode, rebuildLayersList);
 	}

@@ -26,6 +26,7 @@ import javax.swing.JScrollPane;
 import javax.swing.tree.TreePath;
 
 import au.gov.ga.worldwind.common.ui.lazytree.DefaultLazyTreeModel;
+import au.gov.ga.worldwind.common.ui.lazytree.LazyTreeModel;
 import au.gov.ga.worldwind.common.ui.lazytree.LazyTreeObjectNode;
 import au.gov.ga.worldwind.common.util.Icons;
 import au.gov.ga.worldwind.viewer.panels.layers.LayerTreeModel;
@@ -72,6 +73,11 @@ public class DatasetPanel extends AbstractThemePanel
 	public DatasetTree getTree()
 	{
 		return tree;
+	}
+	
+	public LazyTreeModel getModel()
+	{
+		return tree.getModel();
 	}
 
 	public void registerLayerTreeModel(LayerTreeModel layerTreeModel)

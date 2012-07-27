@@ -123,7 +123,7 @@ public class PlacesPanel extends AbstractThemePanel
 	private RenderingListener opacityChanger;
 	private RenderingListener exaggerationChanger;
 
-	private class ListItem
+	public class ListItem
 	{
 		public final JCheckBox check;
 		public final Place place;
@@ -150,6 +150,16 @@ public class PlacesPanel extends AbstractThemePanel
 	public WorldWindow getWwd()
 	{
 		return wwd;
+	}
+
+	public DefaultListModel getModel()
+	{
+		return model;
+	}
+
+	public JList getList()
+	{
+		return list;
 	}
 
 	protected void loadPlaces(File file, boolean append)
@@ -518,7 +528,7 @@ public class PlacesPanel extends AbstractThemePanel
 		}
 	}
 
-	private void flyTo(ListItem item)
+	public void flyTo(ListItem item)
 	{
 		if (item == null)
 		{
@@ -844,7 +854,7 @@ public class PlacesPanel extends AbstractThemePanel
 		enableActions();
 	}
 
-	private long flyToPlace(Place place)
+	public long flyToPlace(Place place)
 	{
 		View view = wwd.getView();
 

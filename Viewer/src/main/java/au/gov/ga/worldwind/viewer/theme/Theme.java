@@ -23,9 +23,11 @@ import java.util.List;
 
 import javax.swing.JFrame;
 
+import au.gov.ga.worldwind.viewer.panels.dataset.DatasetPanel;
 import au.gov.ga.worldwind.viewer.panels.dataset.IDataset;
 import au.gov.ga.worldwind.viewer.panels.layers.LayersPanel;
 import au.gov.ga.worldwind.viewer.panels.layers.ThemeLayersPanel;
+import au.gov.ga.worldwind.viewer.panels.places.PlacesPanel;
 import au.gov.ga.worldwind.viewer.util.SettingsUtil;
 
 public interface Theme extends Disposable
@@ -141,6 +143,21 @@ public interface Theme extends Disposable
 	 * @return The {@link LayersPanel} in this theme, if any
 	 */
 	LayersPanel getLayersPanel();
+
+	/**
+	 * @return The {@link ThemeLayersPanel} in this theme, if any
+	 */
+	ThemeLayersPanel getThemeLayersPanel();
+
+	/**
+	 * @return The {@link DatasetPanel} in this theme, if any
+	 */
+	DatasetPanel getDatasetPanel();
+
+	/**
+	 * @return The {@link PlacesPanel} in this theme, if any
+	 */
+	PlacesPanel getPlacesPanel();
 
 	/**
 	 * @return Initial view center latitude to use when starting the application

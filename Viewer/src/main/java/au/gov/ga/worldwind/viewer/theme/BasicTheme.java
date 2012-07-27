@@ -23,9 +23,11 @@ import java.util.List;
 import javax.swing.JFrame;
 
 import au.gov.ga.worldwind.common.util.Util;
+import au.gov.ga.worldwind.viewer.panels.dataset.DatasetPanel;
 import au.gov.ga.worldwind.viewer.panels.dataset.IDataset;
 import au.gov.ga.worldwind.viewer.panels.layers.LayersPanel;
 import au.gov.ga.worldwind.viewer.panels.layers.ThemeLayersPanel;
+import au.gov.ga.worldwind.viewer.panels.places.PlacesPanel;
 
 /**
  * Basic implementation of the {@link Theme} interface. Contains setters for
@@ -186,7 +188,7 @@ public class BasicTheme implements Theme
 	{
 		this.statusBar = statusBar;
 	}
-	
+
 	@Override
 	public boolean hasSideBar()
 	{
@@ -406,23 +408,35 @@ public class BasicTheme implements Theme
 	@Override
 	public LayersPanel getLayersPanel()
 	{
-		for (ThemePanel panel : getPanels())
-		{
-			if (panel instanceof LayersPanel)
-			{
-				return (LayersPanel) panel;
-			}
-		}
-		return null;
+		return getPanel(LayersPanel.class);
 	}
 
+	@Override
 	public ThemeLayersPanel getThemeLayersPanel()
+	{
+		return getPanel(ThemeLayersPanel.class);
+	}
+
+	@Override
+	public DatasetPanel getDatasetPanel()
+	{
+		return getPanel(DatasetPanel.class);
+	}
+
+	@Override
+	public PlacesPanel getPlacesPanel()
+	{
+		return getPanel(PlacesPanel.class);
+	}
+
+	@SuppressWarnings("unchecked")
+	private <T> T getPanel(Class<T> c)
 	{
 		for (ThemePanel panel : getPanels())
 		{
-			if (panel instanceof ThemeLayersPanel)
+			if (c.isAssignableFrom(panel.getClass()))
 			{
-				return (ThemeLayersPanel) panel;
+				return (T) panel;
 			}
 		}
 		return null;
