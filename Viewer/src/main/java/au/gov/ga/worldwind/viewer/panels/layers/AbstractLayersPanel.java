@@ -188,64 +188,65 @@ public abstract class AbstractLayersPanel extends AbstractThemePanel
 					}
 
 					Object o = path.getLastPathComponent();
-
-					//first check if the tree node is pointing to a KML feature; if so, goto the feature 
-					if (o instanceof TreeNodeLayerNode)
-					{
-						TreeNode treeNode = ((TreeNodeLayerNode) o).getTreeNode();
-						if (treeNode instanceof KMLFeatureTreeNode)
-						{
-							KMLAbstractFeature feature = ((KMLFeatureTreeNode) treeNode).getFeature();
-
-							KMLViewController viewController = CustomKMLViewControllerFactory.create(wwd);
-							if (viewController != null)
-							{
-								viewController.goTo(feature);
-								wwd.redraw();
-								return;
-							}
-						}
-					}
-
 					if (!(o instanceof ILayerNode))
 					{
 						return;
 					}
-
-					ILayerNode layer = (ILayerNode) o;
-					Sector sector = layerEnabler.getLayerExtents(layer);
-					if (sector == null || !(wwd.getView() instanceof OrbitView))
-					{
-						return;
-					}
-
-					OrbitView orbitView = (OrbitView) wwd.getView();
-					Position center = orbitView.getCenterPosition();
-					Position newCenter;
-					if (sector.contains(center) && sector.getDeltaLatDegrees() > 90 && sector.getDeltaLonDegrees() > 90)
-					{
-						newCenter = center;
-					}
-					else
-					{
-						newCenter = new Position(sector.getCentroid(), 0);
-					}
-
-					LatLon endVisibleDelta = new LatLon(sector.getDeltaLat(), sector.getDeltaLon());
-					long lengthMillis = SettingsUtil.getScaledLengthMillis(center, newCenter);
-
-					FlyToOrbitViewAnimator animator =
-							FlyToSectorAnimator.createFlyToSectorAnimator(orbitView, center, newCenter,
-									orbitView.getHeading(), orbitView.getPitch(), orbitView.getZoom(), endVisibleDelta,
-									lengthMillis);
-					orbitView.stopAnimations();
-					orbitView.stopMovement();
-					orbitView.addAnimator(animator);
-
-					wwd.redraw();
+					flyToLayer((ILayerNode) o);
 				}
 			}
 		});
+	}
+
+	public void flyToLayer(ILayerNode layer)
+	{
+		//first check if the tree node is pointing to a KML feature; if so, goto the feature 
+		if (layer instanceof TreeNodeLayerNode)
+		{
+			TreeNode treeNode = ((TreeNodeLayerNode) layer).getTreeNode();
+			if (treeNode instanceof KMLFeatureTreeNode)
+			{
+				KMLAbstractFeature feature = ((KMLFeatureTreeNode) treeNode).getFeature();
+
+				KMLViewController viewController = CustomKMLViewControllerFactory.create(wwd);
+				if (viewController != null)
+				{
+					viewController.goTo(feature);
+					wwd.redraw();
+					return;
+				}
+			}
+		}
+
+		Sector sector = layerEnabler.getLayerExtents(layer);
+		if (sector == null || !(wwd.getView() instanceof OrbitView))
+		{
+			return;
+		}
+
+		OrbitView orbitView = (OrbitView) wwd.getView();
+		Position center = orbitView.getCenterPosition();
+		Position newCenter;
+		if (sector.contains(center) && sector.getDeltaLatDegrees() > 90 && sector.getDeltaLonDegrees() > 90)
+		{
+			newCenter = center;
+		}
+		else
+		{
+			newCenter = new Position(sector.getCentroid(), 0);
+		}
+
+		LatLon endVisibleDelta = new LatLon(sector.getDeltaLat(), sector.getDeltaLon());
+		long lengthMillis = SettingsUtil.getScaledLengthMillis(center, newCenter);
+
+		FlyToOrbitViewAnimator animator =
+				FlyToSectorAnimator.createFlyToSectorAnimator(orbitView, center, newCenter, orbitView.getHeading(),
+						orbitView.getPitch(), orbitView.getZoom(), endVisibleDelta, lengthMillis);
+		orbitView.stopAnimations();
+		orbitView.stopMovement();
+		orbitView.addAnimator(animator);
+
+		wwd.redraw();
 	}
 
 	protected abstract INode createRootNode(Theme theme);
