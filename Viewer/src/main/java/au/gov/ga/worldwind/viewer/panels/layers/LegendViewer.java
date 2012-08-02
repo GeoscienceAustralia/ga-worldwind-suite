@@ -41,13 +41,14 @@ import au.gov.ga.worldwind.common.util.Icons;
  */
 public class LegendViewer
 {
-	private static Map<URL, Dialog> dialogs = new HashMap<URL, Dialog>();
+	private static Map<String, Dialog> dialogs = new HashMap<String, Dialog>();
 
 	public static void openLegend(final URL url, String title, final Frame frame)
 	{
-		if (dialogs.containsKey(url))
+		final String key = url + title;
+		if (dialogs.containsKey(key))
 		{
-			Dialog dialog = dialogs.get(url);
+			Dialog dialog = dialogs.get(key);
 			dialog.setVisible(true);
 			dialog.toFront();
 			return;
@@ -55,14 +56,14 @@ public class LegendViewer
 
 		final JDialog dialog = new JDialog(frame, title, false);
 		dialog.setIconImage(Icons.legend.getIcon().getImage());
-		dialogs.put(url, dialog);
+		dialogs.put(key, dialog);
 		dialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
 		dialog.addWindowListener(new WindowAdapter()
 		{
 			@Override
 			public void windowClosing(WindowEvent e)
 			{
-				dialogs.remove(url);
+				dialogs.remove(key);
 				dialog.dispose();
 			}
 		});

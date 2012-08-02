@@ -15,6 +15,7 @@
  ******************************************************************************/
 package au.gov.ga.worldwind.common.util.exaggeration;
 
+import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.render.DrawContext;
 
 /**
@@ -47,11 +48,57 @@ public class VerticalExaggerationAccessor
 		return getService().applyVerticalExaggeration(dc, elevation);
 	}
 	
+	/**
+	 * @see VerticalExaggerationService#unapplyVerticalExaggeration(DrawContext, double)
+	 */
+	public static double unapplyVerticalExaggeration(DrawContext dc, double exaggeratedElevation)
+	{
+		return getService().unapplyVerticalExaggeration(dc, exaggeratedElevation);
+	}
+
 	/** @see VerticalExaggerationService#getGlobalVerticalExaggeration(DrawContext) */
 	public static double getGlobalVerticalExaggeration(DrawContext dc)
 	{
 		return getService().getGlobalVerticalExaggeration(dc);
 	}
 	
+	/** @see VerticalExaggerationService#getUnexaggeratedElevation(DrawContext, Angle, Angle) */
+	public static double getUnexaggeratedElevation(DrawContext dc, Angle latitude, Angle longitude)
+	{
+		return getService().getUnexaggeratedElevation(dc, latitude, longitude);
+	}
+	
+	/**
+	 * @see VerticalExaggerationService#markVerticalExaggeration(Object, DrawContext)
+	 */
+	public static void markVerticalExaggeration(Object key, DrawContext dc)
+	{
+		getService().markVerticalExaggeration(key, dc);
+	}
+
+	/**
+	 * @see VerticalExaggerationService#clearMark(java.lang.Object)
+	 */
+	public static void clearMark(Object key)
+	{
+		getService().clearMark(key);
+	}
+
+	/**
+	 * @see VerticalExaggerationService#isVerticalExaggerationChanged(Object, DrawContext)
+	 */
+	public static boolean isVerticalExaggerationChanged(Object key, DrawContext dc)
+	{
+		return getService().isVerticalExaggerationChanged(key, dc);
+	}
+
+	/**
+	 * @see VerticalExaggerationService#checkAndMarkVerticalExaggeration(Object, DrawContext)
+	 */
+	public static boolean checkAndMarkVerticalExaggeration(Object key, DrawContext dc)
+	{
+		return getService().checkAndMarkVerticalExaggeration(key, dc);
+	}
+
 	private VerticalExaggerationAccessor(){}
 }

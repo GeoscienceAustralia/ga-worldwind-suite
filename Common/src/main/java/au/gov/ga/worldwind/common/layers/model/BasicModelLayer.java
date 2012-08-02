@@ -60,6 +60,10 @@ public class BasicModelLayer extends AbstractModelLayer implements ModelLayer
 		if (b != null)
 			reverseNormals = b;
 
+		b = (Boolean) params.getValue(AVKeyMore.ORDERED_RENDERING);
+		if (b != null)
+			useOrderedRendering = b;
+
 		pointMinSize = (Double) params.getValue(AVKeyMore.POINT_MIN_SIZE);
 		pointMaxSize = (Double) params.getValue(AVKeyMore.POINT_MAX_SIZE);
 		pointConstantAttenuation = (Double) params.getValue(AVKeyMore.POINT_CONSTANT_ATTENUATION);

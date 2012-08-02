@@ -1,7 +1,11 @@
 package au.gov.ga.worldwind.common.util.exaggeration;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import gov.nasa.worldwind.render.DrawContext;
+
+import java.util.Random;
 
 import org.jmock.Expectations;
 import org.jmock.Mockery;
@@ -62,11 +66,67 @@ public class DefaultVerticalExaggerationServiceImplTest
 		assertEquals(10, classUnderTest.getGlobalVerticalExaggeration(dc), DELTA);
 	}
 	
+	@Test
+	public void testIsVEChangedWithoutMark()
+	{
+		setDrawContextExaggeration(0);
+		assertTrue(classUnderTest.isVerticalExaggerationChanged(this, dc));
+	}
+	
+	@Test
+	public void testIsVEChangedWithMarkNoChange()
+	{
+		setDrawContextExaggeration(0);
+		classUnderTest.markVerticalExaggeration(this, dc);
+		
+		setDrawContextExaggeration(0);
+		assertFalse(classUnderTest.isVerticalExaggerationChanged(this, dc));
+	}
+	
+	@Test
+	public void testIsVEChangedWithMarkWithChange()
+	{
+		setDrawContextExaggeration(0.0);
+		classUnderTest.markVerticalExaggeration(this, dc);
+		
+		changeDrawContextExaggeration(0.1);
+		assertTrue(classUnderTest.isVerticalExaggerationChanged(this, dc));
+	}
+	
+	@Test
+	public void testIsVEChangedAfterClear()
+	{
+		setDrawContextExaggeration(0.0);
+		classUnderTest.markVerticalExaggeration(this, dc);
+		classUnderTest.clearMark(this);
+		
+		assertTrue(classUnderTest.isVerticalExaggerationChanged(this, dc));
+	}
+	
+	@Test
+	public void testCheckAndMarkWithNoChange()
+	{
+		setDrawContextExaggeration(0.0);
+		classUnderTest.markVerticalExaggeration(this, dc);
+		
+		changeDrawContextExaggeration(0.1);
+		assertTrue(classUnderTest.checkAndMarkVerticalExaggeration(this, dc));
+		
+		assertFalse(classUnderTest.isVerticalExaggerationChanged(this, dc));
+	}
+	
 	private void setDrawContextExaggeration(final double exaggeration)
 	{
 		mockContext.checking(new Expectations(){{
 			allowing(dc).getVerticalExaggeration(); will(returnValue(exaggeration));
 		}});
+	}
+	
+	private void changeDrawContextExaggeration(final double exaggeration)
+	{
+		Random rand = new Random();
+		dc = mockContext.mock(DrawContext.class, "newContext" + rand.nextInt());
+		setDrawContextExaggeration(exaggeration);
 	}
 	
 }

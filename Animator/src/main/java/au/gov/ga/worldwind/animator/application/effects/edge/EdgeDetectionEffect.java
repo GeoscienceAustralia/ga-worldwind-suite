@@ -32,7 +32,7 @@ import au.gov.ga.worldwind.animator.animation.io.AnimationFileVersion;
 import au.gov.ga.worldwind.animator.animation.io.AnimationIOConstants;
 import au.gov.ga.worldwind.animator.application.effects.Effect;
 import au.gov.ga.worldwind.animator.application.effects.EffectBase;
-import au.gov.ga.worldwind.animator.application.render.FrameBuffer;
+import au.gov.ga.worldwind.common.render.FrameBuffer;
 
 /**
  * Example {@link Effect} that convolves the input with a kernel matrix,
@@ -85,15 +85,11 @@ public class EdgeDetectionEffect extends EffectBase
 	{
 		GL gl = dc.getGL();
 
-		if (!edgeShader.isCreated())
-		{
-			edgeShader.create(gl);
-		}
-
+		edgeShader.createIfRequired(gl);
 		try
 		{
 			edgeShader.use(gl, dimensions.width, dimensions.height);
-			FrameBuffer.renderTexturedQuad(gl, frameBuffer.getTextureId(), frameBuffer.getDepthId());
+			FrameBuffer.renderTexturedQuad(gl, frameBuffer.getTexture().getId(), frameBuffer.getDepth().getId());
 		}
 		finally
 		{
@@ -104,9 +100,6 @@ public class EdgeDetectionEffect extends EffectBase
 	@Override
 	protected void releaseEffect(DrawContext dc)
 	{
-		if (edgeShader.isCreated())
-		{
-			edgeShader.delete(dc.getGL());
-		}
+		edgeShader.deleteIfCreated(dc.getGL());
 	}
 }

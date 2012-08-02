@@ -128,6 +128,7 @@ public class LazyTreeController implements TreeWillExpandListener
 			{
 				node.setChildren(nodes);
 				tree.getUI().relayout();
+				tree.repaint();
 			}
 
 			@Override

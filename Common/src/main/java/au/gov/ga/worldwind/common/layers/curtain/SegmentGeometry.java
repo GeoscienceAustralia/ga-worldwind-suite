@@ -15,12 +15,13 @@
  ******************************************************************************/
 package au.gov.ga.worldwind.common.layers.curtain;
 
+import gov.nasa.worldwind.cache.GpuResourceCache;
 import gov.nasa.worldwind.geom.Vec4;
 import gov.nasa.worldwind.render.DrawContext;
 import gov.nasa.worldwind.render.Renderable;
 import gov.nasa.worldwind.util.OGLStackHandler;
 
-import java.nio.DoubleBuffer;
+import java.nio.FloatBuffer;
 
 import javax.media.opengl.GL;
 
@@ -32,15 +33,26 @@ import javax.media.opengl.GL;
  */
 public class SegmentGeometry implements Renderable
 {
-	private final Vec4 referenceCenter;
-	private final DoubleBuffer vertices;
-	private final DoubleBuffer texCoords;
+	private final int vertexCount;
+	private final FloatBuffer vertices;
+	private final FloatBuffer texCoords;
+	private Vec4 referenceCenter;
+	private long time;
 
-	public SegmentGeometry(DoubleBuffer vertices, DoubleBuffer texCoords, Vec4 referenceCenter)
+	protected Object vboCacheKey = new Object();
+
+	public SegmentGeometry(DrawContext dc, FloatBuffer vertices, FloatBuffer texCoords, Vec4 referenceCenter)
 	{
+		this.vertexCount = vertices.limit() / 3;
 		this.vertices = vertices;
 		this.texCoords = texCoords;
 		this.referenceCenter = referenceCenter;
+		time = System.currentTimeMillis();
+
+		if (dc.getGLRuntimeCapabilities().isUseVertexBufferObject())
+		{
+			fillVerticesVBO(dc);
+		}
 	}
 
 	@Override
@@ -59,42 +71,43 @@ public class SegmentGeometry implements Renderable
 		try
 		{
 			ogsh.pushClientAttrib(gl, GL.GL_CLIENT_VERTEX_ARRAY_BIT);
-
 			gl.glEnableClientState(GL.GL_VERTEX_ARRAY);
 
-			/*if (dc.getGLRuntimeCapabilities().isUseVertexBufferObject())
+			if (dc.getGLRuntimeCapabilities().isUseVertexBufferObject())
 			{
-				//Use VBO's
-				gl.glBindBuffer(GL.GL_ARRAY_BUFFER, tile.ri.bufferIdVertices);
-				gl.glVertexPointer(3, GL.GL_DOUBLE, 0, 0);
+				//Use VBOs
+				int[] vboIds = (int[]) dc.getGpuResourceCache().get(this.vboCacheKey);
+				if (vboIds == null)
+				{
+					vboIds = fillVerticesVBO(dc);
+				}
+				
+				gl.glBindBuffer(GL.GL_ARRAY_BUFFER, vboIds[0]);
+				gl.glVertexPointer(3, GL.GL_FLOAT, 0, 0);
 
 				for (int i = 0; i < numTextureUnits; i++)
 				{
 					gl.glClientActiveTexture(GL.GL_TEXTURE0 + i);
 					gl.glEnableClientState(GL.GL_TEXTURE_COORD_ARRAY);
 
-					gl.glBindBuffer(GL.GL_ARRAY_BUFFER, tile.ri.bufferIdTexCoords);
-					gl.glTexCoordPointer(2, GL.GL_DOUBLE, 0, 0);
+					gl.glBindBuffer(GL.GL_ARRAY_BUFFER, vboIds[1]);
+					gl.glTexCoordPointer(2, GL.GL_FLOAT, 0, 0);
 				}
 
-				gl.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER, tile.ri.bufferIdIndicies);
-
-				gl.glDrawElements(javax.media.opengl.GL.GL_TRIANGLE_STRIP, tile.ri.indices.limit(),
-						javax.media.opengl.GL.GL_UNSIGNED_INT, 0);
+				gl.glDrawArrays(GL.GL_TRIANGLE_STRIP, 0, vertexCount);
 			}
-			else*/
+			else
 			{
 				//Use Vertex Arrays
-				gl.glVertexPointer(3, GL.GL_DOUBLE, 0, vertices.rewind());
+				gl.glVertexPointer(3, GL.GL_FLOAT, 0, vertices.rewind());
 
 				for (int i = 0; i < numTextureUnits; i++)
 				{
 					gl.glClientActiveTexture(GL.GL_TEXTURE0 + i);
 					gl.glEnableClientState(GL.GL_TEXTURE_COORD_ARRAY);
-					gl.glTexCoordPointer(2, GL.GL_DOUBLE, 0, texCoords.rewind());
+					gl.glTexCoordPointer(2, GL.GL_FLOAT, 0, texCoords.rewind());
 				}
 
-				int vertexCount = vertices.limit() / 3;
 				gl.glDrawArrays(GL.GL_TRIANGLE_STRIP, 0, vertexCount);
 			}
 		}
@@ -110,13 +123,62 @@ public class SegmentGeometry implements Renderable
 		return referenceCenter;
 	}
 
-	public DoubleBuffer getVertices()
+	public FloatBuffer getVertices()
 	{
 		return vertices;
 	}
 
-	public DoubleBuffer getTexCoords()
+	public FloatBuffer getTexCoords()
 	{
 		return texCoords;
+	}
+
+	public long getTime()
+	{
+		return time;
+	}
+
+	public long getSizeInBytes()
+	{
+		return 5 * vertexCount * Float.SIZE / 8;
+	}
+	
+	protected void update(DrawContext dc, Vec4 referenceCenter)
+    {
+        this.time = System.currentTimeMillis();
+        this.referenceCenter = referenceCenter;
+
+        if (dc.getGLRuntimeCapabilities().isUseVertexBufferObject())
+        {
+            this.fillVerticesVBO(dc);
+        }
+    }
+
+	protected int[] fillVerticesVBO(DrawContext dc)
+	{
+		GL gl = dc.getGL();
+
+		int[] vboIds = (int[]) dc.getGpuResourceCache().get(this.vboCacheKey);
+		if (vboIds == null)
+		{
+			vboIds = new int[2];
+			gl.glGenBuffers(vboIds.length, vboIds, 0);
+			int size = (vertices.limit() + texCoords.limit()) * 4;
+			dc.getGpuResourceCache().put(this.vboCacheKey, vboIds, GpuResourceCache.VBO_BUFFERS, size);
+		}
+
+		try
+		{
+			gl.glBindBuffer(GL.GL_ARRAY_BUFFER, vboIds[0]);
+			gl.glBufferData(GL.GL_ARRAY_BUFFER, vertices.limit() * 4, vertices.rewind(), GL.GL_STATIC_DRAW);
+			gl.glBindBuffer(GL.GL_ARRAY_BUFFER, vboIds[1]);
+			gl.glBufferData(GL.GL_ARRAY_BUFFER, texCoords.limit() * 4, texCoords.rewind(), GL.GL_STATIC_DRAW);
+		}
+		finally
+		{
+			gl.glBindBuffer(GL.GL_ARRAY_BUFFER, 0);
+		}
+
+		return vboIds;
 	}
 }

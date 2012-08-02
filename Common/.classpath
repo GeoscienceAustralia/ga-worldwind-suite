@@ -27,12 +27,8 @@
 			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="Common/lib/package/native/windows-i586"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry exported="true" kind="lib" path="lib/package/worldwind.jar" sourcepath="lib/src/worldwind-src.zip">
-		<attributes>
-			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="Common/lib/package/native/windows-i586"/>
-		</attributes>
-	</classpathentry>
-	<classpathentry exported="true" kind="lib" path="lib/package/worldwindx.jar" sourcepath="lib/src/worldwind-src.zip"/>
 	<classpathentry exported="true" kind="lib" path="lib/package/jhlabs-filters.jar" sourcepath="lib/src/jhlabs-filters-src.zip"/>
+	<classpathentry exported="true" kind="lib" path="lib/debug/worldwind-debug.jar" sourcepath="/worldwind-105.156-src"/>
+	<classpathentry exported="true" kind="lib" path="lib/debug/worldwindx-debug.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

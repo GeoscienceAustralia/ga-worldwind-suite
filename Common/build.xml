@@ -77,9 +77,11 @@
 	</target>
 
 	<target name="test" depends="build-test" if="${perform_unit_tests}">
+		
 		<mkdir dir="${test_results_dir}" />
 		<mkdir dir="${test_reports_dir}" />
-		<junit printsummary="on" failureproperty="junit.failure">
+		<junit printsummary="on" fork="true" forkmode="once" failureproperty="junit.failure" dir="${user.dir}">
+			<jvmarg value="-Duser.dir=${user.dir}"/>
 			<classpath>
 				<path refid="test_classpath" />
 				<path path="${test_build_dir}" />

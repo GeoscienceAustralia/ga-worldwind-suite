@@ -43,6 +43,7 @@ public interface AVKeyMore extends AVKey
 	final static String COLOR_MAP = "au.gov.ga.worldwind.AVKeyMore.ColorMap";
 	final static String REVERSE_NORMALS = "au.gov.ga.worldwind.AVKeyMore.ReverseNormals";
 	final static String PAINTED_VARIABLE = "au.gov.ga.worldwind.AVKeyMore.PaintedVariable";
+	final static String ORDERED_RENDERING = "au.gov.ga.worldwind.AVKeyMore.OrderedRendering";
 
 	//curtain layer
 	final static String FULL_WIDTH = "au.gov.ga.worldwind.AVKeyMore.FullWidth";
@@ -101,4 +102,14 @@ public interface AVKeyMore extends AVKey
 	final static String INITIAL_OFFSET_MAX_V = "au.gov.ga.worldwind.AVKeyMore.InitialOffsetMaxV";
 	final static String INITIAL_OFFSET_MIN_W = "au.gov.ga.worldwind.AVKeyMore.InitialOffsetMinW";
 	final static String INITIAL_OFFSET_MAX_W = "au.gov.ga.worldwind.AVKeyMore.InitialOffsetMaxW";
+	final static String FORCE_TWO_SIDED_LIGHTING = "au.gov.ga.worldwind.AVKeyMore.Force2SidedLighting";
+
+	//model layer
+	final static String TARGET_BAND = "au.gov.ga.worldwind.AVKeyMore.TargetBand";
+	final static String OFFSET = "au.gov.ga.worldwind.AVKeyMore.Offset";
+	
+	//sphere layer
+	final static String SPHERE_RADIUS = "au.gov.worldwind.AVKeyMore.SphereRadius";
+	final static String SPHERE_SLICES = "au.gov.worldwind.AVKeyMore.SphereSlices";
+	final static String SPHERE_STACKS = "au.gov.worldwind.AVKeyMore.SphereStacks";
 }

@@ -1,6 +1,7 @@
 package au.gov.ga.worldwind.viewer.panels.layers;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayOutputStream;
 
@@ -27,7 +28,8 @@ public class LayerTreePersistenceTest
 		String result = getFormattedXml(document);
 		String expected = TestUtils.readStreamToString(getClass().getResourceAsStream("layerTreePersistence.xml"));
 		
-		assertEquals(convertLineBreaks(expected.trim()), convertLineBreaks(result.trim()));
+		assertEquals(removeXmlDeclaration(convertLineBreaks(expected.trim())), 
+				     removeXmlDeclaration(convertLineBreaks(result.trim())));
 	}
 	
 	@Test
@@ -39,6 +41,7 @@ public class LayerTreePersistenceTest
 	@Test
 	public void testLoad() throws Exception
 	{
+		// TODO: This test runs very slowly!
 		INode result = LayerTreePersistance.readFromXML(getClass().getResource("layerTreePersistence.xml"));
 		INode expected = createNodeTree();
 		
@@ -84,7 +87,15 @@ public class LayerTreePersistenceTest
 	 */
 	private String convertLineBreaks(String string)
 	{
-		return string.replaceAll("[\\r\\n]*", "\n");
+		return string.replaceAll("(\\r|\\n)+", "\n");
+	}
+	
+	/**
+	 * Remove the XML declaration to prevent false test failures due to XML transformer
+	 */
+	private String removeXmlDeclaration(String string)
+	{
+		return string.replaceAll("<\\?xml.*\\?>", "").trim();
 	}
 	
 	private void assertNodeTreesEqual(INode expected, INode result)

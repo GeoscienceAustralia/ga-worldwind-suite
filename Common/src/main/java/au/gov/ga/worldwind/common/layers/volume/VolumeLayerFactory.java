@@ -59,14 +59,15 @@ public class VolumeLayerFactory
 	public static AVList getParamsFromDocument(Element domElement, AVList params)
 	{
 		if (params == null)
+		{
 			params = new AVListImpl();
+		}
 
 		XPath xpath = WWXML.makeXPath();
 
 		WWXML.checkAndSetStringParam(domElement, params, AVKey.URL, "URL", xpath);
 		WWXML.checkAndSetLongParam(domElement, params, AVKey.EXPIRY_TIME, "ExpiryTime", xpath);
-		WWXML.checkAndSetDateTimeParam(domElement, params, AVKey.EXPIRY_TIME, "LastUpdate",
-				DataLayerFactory.DATE_TIME_PATTERN, xpath);
+		WWXML.checkAndSetDateTimeParam(domElement, params, AVKey.EXPIRY_TIME, "LastUpdate", DataLayerFactory.DATE_TIME_PATTERN, xpath);
 		WWXML.checkAndSetStringParam(domElement, params, AVKey.DATA_CACHE_NAME, "DataCacheName", xpath);
 
 		WWXML.checkAndSetDoubleParam(domElement, params, AVKeyMore.MAX_VARIANCE, "MaxVariance", xpath);
@@ -81,6 +82,11 @@ public class VolumeLayerFactory
 		WWXML.checkAndSetIntegerParam(domElement, params, AVKeyMore.INITIAL_OFFSET_MAX_V, "InitialOffset/@maxV", xpath);
 		WWXML.checkAndSetIntegerParam(domElement, params, AVKeyMore.INITIAL_OFFSET_MIN_W, "InitialOffset/@minW", xpath);
 		WWXML.checkAndSetIntegerParam(domElement, params, AVKeyMore.INITIAL_OFFSET_MAX_W, "InitialOffset/@maxW", xpath);
+
+		WWXML.checkAndSetBooleanParam(domElement, params, AVKeyMore.REVERSE_NORMALS, "ReverseNormals", xpath);
+		WWXML.checkAndSetBooleanParam(domElement, params, AVKeyMore.ORDERED_RENDERING, "OrderedRendering", xpath);
+		
+		WWXML.checkAndSetStringParam(domElement, params, AVKeyMore.PAINTED_VARIABLE, "PaintedVariable", xpath);
 
 		ColorMap colorMap = XMLUtil.getColorMap(domElement, "ColorMap", xpath);
 		params.setValue(AVKeyMore.COLOR_MAP, colorMap);
@@ -102,9 +108,13 @@ public class VolumeLayerFactory
 		{
 			params.setValue(AVKeyMore.DATA_LAYER_PROVIDER, new SGridVolumeDataProvider());
 		}
-		else if("Array".equalsIgnoreCase(format))
+		else if ("Array".equalsIgnoreCase(format))
 		{
 			params.setValue(AVKeyMore.DATA_LAYER_PROVIDER, new ArrayVolumeDataProvider());
+		}
+		else if ("Position Array".equalsIgnoreCase(format))
+		{
+			params.setValue(AVKeyMore.DATA_LAYER_PROVIDER, new ArrayWithPositionsVolumeDataProvider());
 		}
 		else
 		{

@@ -31,6 +31,7 @@ import au.gov.ga.worldwind.animator.application.AnimatorSceneController;
 import au.gov.ga.worldwind.animator.application.PaintTask;
 import au.gov.ga.worldwind.animator.application.ScreenshotPaintTask;
 import au.gov.ga.worldwind.animator.layers.immediate.ImmediateMode;
+import au.gov.ga.worldwind.common.render.FrameBuffer;
 import au.gov.ga.worldwind.common.util.Validate;
 
 /**
@@ -45,7 +46,7 @@ public class OffscreenRenderer extends AnimationRendererBase
 	protected WorldWindow wwd;
 	protected Animator targetApplication;
 	protected AnimatorSceneController animatorSceneController;
-	
+
 	private FrameBuffer frameBuffer = new FrameBuffer();
 
 	private boolean detectCollisions;
@@ -60,7 +61,8 @@ public class OffscreenRenderer extends AnimationRendererBase
 	{
 		Validate.notNull(wwd, "A world window is required");
 		Validate.notNull(targetApplication, "An Animator application is required");
-		Validate.isTrue(wwd.getSceneController() instanceof AnimatorSceneController, "SceneController must be an AnimatorSceneController");
+		Validate.isTrue(wwd.getSceneController() instanceof AnimatorSceneController,
+				"SceneController must be an AnimatorSceneController");
 
 		this.wwd = wwd;
 		this.targetApplication = targetApplication;
@@ -74,7 +76,7 @@ public class OffscreenRenderer extends AnimationRendererBase
 
 		final Dimension renderDimensions = renderParams.getRenderDimension();
 		//final Dimension viewDimensions = renderParams.getImageDimension();
-		
+
 		animatorSceneController.setRenderDimensions(renderDimensions);
 		animatorSceneController.addPrePaintTask(new PaintTask()
 		{
@@ -96,7 +98,7 @@ public class OffscreenRenderer extends AnimationRendererBase
 				gl.glViewport(0, 0, renderDimensions.width, renderDimensions.height);
 			}
 		};
-		
+
 		prePostRenderTask = new PaintTask()
 		{
 			@Override
@@ -117,7 +119,7 @@ public class OffscreenRenderer extends AnimationRendererBase
 				GL gl = dc.getGL();
 				frameBuffer.unbind(gl);
 				gl.glViewport(0, 0, dc.getDrawableWidth(), dc.getDrawableHeight());
-				FrameBuffer.renderTexturedQuad(gl, frameBuffer.getTextureId());
+				FrameBuffer.renderTexturedQuad(gl, frameBuffer.getTexture().getId());
 			}
 		};
 
@@ -132,13 +134,13 @@ public class OffscreenRenderer extends AnimationRendererBase
 		{
 			targetFile.getParentFile().mkdirs();
 		}
-		
+
 		targetApplication.setSlider(frame);
 		animation.applyFrame(frame);
 
 		//add the pre render task
 		animatorSceneController.addPrePaintTask(preRenderTask);
-		
+
 		//also add a viewport set just before the screenshot, to ensure the viewport is always correct
 		animatorSceneController.addPostPaintTask(prePostRenderTask);
 

@@ -20,37 +20,32 @@ import gov.nasa.worldwind.geom.Vec4;
 
 import java.awt.Color;
 import java.io.BufferedInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import javax.media.opengl.GL;
 
-import org.gdal.osr.CoordinateTransformation;
-
-import au.gov.ga.worldwind.common.util.FastShape;
+import au.gov.ga.worldwind.common.render.fastshape.FastShape;
 import au.gov.ga.worldwind.common.util.HSLColor;
 import au.gov.ga.worldwind.common.util.Validate;
-
-import com.sun.opengl.util.BufferUtil;
+import au.gov.ga.worldwind.common.util.io.FloatReader;
+import au.gov.ga.worldwind.common.util.io.FloatReader.FloatFormat;
 
 /**
  * {@link GocadReader} implementation for reading Voxet GOCAD files.
  * 
  * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
-public class GocadVoxetReader implements GocadReader
+public class GocadVoxetReader implements GocadReader<FastShape>
 {
+	// Constant indices for array access
+	private static final int U=0,V=1,W=2;
+	
 	public final static String HEADER_REGEX = "(?i).*voxet.*";
-
-	private final static Pattern axisPattern = Pattern
-			.compile("AXIS_(\\S+)\\s+([\\d.\\-]+)\\s+([\\d.\\-]+)\\s+([\\d.\\-]+).*");
 
 	private String name;
 	private boolean zPositive = true;
@@ -82,7 +77,7 @@ public class GocadVoxetReader implements GocadReader
 	@Override
 	public void addLine(String line)
 	{
-		Matcher matcher = axisPattern.matcher(line);
+		Matcher matcher = axis3Pattern.matcher(line);
 		if (matcher.matches())
 		{
 			parseAxis(matcher);
@@ -102,9 +97,9 @@ public class GocadVoxetReader implements GocadReader
 			name = matcher.group(1);
 			return;
 		}
-		
+
 		matcher = zpositivePattern.matcher(line);
-		if(matcher.matches())
+		if (matcher.matches())
 		{
 			zPositive = !matcher.group(1).equalsIgnoreCase("depth");
 		}
@@ -190,6 +185,8 @@ public class GocadVoxetReader implements GocadReader
 	@Override
 	public FastShape end(URL context)
 	{
+		validateProperties();
+		
 		if (axisN == null)
 		{
 			if (axisD == null || axisMIN == null || axisMAX == null)
@@ -203,21 +200,248 @@ public class GocadVoxetReader implements GocadReader
 			axisN = new Vec4(nx, ny, nz);
 		}
 
-		long nu = Math.round(axisN.x), nv = Math.round(axisN.y), nw = Math.round(axisN.z);
 		Vec4 axisUStride = axisU.multiply3((axisMAX.x - axisMIN.x) / (axisN.x - 1));
 		Vec4 axisVStride = axisV.multiply3((axisMAX.y - axisMIN.y) / (axisN.y - 1));
 		Vec4 axisWStride = axisW.multiply3((axisMAX.z - axisMIN.z) / (axisN.z - 1));
-		Vec4 axisUOrigin = axisU.multiply3(axisMIN.x);
-		Vec4 axisVOrigin = axisV.multiply3(axisMIN.y);
-		Vec4 axisWOrigin = axisW.multiply3(axisMIN.z);
-		Vec4 origin =
-				new Vec4(axisO.x + axisUOrigin.x + axisVOrigin.x + axisWOrigin.x, axisO.y + axisUOrigin.y
-						+ axisVOrigin.y + axisWOrigin.y, axisO.z + axisUOrigin.z + axisVOrigin.z + axisWOrigin.z);
 
+		Vec4 origin = calculateAxisOrigin();
+		int[] strides = calculateStrides();
+		long[] axisN = calculateAxisN();
+		int[] samples = calculateSamples(strides, axisN);
+
+		List<Position> positions = new ArrayList<Position>();
+		float[] values = createValuesArray(samples);
+
+		double[] transformed = new double[3];
+		float[] minmax = new float[]{Float.MAX_VALUE, -Float.MAX_VALUE};
+		try
+		{
+			URL fileUrl = new URL(context, file);
+			InputStream is = new BufferedInputStream(fileUrl.openStream());
+			FloatReader reader = FloatReader.Builder.newFloatReaderForStream(is)
+													.withOffset(offset)
+													.withFormat(FloatFormat.valueOf(etype))
+													.withByteOrder(parameters.getByteOrder())
+													.build();
+			float[] floatValue = new float[1];
+			if (parameters.isBilinearMinification())
+			{
+				//contains the number of values summed
+				int[] count = new int[values.length];
+
+				//read all the values, and sum them in regions
+				for (int w = 0; w < axisN[W]; w++)
+				{
+					int wRegion = (w / strides[W]) * samples[V] * samples[U];
+					for (int v = 0; v < axisN[V]; v++)
+					{
+						int vRegion = (v / strides[V]) * samples[U];
+						for (int u = 0; u < axisN[U]; u++)
+						{
+							reader.readNextValues(floatValue);
+							if (!Float.isNaN(floatValue[0]) && floatValue[0] != noDataValue)
+							{
+								int uRegion = (u / strides[U]);
+								int valueIndex = wRegion + vRegion + uRegion;
+
+								//if this is the first value for this region, set it, otherwise add it
+								if (count[valueIndex] == 0)
+								{
+									values[valueIndex] = floatValue[0];
+								}
+								else
+								{
+									values[valueIndex] += floatValue[0];
+								}
+								count[valueIndex]++;
+							}
+						}
+					}
+				}
+
+				normaliseValues(values, minmax, count);
+
+				//create points for each summed region that has a value
+				for (int w = 0, wi = 0; w < axisN[W]; w += strides[W], wi++)
+				{
+					int wOffset = wi * samples[V] * samples[U];
+					Vec4 wAdd = axisWStride.multiply3(w);
+					for (int v = 0, vi = 0; v < axisN[V]; v += strides[V], vi++)
+					{
+						int vOffset = vi * samples[U];
+						Vec4 vAdd = axisVStride.multiply3(v);
+						for (int u = 0, ui = 0; u < axisN[U]; u += strides[U], ui++)
+						{
+							int uOffset = ui;
+							int valueIndex = wOffset + vOffset + uOffset;
+							float value = values[valueIndex];
+
+							if (!Float.isNaN(value))
+							{
+								Vec4 uAdd = axisUStride.multiply3(u);
+								Vec4 point = new Vec4(origin.x + uAdd.x + vAdd.x + wAdd.x, 
+												  	  origin.y + uAdd.y + vAdd.y + wAdd.y, 
+												  	  origin.z + uAdd.z + vAdd.z + wAdd.z);
+								
+								positions.add(createPositionFromPoint(transformed, point));
+							}
+						}
+					}
+				}
+			}
+			else
+			{
+				//non-bilinear is simple; we can skip over any input values that don't contribute to the points
+				int valueIndex = 0;
+				for (int w = 0; w < axisN[W]; w += strides[W])
+				{
+					Vec4 wAdd = axisWStride.multiply3(w);
+					for (int v = 0; v < axisN[V]; v += strides[V])
+					{
+						Vec4 vAdd = axisVStride.multiply3(v);
+						for (int u = 0; u < axisN[U]; u += strides[U])
+						{
+							reader.readNextValues(floatValue);
+							if (!Float.isNaN(floatValue[0]) && floatValue[0] != noDataValue)
+							{
+								values[valueIndex] = floatValue[0];
+								minmax[0] = Math.min(minmax[0], floatValue[0]);
+								minmax[1] = Math.max(minmax[1], floatValue[0]);
+
+								Vec4 uAdd = axisUStride.multiply3(u);
+								Vec4 point = new Vec4(origin.x + uAdd.x + vAdd.x + wAdd.x, 
+											      	  origin.y + uAdd.y + vAdd.y + wAdd.y, 
+											      	  origin.z + uAdd.z + vAdd.z + wAdd.z);
+								
+								positions.add(createPositionFromPoint(transformed, point));
+							}
+							valueIndex++;
+							reader.skip(esize * Math.min(strides[U] - 1, axisN[U] - u - 1));
+						}
+						reader.skip(esize * axisN[U] * Math.min(strides[V] - 1, axisN[V] - v - 1));
+					}
+					reader.skip(esize * axisN[U] * axisN[V] * Math.min(strides[W] - 1, axisN[W] - w - 1));
+				}
+			}
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			return null;
+		}
+
+		FloatBuffer colorBuffer = createColorBuffer(values, minmax);
+
+		if (name == null)
+		{
+			name = "Voxet";
+		}
+
+		FastShape shape = new FastShape(positions, GL.GL_POINTS);
+		shape.setName(name);
+		shape.setColorBuffer(colorBuffer.array());
+		shape.setColorBufferElementSize(4);
+		shape.setForceSortedPrimitives(true);
+		shape.setFollowTerrain(true);
+		return shape;
+	}
+
+	
+	private void normaliseValues(float[] values, float[] minmax, int[] count)
+	{
+		//divide all the sums by the number of values summed (basically, average)
+		for (int i = 0; i < values.length; i++)
+		{
+			if (count[i] > 0)
+			{
+				values[i] /= count[i];
+				minmax[0] = Math.min(minmax[0], values[i]);
+				minmax[1] = Math.max(minmax[1], values[i]);
+			}
+		}
+	}
+
+	private Position createPositionFromPoint(double[] transformed, Vec4 point)
+	{
+		if (parameters.getCoordinateTransformation() != null)
+		{
+			parameters.getCoordinateTransformation().TransformPoint(transformed, point.x, point.y, zPositive ? point.z : -point.z);
+			return Position.fromDegrees(transformed[1], transformed[0], transformed[2]);
+		}
+		else
+		{
+			return Position.fromDegrees(point.y, point.x, zPositive ? point.z : -point.z);
+		}
+	}
+
+	private void validateProperties()
+	{
 		Validate.isTrue(esize == 4, "Unsupported PROP_ESIZE value: " + esize); //TODO support "1"?
 		Validate.isTrue("RAW".equals(format), "Unsupported PROP_FORMAT value: " + format); //TODO support "SEGY"?
 		Validate.isTrue("IBM".equals(etype) || "IEEE".equals(etype), "Unsupported PROP_ETYPE value: " + etype);
+	}
+	
+	private FloatBuffer createColorBuffer(float[] values, float[] minmax)
+	{
+		FloatBuffer colorBuffer = FloatBuffer.allocate(values.length * 4);
+		for (float value : values)
+		{
+			//check that this value is valid; only non-NaN floats have points associated
+			if (!Float.isNaN(value))
+			{
+				if (parameters.getColorMap() != null)
+				{
+					Color color = parameters.getColorMap().calculateColorNotingIsValuesPercentages(value, minmax[0], minmax[1]);
+					colorBuffer.put(color.getRed() / 255f)
+							   .put(color.getGreen() / 255f)
+							   .put(color.getBlue() / 255f)
+							   .put(color.getAlpha() / 255f);
+				}
+				else
+				{
+					float percent = (value - minmax[0]) / (minmax[1] - minmax[0]);
+					HSLColor hsl = new HSLColor((1f - percent) * 300f, 100f, 50f);
+					Color color = hsl.getRGB();
+					colorBuffer.put(color.getRed() / 255f)
+							   .put(color.getGreen() / 255f)
+							   .put(color.getBlue() / 255f)
+							   .put(255);
+				}
+			}
+		}
+		return colorBuffer;
+	}
 
+	private float[] createValuesArray(int[] samples)
+	{
+		float[] values = new float[samples[U] * samples[V] * samples[W]];
+		for (int i = 0; i < values.length; i++)
+		{
+			values[i] = Float.NaN;
+		}
+		return values;
+	}
+
+	private int[] calculateSamples(int[] strides, long[] axisN)
+	{
+		int uSamples = (int) (1 + (axisN[U] - 1) / strides[U]);
+		int vSamples = (int) (1 + (axisN[V] - 1) / strides[V]);
+		int wSamples = (int) (1 + (axisN[W] - 1) / strides[W]);
+		int[] samples = new int[]{uSamples, vSamples, wSamples};
+		return samples;
+	}
+
+	private long[] calculateAxisN()
+	{
+		long nu = Math.round(axisN.x);
+		long nv = Math.round(axisN.y);
+		long nw = Math.round(axisN.z);
+		long[] axisN = new long[]{nu, nv, nw};
+		return axisN;
+	}
+
+	private int[] calculateStrides()
+	{
 		int strideU = parameters.getSubsamplingU();
 		int strideV = parameters.getSubsamplingV();
 		int strideW = parameters.getSubsamplingW();
@@ -229,255 +453,19 @@ public class GocadVoxetReader implements GocadReader
 			strideV = Math.max(1, Math.round((float) axisN.y / samplesPerAxis));
 			strideW = Math.max(1, Math.round((float) axisN.z / samplesPerAxis));
 		}
-
-		int uSamples = (int) (1 + (nu - 1) / strideU);
-		int vSamples = (int) (1 + (nv - 1) / strideV);
-		int wSamples = (int) (1 + (nw - 1) / strideW);
-
-		List<Position> positions = new ArrayList<Position>();
-		float[] values = new float[uSamples * vSamples * wSamples];
-		for (int i = 0; i < values.length; i++)
-		{
-			values[i] = Float.NaN;
-		}
-
-		double[] transformed = new double[3];
-		CoordinateTransformation transformation = parameters.getCoordinateTransformation();
-
-		float min = Float.MAX_VALUE, max = -Float.MAX_VALUE;
-		try
-		{
-			URL fileUrl = new URL(context, file);
-			InputStream is = new BufferedInputStream(fileUrl.openStream());
-			is.skip(offset);
-
-			boolean ieee = "IEEE".equals(etype);
-
-			if (parameters.isBilinearMinification())
-			{
-				//contains the number of values summed
-				int[] count = new int[values.length];
-
-				//read all the values, and sum them in regions
-				for (int w = 0; w < nw; w++)
-				{
-					int wRegion = (w / strideW) * vSamples * uSamples;
-					for (int v = 0; v < nv; v++)
-					{
-						int vRegion = (v / strideV) * uSamples;
-						for (int u = 0; u < nu; u++)
-						{
-							float value = readNextFloat(is, parameters.getByteOrder(), ieee);
-							if (!Float.isNaN(value) && value != noDataValue)
-							{
-								int uRegion = (u / strideU);
-								int valueIndex = wRegion + vRegion + uRegion;
-
-								//if this is the first value for this region, set it, otherwise add it
-								if (count[valueIndex] == 0)
-								{
-									values[valueIndex] = value;
-								}
-								else
-								{
-									values[valueIndex] += value;
-								}
-								count[valueIndex]++;
-							}
-						}
-					}
-				}
-
-				//divide all the sums by the number of values summed (basically, average)
-				for (int i = 0; i < values.length; i++)
-				{
-					if (count[i] > 0)
-					{
-						values[i] /= count[i];
-						min = Math.min(min, values[i]);
-						max = Math.max(max, values[i]);
-					}
-				}
-
-				//create points for each summed region that has a value
-				for (int w = 0, wi = 0; w < nw; w += strideW, wi++)
-				{
-					int wOffset = wi * vSamples * uSamples;
-					Vec4 wAdd = axisWStride.multiply3(w);
-					for (int v = 0, vi = 0; v < nv; v += strideV, vi++)
-					{
-						int vOffset = vi * uSamples;
-						Vec4 vAdd = axisVStride.multiply3(v);
-						for (int u = 0, ui = 0; u < nu; u += strideU, ui++)
-						{
-							int uOffset = ui;
-							int valueIndex = wOffset + vOffset + uOffset;
-							float value = values[valueIndex];
-
-							if (!Float.isNaN(value))
-							{
-								Vec4 uAdd = axisUStride.multiply3(u);
-								Vec4 p =
-										new Vec4(origin.x + uAdd.x + vAdd.x + wAdd.x, origin.y + uAdd.y + vAdd.y
-												+ wAdd.y, origin.z + uAdd.z + vAdd.z + wAdd.z);
-								if (transformation != null)
-								{
-									transformation.TransformPoint(transformed, p.x, p.y, zPositive ? p.z : -p.z);
-									positions.add(Position.fromDegrees(transformed[1], transformed[0], transformed[2]));
-								}
-								else
-								{
-									positions.add(Position.fromDegrees(p.y, p.x, zPositive ? p.z : -p.z));
-								}
-							}
-						}
-					}
-				}
-			}
-			else
-			{
-				//non-bilinear is simple; we can skip over any input values that don't contribute to the points
-				int valueIndex = 0;
-				for (int w = 0; w < nw; w += strideW)
-				{
-					Vec4 wAdd = axisWStride.multiply3(w);
-					for (int v = 0; v < nv; v += strideV)
-					{
-						Vec4 vAdd = axisVStride.multiply3(v);
-						for (int u = 0; u < nu; u += strideU)
-						{
-							float value = readNextFloat(is, parameters.getByteOrder(), ieee);
-							if (!Float.isNaN(value) && value != noDataValue)
-							{
-								values[valueIndex] = value;
-								min = Math.min(min, value);
-								max = Math.max(max, value);
-
-								Vec4 uAdd = axisUStride.multiply3(u);
-								Vec4 p =
-										new Vec4(origin.x + uAdd.x + vAdd.x + wAdd.x, origin.y + uAdd.y + vAdd.y
-												+ wAdd.y, origin.z + uAdd.z + vAdd.z + wAdd.z);
-								if (transformation != null)
-								{
-									transformation.TransformPoint(transformed, p.x, p.y, zPositive ? p.z : -p.z);
-									positions.add(Position.fromDegrees(transformed[1], transformed[0], transformed[2]));
-								}
-								else
-								{
-									positions.add(Position.fromDegrees(p.y, p.x, zPositive ? p.z : -p.z));
-								}
-							}
-							valueIndex++;
-							skipBytes(is, esize * Math.min(strideU - 1, nu - u - 1));
-						}
-						skipBytes(is, esize * nu * Math.min(strideV - 1, nv - v - 1));
-					}
-					skipBytes(is, esize * nu * nv * Math.min(strideW - 1, nw - w - 1));
-				}
-			}
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			return null;
-		}
-
-		//create a color buffer containing a color for each point
-		int colorBufferElementSize = parameters.getColorMap() != null ? 4 : 3;
-		FloatBuffer colorBuffer = BufferUtil.newFloatBuffer(positions.size() * colorBufferElementSize);
-		for (float value : values)
-		{
-			//check that this value is valid; only non-NaN floats have points associated
-			if (!Float.isNaN(value))
-			{
-				if (parameters.getColorMap() != null)
-				{
-					Color color = parameters.getColorMap().calculateColorNotingIsValuesPercentages(value, min, max);
-					colorBuffer.put(color.getRed() / 255f).put(color.getGreen() / 255f).put(color.getBlue() / 255f)
-							.put(color.getAlpha() / 255f);
-				}
-				else
-				{
-					float percent = (value - min) / (max - min);
-					HSLColor hsl = new HSLColor((1f - percent) * 300f, 100f, 50f);
-					Color color = hsl.getRGB();
-					colorBuffer.put(color.getRed() / 255f).put(color.getGreen() / 255f).put(color.getBlue() / 255f);
-				}
-			}
-		}
-
-		if (name == null)
-		{
-			name = "Voxet";
-		}
-
-		FastShape shape = new FastShape(positions, GL.GL_POINTS);
-		shape.setName(name);
-		shape.setColorBuffer(colorBuffer);
-		shape.setColorBufferElementSize(colorBufferElementSize);
-		shape.setForceSortedPrimitives(true);
-		shape.setFollowTerrain(true);
-		return shape;
+		int[] strides = new int[]{strideU, strideV, strideW};
+		return strides;
 	}
 
-	public static void skipBytes(InputStream is, long n) throws IOException
+	private Vec4 calculateAxisOrigin()
 	{
-		while (n > 0)
-		{
-			long skipped = is.skip(n);
-			if (skipped < 0)
-			{
-				throw new IOException("Error skipping in InputStream");
-			}
-			n -= skipped;
-		}
+		Vec4 axisUOrigin = axisU.multiply3(axisMIN.x);
+		Vec4 axisVOrigin = axisV.multiply3(axisMIN.y);
+		Vec4 axisWOrigin = axisW.multiply3(axisMIN.z);
+		Vec4 origin = new Vec4(axisO.x + axisUOrigin.x + axisVOrigin.x + axisWOrigin.x, 
+							   axisO.y + axisUOrigin.y + axisVOrigin.y + axisWOrigin.y, 
+							   axisO.z + axisUOrigin.z + axisVOrigin.z + axisWOrigin.z);
+		return origin;
 	}
-
-	public static float readNextFloat(InputStream is, ByteOrder byteOrder, boolean ieee) throws IOException
-	{
-		int b0, b1, b2, b3;
-		if (byteOrder == ByteOrder.LITTLE_ENDIAN)
-		{
-			b3 = is.read();
-			b2 = is.read();
-			b1 = is.read();
-			b0 = is.read();
-		}
-		else
-		{
-			b0 = is.read();
-			b1 = is.read();
-			b2 = is.read();
-			b3 = is.read();
-		}
-		return bytesToFloat(b0, b1, b2, b3, ieee);
-	}
-
-	private static float bytesToFloat(int b0, int b1, int b2, int b3, boolean ieee)
-	{
-		if (ieee)
-		{
-			return Float.intBitsToFloat((b0) | (b1 << 8) | (b2 << 16) | b3 << 24);
-		}
-		else
-		{
-			//ibm
-			byte S = (byte) ((b3 & 0x80) >> 7);
-			int E = (b3 & 0x7f);
-			long F = (b2 << 16) + (b1 << 8) + b0;
-
-			if (S == 0 && E == 0 && F == 0)
-				return 0;
-
-			double A = 16.0;
-			double B = 64.0;
-			double e24 = 16777216.0; // 2^24
-			double M = (double) F / e24;
-
-			double F1 = S == 0 ? 1.0 : -1.0;
-			return (float) (F1 * M * Math.pow(A, E - B));
-		}
-	}
-
-
+	
 }

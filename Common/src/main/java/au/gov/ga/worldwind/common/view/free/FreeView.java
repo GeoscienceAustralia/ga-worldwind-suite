@@ -67,7 +67,7 @@ public class FreeView extends BasicView implements TransformView
 	@Override
 	public void beforeComputeMatrices()
 	{
-		minimumFarDistance = globe.getDiameter() / 2d;
+		minimumFarDistance = globe.getDiameter() * 1.5d;
 	}
 	
 	@Override
@@ -133,12 +133,16 @@ public class FreeView extends BasicView implements TransformView
 		// Compute the current modelview matrix.
 		this.modelview = computeModelView();
 		if (this.modelview == null)
+		{
 			this.modelview = Matrix.IDENTITY;
+		}
 
 		// Compute the current inverse-modelview matrix.
 		this.modelviewInv = this.modelview.getInverse();
 		if (this.modelviewInv == null)
+		{
 			this.modelviewInv = Matrix.IDENTITY;
+		}
 
 		//========== projection matrix state ==========//
 		// Get the current OpenGL viewport state.
@@ -184,7 +188,11 @@ public class FreeView extends BasicView implements TransformView
 	protected double computeFarDistance(Position eyePosition)
 	{
 		double far = super.computeFarDistance(eyePosition);
-		return far < minimumFarDistance ? minimumFarDistance : far;
+		if (eyePosition.getAltitude() < 0)
+		{
+			far = Math.max(minimumFarDistance, far);
+		}
+		return far;
 	}
 
 	@Override

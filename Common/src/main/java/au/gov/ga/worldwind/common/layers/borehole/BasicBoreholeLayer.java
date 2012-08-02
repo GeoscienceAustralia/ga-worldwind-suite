@@ -33,6 +33,7 @@ import gov.nasa.worldwind.render.markers.Marker;
 import gov.nasa.worldwind.render.markers.MarkerAttributes;
 import gov.nasa.worldwind.render.markers.MarkerRenderer;
 
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Point;
@@ -65,6 +66,8 @@ import au.gov.ga.worldwind.common.util.Validate;
  */
 public class BasicBoreholeLayer extends AbstractLayer implements BoreholeLayer, SelectListener
 {
+	private static final Color DEFAULT_SAMPLE_COLOR = Color.GRAY;
+	
 	protected BoreholeProvider boreholeProvider;
 	protected StyleProvider boreholeStyleProvider = new BasicStyleProvider();
 	protected StyleProvider sampleStyleProvider = new BasicStyleProvider();
@@ -105,11 +108,15 @@ public class BasicBoreholeLayer extends AbstractLayer implements BoreholeLayer, 
 		
 		Boolean b = (Boolean) params.getValue(AVKeyMore.BOREHOLE_SAMPLE_DEPTH_ATTRIBUTES_POSITIVE);
 		if(b != null)
+		{
 			attributesRepresentPositiveDepth = b;
+		}
 
 		Double d = (Double) params.getValue(AVKeyMore.LINE_WIDTH);
 		if (d != null)
+		{
 			lineWidth = d;
+		}
 		
 		minimumDistance = (Double) params.getValue(AVKeyMore.MINIMUM_DISTANCE);
 
@@ -225,7 +232,9 @@ public class BasicBoreholeLayer extends AbstractLayer implements BoreholeLayer, 
 	protected void doRender(DrawContext dc)
 	{
 		if (!isEnabled())
+		{
 			return;
+		}
 
 		boreholeProvider.requestData(this);
 		synchronized (boreholes)
@@ -279,7 +288,9 @@ public class BasicBoreholeLayer extends AbstractLayer implements BoreholeLayer, 
 	public void selected(SelectEvent e)
 	{
 		if (e == null)
+		{
 			return;
+		}
 
 		PickedObject topPickedObject = e.getTopPickedObject();
 		if (topPickedObject != null
@@ -321,6 +332,12 @@ public class BasicBoreholeLayer extends AbstractLayer implements BoreholeLayer, 
 		}
 	}
 
+	@Override
+	public Color getDefaultSampleColor()
+	{
+		return DEFAULT_SAMPLE_COLOR;
+	}
+	
 	/**
 	 * Highlight the provided object by showing the tooltip annotation over it.
 	 * 

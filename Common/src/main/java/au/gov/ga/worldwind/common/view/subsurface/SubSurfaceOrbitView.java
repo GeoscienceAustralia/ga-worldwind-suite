@@ -42,13 +42,6 @@ public class SubSurfaceOrbitView extends ViewStateBasicOrbitView
 	}
 
 	@Override
-	protected double computeFarClipDistance()
-	{
-		double far = super.computeFarClipDistance();
-		return Math.max(far, minimumFarDistance);
-	}
-
-	@Override
 	public void focusOnViewportCenter()
 	{
 		if (this.dc == null)

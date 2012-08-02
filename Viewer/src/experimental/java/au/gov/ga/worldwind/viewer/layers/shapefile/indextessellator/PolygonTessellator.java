@@ -20,10 +20,8 @@ import javax.media.opengl.GL;
 import javax.media.opengl.glu.GLU;
 import javax.media.opengl.glu.GLUtessellator;
 
-import au.gov.ga.worldwind.common.util.FastShape;
+import au.gov.ga.worldwind.common.render.fastshape.FastShape;
 import au.gov.ga.worldwind.common.util.Util;
-
-import com.sun.opengl.util.BufferUtil;
 
 public class PolygonTessellator
 {
@@ -290,11 +288,11 @@ public class PolygonTessellator
 		glu.gluDeleteTess(tess);
 
 		List<Integer> indices = callback.indices;
-		IntBuffer ib = BufferUtil.newIntBuffer(indices.size());
+		IntBuffer ib = IntBuffer.allocate(indices.size());
 		for (Integer i : indices)
 			ib.put(i);
 
-		FastShape shape = new FastShape(positions, ib, GL.GL_TRIANGLES);
+		FastShape shape = new FastShape(positions, ib.array(), GL.GL_TRIANGLES);
 		shape.setCalculateNormals(true);
 		return shape;
 

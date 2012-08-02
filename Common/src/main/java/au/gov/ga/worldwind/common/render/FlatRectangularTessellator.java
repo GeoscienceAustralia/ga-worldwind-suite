@@ -33,17 +33,17 @@ public class FlatRectangularTessellator extends WireframeRectangularTessellator
 	@Override
 	public SectorGeometryList tessellate(DrawContext dc)
 	{
-		double oldExaggeration = dc.getVerticalExaggeration();
 		Integer oldMaxLevel = Configuration.getIntegerValue(AVKey.RECTANGULAR_TESSELLATOR_MAX_LEVEL);
 		try
 		{
-			dc.setVerticalExaggeration(0);
 			Configuration.setValue(AVKey.RECTANGULAR_TESSELLATOR_MAX_LEVEL, 4);
-			return super.tessellate(dc);
+			DrawContextDelegateVerticalExaggerationOverride odc =
+					new DrawContextDelegateVerticalExaggerationOverride(dc);
+			odc.overrideVerticalExaggeration(0);
+			return super.tessellate(odc);
 		}
 		finally
 		{
-			dc.setVerticalExaggeration(oldExaggeration);
 			Configuration.setValue(AVKey.RECTANGULAR_TESSELLATOR_MAX_LEVEL, oldMaxLevel);
 		}
 	}

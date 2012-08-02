@@ -28,22 +28,21 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-import au.gov.ga.worldwind.common.util.FastShape;
+import au.gov.ga.worldwind.common.render.fastshape.FastShape;
 
 /**
- * Factory for creating {@link FastShape}s from GOCAD files.
+ * Factory for creating {@link Object}s from GOCAD files.
  * 
  * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
 public class GocadFactory
 {
-	private static final String OBJECT_END_REGEX = "END\\s*";
 	private static final String COMMENT_REGEX = "\\s*#.*";
 
 	public static boolean isGocadFileSuffix(String suffix)
 	{
 		return suffix.equalsIgnoreCase("ts") || suffix.equalsIgnoreCase("gp") || suffix.equalsIgnoreCase("vo")
-				|| suffix.equalsIgnoreCase("pl") || suffix.equalsIgnoreCase("grs");
+				|| suffix.equalsIgnoreCase("pl") || suffix.equalsIgnoreCase("grs") || suffix.equalsIgnoreCase("sg");
 	}
 
 	/**
@@ -51,24 +50,33 @@ public class GocadFactory
 	 */
 	public enum GocadType
 	{
-		PLine(GocadPLineReader.HEADER_REGEX, GocadPLineReader.class),
-		Voxet(GocadVoxetReader.HEADER_REGEX, GocadVoxetReader.class),
-		TSurf(GocadTSurfReader.HEADER_REGEX, GocadTSurfReader.class),
-		GSurf(GocadGSurfReader.HEADER_REGEX, GocadGSurfReader.class);
+		PLine(GocadPLineReader.HEADER_REGEX, GocadPLineReader.END_REGEX, GocadPLineReader.class),
+		Voxet(GocadVoxetReader.HEADER_REGEX, GocadVoxetReader.END_REGEX, GocadVoxetReader.class),
+		TSurf(GocadTSurfReader.HEADER_REGEX, GocadTSurfReader.END_REGEX, GocadTSurfReader.class),
+		SGrid(GocadSGridReader.HEADER_REGEX, GocadSGridReader.END_REGEX, GocadSGridReader.class),
+		GSurf(GocadGSurfReader.HEADER_REGEX, GocadGSurfReader.END_REGEX, GocadGSurfReader.class),
+		Group(GocadGroupReader.HEADER_REGEX, GocadGroupReader.END_REGEX, GocadGroupReader.class),
+		VSet(GocadVSetReader.HEADER_REGEX, GocadVSetReader.END_REGEX, GocadVSetReader.class);
 
 		/**
-		 * Regular expression used for matching the first line of the GOCAD file
-		 * to this type.
+		 * Regular expression used for matching the first line of the GOCAD object to this type.
 		 */
 		public final String headerRegex;
+		
+		/**
+		 * Regular expression used for matching the end of the GOCAD object of this type.
+		 */
+		public final String endRegex;
+		
 		/**
 		 * {@link GocadReader} implementation used for reading this type.
 		 */
-		public final Class<? extends GocadReader> readerClass;
+		public final Class<? extends GocadReader<?>> readerClass;
 
-		private GocadType(String headerRegex, Class<? extends GocadReader> readerClass)
+		private GocadType(String headerRegex, String endRegex, Class<? extends GocadReader<?>> readerClass)
 		{
 			this.headerRegex = headerRegex;
+			this.endRegex = endRegex;
 			this.readerClass = readerClass;
 		}
 
@@ -76,7 +84,7 @@ public class GocadFactory
 		 * @return An instance of a {@link GocadReader} for reading a file of
 		 *         this type.
 		 */
-		public GocadReader instanciateReader()
+		public GocadReader<?> instanciateReader()
 		{
 			try
 			{
@@ -114,11 +122,11 @@ public class GocadFactory
 	}
 
 	/**
-	 * Read a GOCAD source to a {@link FastShape}.
+	 * Read a GOCAD source to a {@link Object}.
 	 * 
 	 * @param reader
 	 *            Reader to read from
-	 * @return A list of {@link FastShape}s containing the geometry from the
+	 * @return A list of {@link Object}s containing the geometry from the
 	 *         GOCAD file
 	 */
 	public static List<FastShape> read(Reader reader, URL context, GocadReaderParameters parameters)
@@ -149,28 +157,15 @@ public class GocadFactory
 					continue;
 				}
 
-				GocadReader gocadReader = type.instanciateReader();
-				gocadReader.begin(parameters);
-				while (true)
+				Object object = readFromGocadObject(type, parameters, br, context);
+				if (object instanceof FastShape)
 				{
-					line = br.readLine();
-					if (line == null)
-					{
-						throw new IllegalArgumentException("GOCAD file ended unexpectedly");
-					}
-					if (line.matches(COMMENT_REGEX))
-					{
-						//don't pass comment lines to the reader
-						continue;
-					}
-					if (line.matches(OBJECT_END_REGEX))
-					{
-						//object has ended, break out of the loop to parse the next object (if any)
-						break;
-					}
-					gocadReader.addLine(line);
+					shapes.add((FastShape) object);
 				}
-				shapes.add(gocadReader.end(context));
+				else if (object instanceof GocadReaderParameters)
+				{
+					parameters = (GocadReaderParameters) object;
+				}
 			}
 		}
 		catch (IOException e)
@@ -199,4 +194,46 @@ public class GocadFactory
 		}
 		return null;
 	}
+	
+	/**
+	 * Reads a GOCAD object of the defined type from the buffered reader provided. 
+	 * <p/>
+	 * The provided buffered reader will be advanced to the last line of the GOCAD object
+	 * on successful return from this method. 
+	 * 
+	 * @param type The type of GOCAD object to read
+	 * @param parameters Global reader parameters to use
+	 * @param br The buffered reader to read the GOCAD object from
+	 * @param context The URL of the file being read
+	 * 
+	 * @return A {@link Object} that represents the read GOCAD object
+	 * 
+	 * @throws IOException
+	 */
+	private static Object readFromGocadObject(GocadType type, GocadReaderParameters parameters, BufferedReader br, URL context) throws IOException
+	{
+		GocadReader<?> gocadReader = type.instanciateReader();
+		gocadReader.begin(parameters);
+		while (true)
+		{
+			String line = br.readLine();
+			if (line == null)
+			{
+				throw new IllegalArgumentException("GOCAD file ended unexpectedly");
+			}
+			if (line.matches(COMMENT_REGEX))
+			{
+				//don't pass comment lines to the reader
+				continue;
+			}
+			if (line.matches(type.endRegex))
+			{
+				//object has ended, break out of the loop to parse the next object (if any)
+				break;
+			}
+			gocadReader.addLine(line);
+		}
+		return gocadReader.end(context);
+	}
+	
 }

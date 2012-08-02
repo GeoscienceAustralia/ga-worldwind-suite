@@ -30,20 +30,19 @@ import java.util.regex.Pattern;
 
 import javax.media.opengl.GL;
 
-import au.gov.ga.worldwind.common.util.FastShape;
-
-import com.sun.opengl.util.BufferUtil;
+import au.gov.ga.worldwind.common.render.fastshape.FastShape;
 
 /**
  * {@link GocadReader} implementation for reading PLine GOCAD files.
  * 
  * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
-public class GocadPLineReader implements GocadReader
+public class GocadPLineReader implements GocadReader<FastShape>
 {
 	public final static String HEADER_REGEX = "(?i).*pline.*";
 
 	private final static Pattern segmentPattern = Pattern.compile("SEG\\s+(\\d+)\\s+(\\d+).*");
+
 
 	private GocadReaderParameters parameters;
 	private List<Position> positions;
@@ -123,7 +122,7 @@ public class GocadPLineReader implements GocadReader
 
 			return;
 		}
-		
+
 		matcher = atomPattern.matcher(line);
 		if (matcher.matches())
 		{
@@ -189,9 +188,9 @@ public class GocadPLineReader implements GocadReader
 			name = matcher.group(1);
 			return;
 		}
-		
+
 		matcher = zpositivePattern.matcher(line);
-		if(matcher.matches())
+		if (matcher.matches())
 		{
 			zPositive = !matcher.group(1).equalsIgnoreCase("depth");
 		}
@@ -237,7 +236,7 @@ public class GocadPLineReader implements GocadReader
 	@Override
 	public FastShape end(URL context)
 	{
-		IntBuffer indicesBuffer = BufferUtil.newIntBuffer(segmentIds.size());
+		IntBuffer indicesBuffer = IntBuffer.allocate(segmentIds.size());
 		for (Integer i : segmentIds)
 		{
 			if (!vertexIdMap.containsKey(i))
@@ -252,11 +251,11 @@ public class GocadPLineReader implements GocadReader
 			name = "PLine";
 		}
 
-		FastShape shape = new FastShape(positions, indicesBuffer, GL.GL_LINES);
+		FastShape shape = new FastShape(positions, indicesBuffer.array(), GL.GL_LINES);
 		shape.setName(name);
 		if (parameters.getColorMap() != null)
 		{
-			FloatBuffer colorBuffer = BufferUtil.newFloatBuffer(positions.size() * 4);
+			FloatBuffer colorBuffer = FloatBuffer.allocate(positions.size() * 4);
 			for (float value : values)
 			{
 				if (Float.isNaN(value) || value == noDataValue)
@@ -271,7 +270,7 @@ public class GocadPLineReader implements GocadReader
 				}
 			}
 			shape.setColorBufferElementSize(4);
-			shape.setColorBuffer(colorBuffer);
+			shape.setColorBuffer(colorBuffer.array());
 		}
 		else if (color != null)
 		{

@@ -16,7 +16,11 @@
 package au.gov.ga.worldwind.common.layers.curtain;
 
 import static au.gov.ga.worldwind.common.util.Util.isEmpty;
-
+import gov.nasa.worldwind.Configuration;
+import gov.nasa.worldwind.WorldWind;
+import gov.nasa.worldwind.avlist.AVKey;
+import gov.nasa.worldwind.cache.BasicMemoryCache;
+import gov.nasa.worldwind.cache.MemoryCache;
 import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.geom.Box;
 import gov.nasa.worldwind.geom.Extent;
@@ -25,8 +29,9 @@ import gov.nasa.worldwind.geom.Sector;
 import gov.nasa.worldwind.geom.Vec4;
 import gov.nasa.worldwind.globes.Globe;
 import gov.nasa.worldwind.render.DrawContext;
+import gov.nasa.worldwind.util.TileKey;
 
-import java.nio.DoubleBuffer;
+import java.nio.FloatBuffer;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map.Entry;
@@ -48,12 +53,29 @@ public class Path
 	protected final NavigableMap<Double, LatLon> positions = new TreeMap<Double, LatLon>();
 	protected Angle length;
 
+	protected static final String CACHE_NAME = "CurtainPath";
+	protected static final String CACHE_ID = Path.class.getName();
+
+	protected long updateFrequency = 2000; // milliseconds
+	protected long exaggerationChangeTime = -1;
+
 	public Path(List<LatLon> positions)
 	{
+		if (!WorldWind.getMemoryCacheSet().containsCache(CACHE_ID))
+		{
+			long size = Configuration.getLongValue(AVKey.SECTOR_GEOMETRY_CACHE_SIZE, 10000000L);
+			MemoryCache cache = new BasicMemoryCache((long) (0.85 * size), size);
+			cache.setName(CACHE_NAME);
+			WorldWind.getMemoryCacheSet().addCache(CACHE_ID, cache);
+		}
+
 		setPositions(positions);
 	}
 
-	public synchronized void setPositions(List<LatLon> positions)
+	/*
+	 * Private; should only be called by constructor, as vertices are cached.
+	 */
+	private synchronized void setPositions(List<LatLon> positions)
 	{
 		this.positions.clear();
 		double[] distances = new double[positions.size()]; //last array value is unused, but required for simple second loop
@@ -83,6 +105,24 @@ public class Path
 	public synchronized Angle getLength()
 	{
 		return length;
+	}
+
+	/**
+	 * @return Time between updates to vertices, in milliseconds
+	 */
+	public long getUpdateFrequency()
+	{
+		return updateFrequency;
+	}
+
+	/**
+	 * Set the amount of time between vertex updates, in milliseconds
+	 * 
+	 * @param updateFrequency
+	 */
+	public void setUpdateFrequency(long updateFrequency)
+	{
+		this.updateFrequency = updateFrequency;
 	}
 
 	/**
@@ -133,16 +173,46 @@ public class Path
 		return dc.getGlobe().computePointFromPosition(ll, e);
 	}
 
-	public synchronized SegmentGeometry getGeometry(DrawContext dc, Segment segment, double top, double bottom,
+	public synchronized SegmentGeometry getGeometry(DrawContext dc, CurtainTile tile, double top, double bottom,
 			int subsegments, boolean followTerrain)
 	{
+		boolean exaggerationChanged = VerticalExaggerationAccessor.checkAndMarkVerticalExaggeration(this, dc);
+		if (exaggerationChanged)
+		{
+			exaggerationChangeTime = System.currentTimeMillis();
+		}
+
+		MemoryCache cache = WorldWind.getMemoryCache(CACHE_ID);
+		TileKey tileKey = tile.getTileKey();
+		SegmentGeometry geometry = (SegmentGeometry) cache.getObject(tileKey);
+		if (geometry != null && geometry.getTime() >= System.currentTimeMillis() - this.getUpdateFrequency()
+				&& geometry.getTime() >= exaggerationChangeTime)
+		{
+			return geometry;
+		}
+
+		Segment segment = tile.getSegment();
 		NavigableMap<Double, LatLon> betweenMap = segmentMap(segment, subsegments);
 		int numVertices = betweenMap.size() * 2;
 
 		Globe globe = dc.getGlobe();
 
-		DoubleBuffer verts = BufferUtil.newDoubleBuffer(numVertices * 3);
-		DoubleBuffer texCoords = BufferUtil.newDoubleBuffer(numVertices * 2);
+		FloatBuffer verts, texCoords;
+		if (geometry != null)
+		{
+			verts = geometry.getVertices();
+			texCoords = geometry.getTexCoords();
+		}
+		else if (dc.getGLRuntimeCapabilities().isUseVertexBufferObject())
+		{
+			verts = FloatBuffer.allocate(numVertices * 3);
+			texCoords = FloatBuffer.allocate(numVertices * 2);
+		}
+		else
+		{
+			verts = BufferUtil.newFloatBuffer(numVertices * 3);
+			texCoords = BufferUtil.newFloatBuffer(numVertices * 2);
+		}
 		Vec4 refCenter = getSegmentCenterPoint(dc, segment, top, bottom, followTerrain);
 
 		//calculate exaggerated segment top/bottom elevations
@@ -175,13 +245,24 @@ public class Path
 			Vec4 point2 = globe.computePointFromPosition(ll, b + e);
 			double percent = (entry.getKey() - segment.getStart()) / percentDistance;
 
-			verts.put(point1.x - refCenter.x).put(point1.y - refCenter.y).put(point1.z - refCenter.z);
-			verts.put(point2.x - refCenter.x).put(point2.y - refCenter.y).put(point2.z - refCenter.z);
-			texCoords.put(percent).put(1);
-			texCoords.put(percent).put(0);
+			verts.put((float) (point1.x - refCenter.x)).put((float) (point1.y - refCenter.y))
+					.put((float) (point1.z - refCenter.z));
+			verts.put((float) (point2.x - refCenter.x)).put((float) (point2.y - refCenter.y))
+					.put((float) (point2.z - refCenter.z));
+			texCoords.put((float) percent).put(1f);
+			texCoords.put((float) percent).put(0f);
 		}
 
-		return new SegmentGeometry(verts, texCoords, refCenter);
+		if (geometry == null)
+		{
+			geometry = new SegmentGeometry(dc, verts, texCoords, refCenter);
+			cache.add(tileKey, geometry, geometry.getSizeInBytes());
+		}
+		else
+		{
+			geometry.update(dc, refCenter);
+		}
+		return geometry;
 	}
 
 	public synchronized Vec4[] getPointsInSegment(DrawContext dc, Segment segment, double top, double bottom,

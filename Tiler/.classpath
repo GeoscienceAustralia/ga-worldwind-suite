@@ -3,16 +3,21 @@
 	<classpathentry kind="src" path="src/main/java"/>
 	<classpathentry kind="src" path="src/main/resources"/>
 	<classpathentry kind="src" path="src/test/java"/>
-	<classpathentry kind="lib" path="gdal/gdal.jar">
+	<classpathentry kind="src" path="src/test/resources"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="lib/build/gdal.jar">
 		<attributes>
-			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="Tiler/gdal"/>
+			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="Tiler/gdal/gdal-windows-x86"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="lib/jna.jar"/>
-	<classpathentry kind="lib" path="lib/jts-1.7.2.jar"/>
-	<classpathentry kind="lib" path="lib/jump-core-1.2.jar"/>
-	<classpathentry kind="lib" path="lib/opencsv-2.1.jar"/>
-	<classpathentry kind="lib" path="lib/jcommander-1.13.jar"/>
+	<classpathentry kind="lib" path="lib/package/jcommander-1.13.jar"/>
+	<classpathentry kind="lib" path="lib/package/jna.jar"/>
+	<classpathentry kind="lib" path="lib/package/jts-1.7.2.jar"/>
+	<classpathentry kind="lib" path="lib/package/jump-core-1.2.jar"/>
+	<classpathentry kind="lib" path="lib/package/opencsv-2.1.jar"/>
+	<classpathentry kind="lib" path="lib/test/hamcrest-core-1.1.jar"/>
+	<classpathentry kind="lib" path="lib/test/hamcrest-library-1.1.jar"/>
+	<classpathentry kind="lib" path="lib/test/jmock-2.5.1.jar"/>
+	<classpathentry kind="lib" path="lib/test/junit-4.8.1.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

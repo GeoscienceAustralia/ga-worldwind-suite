@@ -8,9 +8,11 @@
 	<property name="resources_dir" value="${basedir}/src/main/resources" />
 
 	<property name="lib_dir" value="${basedir}/lib" />
+	<property name="build_lib_dir" value="${lib_dir}/build" />
+	<property name="package_lib_dir" value="${lib_dir}/package" />
+	
 	<property name="gdal_dir" value="${basedir}/gdal" />
 	<property name="data_dir" value="${basedir}/gdal/data" />
-	<property name="plugins_dir" value="${basedir}/gdal/plugins" />
 	<property name="mapnik_dir" value="${basedir}/mapnik" />
 
 	<property name="target_dir" value="${basedir}/target" />
@@ -23,12 +25,14 @@
 	<property name="executable_gui_batch_name" value="gui.bat" />
 	<property name="executable_console_batch_name" value="console.bat" />
 	<property name="executable_ribbon_batch_name" value="ribbon.bat" />
+	
+	<property name="splash_image_name" value="tiler-splash-400x230.png"/>
 
 	<path id="classpath">
-		<fileset dir="${lib_dir}">
+		<fileset dir="${build_lib_dir}">
 			<include name="**/*.jar" />
 		</fileset>
-		<fileset dir="${gdal_dir}">
+		<fileset dir="${package_lib_dir}">
 			<include name="**/*.jar" />
 		</fileset>
 	</path>
@@ -37,11 +41,11 @@
 		<exclude name="META-INF/**" />
 	</patternset>
 
-	<target name="clean">
+	<target name="clean" description="Remove all generated files">
 		<delete dir="${target_dir}" />
 	</target>
 
-	<target name="build">
+	<target name="build" description="Compile the application source code">
 		<mkdir dir="${build_dir}" />
 		<copy todir="${build_dir}">
 			<fileset dir="${resources_dir}" />
@@ -56,61 +60,85 @@
 		</javac>
 	</target>
 
-	<target name="package" depends="build">
+	<target name="package" depends="build" description="Create the tiler JAR file">
 		<mkdir dir="${package_dir}" />
 		<jar destfile="${package_dir}/${jar_name}">
 			<manifest>
 				<attribute name="Main-Class" value="au.gov.ga.worldwind.tiler.application.Executable" />
+				<attribute name="SplashScreen-Image" value="images/${splash_image_name}" />
 			</manifest>
 			<fileset dir="${build_dir}" />
 		</jar>
 	</target>
 
-	<target name="executable" depends="package">
+	<target name="executable" depends="package" description="Create the executable distros">
 		<mkdir dir="${executable_dir}" />
 
-		<jar destfile="${executable_dir}/${executable_jar_name}">
+		<antcall target="-create-platform-executable">
+			<param name="platform" value="windows-x86"/>
+		</antcall>
+		<antcall target="-create-platform-executable">
+			<param name="platform" value="windows-x64"/>
+		</antcall>
+	</target>
+
+	<!-- Private - Should only be invoked from the 'executable' target -->
+	<target name="-create-platform-executable" description="Create a platform-specific executable distro named in the 'platform' param">
+		<property name="target_platform_dir" value="${executable_dir}/tiler-${platform}"/>
+		<property name="gdal_platform_dir" value="${gdal_dir}/gdal-${platform}"/>
+		<property name="plugins_platform_dir" value="${gdal_platform_dir}/plugins"/>
+		
+		<jar destfile="${target_platform_dir}/${executable_jar_name}">
 			<fileset dir="${build_dir}" />
 
-			<zipgroupfileset dir="${lib_dir}">
+			<zipgroupfileset dir="${package_lib_dir}">
 				<include name="**/*.jar" />
 				<patternset refid="manifest_exclude" />
 			</zipgroupfileset>
-			<zipgroupfileset dir="${gdal_dir}">
+			<zipgroupfileset dir="${gdal_platform_dir}">
 				<include name="**/*.jar" />
 				<patternset refid="manifest_exclude" />
 			</zipgroupfileset>
 
 			<manifest>
 				<attribute name="Main-Class" value="au.gov.ga.worldwind.tiler.application.Executable" />
+				<attribute name="SplashScreen-Image" value="images/${splash_image_name}" />
 			</manifest>
 		</jar>
-
-		<copy todir="${executable_dir}/gdal">
-			<fileset dir="${gdal_dir}">
+		
+		<!-- Copy the splash image -->
+		<copy todir="${target_platform_dir}">
+			<fileset dir="${resources_dir}/images">
+				<include name="${splash_image_name}"/>
+			</fileset>
+		</copy>
+		
+		<!-- Copy the appropriate GDAL package -->
+		<copy todir="${target_platform_dir}/gdal">
+			<fileset dir="${gdal_platform_dir}">
 				<include name="**/*.dll" />
 			</fileset>
 		</copy>
-		<copy todir="${executable_dir}/gdal/data">
+		<copy todir="${target_platform_dir}/gdal/data">
 			<fileset dir="${data_dir}" />
 		</copy>
-		<copy todir="${executable_dir}/gdal/plugins">
-			<fileset dir="${plugins_dir}" />
-		</copy>
-		<copy todir="${executable_dir}/mapnik">
+		
+		<!-- Copy mapnik package -->
+		<copy todir="${target_platform_dir}/mapnik">
 			<fileset dir="${mapnik_dir}" />
 		</copy>
-		<copy todir="${executable_dir}">
+		<copy todir="${target_platform_dir}">
 			<fileset dir="${basedir}">
 				<include name="7za.exe" />
 			</fileset>
 		</copy>
 
-		<echo file="${executable_dir}/${executable_gui_batch_name}">@echo off ${line.separator}SET PATH=.\gdal;%PATH% ${line.separator}java -Xmx1024m -cp ${executable_jar_name} -Djava.library.path=gdal au.gov.ga.worldwind.tiler.application.Executable %*</echo>
-		<echo file="${executable_dir}/${executable_console_batch_name}">@echo off ${line.separator}SET PATH=.\gdal;%PATH% ${line.separator}java -Xmx1024m -cp ${executable_jar_name} -Djava.library.path=gdal au.gov.ga.worldwind.tiler.application.Console %*</echo>
-		<echo file="${executable_dir}/${executable_ribbon_batch_name}">@echo off ${line.separator}SET PATH=.\gdal;%PATH% ${line.separator}java -Xmx1024m -cp ${executable_jar_name} -Djava.library.path=gdal au.gov.ga.worldwind.tiler.ribbon.RibbonTiler %*</echo>
+		<!-- Create the bat scripts -->
+		<echo file="${target_platform_dir}/${executable_gui_batch_name}">@echo off ${line.separator}SET PATH=.\gdal;%PATH% ${line.separator}java -Xmx1024m -cp ${executable_jar_name} -splash:${splash_image_name} -Djava.library.path=gdal au.gov.ga.worldwind.tiler.application.Executable %*</echo>
+		<echo file="${target_platform_dir}/${executable_console_batch_name}">@echo off ${line.separator}SET PATH=.\gdal;%PATH% ${line.separator}java -Xmx1024m -cp ${executable_jar_name} -Djava.library.path=gdal au.gov.ga.worldwind.tiler.application.Console %*</echo>
+		<echo file="${target_platform_dir}/${executable_ribbon_batch_name}">@echo off ${line.separator}SET PATH=.\gdal;%PATH% ${line.separator}java -Xmx1024m -cp ${executable_jar_name} -Djava.library.path=gdal au.gov.ga.worldwind.tiler.ribbon.RibbonTiler %*</echo>
 	</target>
-
+	
 	<target name="run" depends="executable" />
 
 </project>

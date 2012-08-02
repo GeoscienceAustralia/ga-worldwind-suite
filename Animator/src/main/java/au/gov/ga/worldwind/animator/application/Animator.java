@@ -309,6 +309,8 @@ public class Animator
 	{
 		GDALDataHelper.init();
 
+		loadSettings();
+
 		initialiseApplicationWindow();
 		initialiseWorldWindow();
 
@@ -336,6 +338,11 @@ public class Animator
 		resetChanged();
 
 		showApplicationWindow();
+	}
+
+	private void loadSettings()
+	{
+		Settings.get();
 	}
 
 	/**
@@ -495,7 +502,8 @@ public class Animator
 	 */
 	private void showSplashScreen()
 	{
-		SplashScreen splashScreen = new SplashScreen(frame);
+		SplashScreen splashScreen =
+				new SplashScreen(frame, Animator.class.getResource("/images/animator-splash-400x230.png"));
 		splashScreen.addRenderingListener(wwd);
 	}
 
@@ -531,7 +539,14 @@ public class Animator
 				continue;
 			}
 
-			animation.addLayer(layerIdentifier);
+			try
+			{
+				animation.addLayer(layerIdentifier);
+			}
+			catch (Exception e)
+			{
+				e.printStackTrace();
+			}
 		}
 	}
 
@@ -547,7 +562,14 @@ public class Animator
 				continue;
 			}
 
-			animation.addElevationModel(modelIdentifier);
+			try
+			{
+				animation.addElevationModel(modelIdentifier);
+			}
+			catch (Exception e)
+			{
+				e.printStackTrace();
+			}
 		}
 	}
 
@@ -1060,9 +1082,27 @@ public class Animator
 
 	private void initialiseAnimationEventLogger()
 	{
-		eventLogger = new AnimationEventLogger("animationEvents.txt");
-		eventLogger.setEnabled(false);
-		getCurrentAnimation().addChangeListener(eventLogger);
+		try
+		{
+			eventLogger = new AnimationEventLogger("animationEvents.txt");
+		}
+		catch (IllegalArgumentException e)
+		{
+			try
+			{
+				File file = File.createTempFile("animationEvents", ".txt");
+				eventLogger = new AnimationEventLogger(file.getAbsolutePath());
+			}
+			catch (IOException ioe)
+			{
+				ioe.printStackTrace();
+			}
+		}
+		if (eventLogger != null)
+		{
+			eventLogger.setEnabled(false);
+			getCurrentAnimation().addChangeListener(eventLogger);
+		}
 	}
 
 	/**
@@ -1903,8 +1943,11 @@ public class Animator
 
 	void setEnableAnimationEventLogging(boolean enabled)
 	{
-		eventLogger.setEnabled(enabled);
-		Settings.get().setAnimationEventsLogged(enabled);
+		if (eventLogger != null)
+		{
+			eventLogger.setEnabled(enabled);
+			Settings.get().setAnimationEventsLogged(enabled);
+		}
 	}
 
 	public void setParameterEditorVisible(boolean visible)
@@ -1983,7 +2026,7 @@ public class Animator
 			updateSlider();
 		}
 	}
-	
+
 	void promptToSetProxy()
 	{
 		ProxyDialog.show(frame);

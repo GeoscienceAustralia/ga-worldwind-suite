@@ -22,7 +22,7 @@ import java.io.InputStream;
 
 import javax.media.opengl.GL;
 
-import au.gov.ga.worldwind.animator.application.effects.Shader;
+import au.gov.ga.worldwind.common.render.Shader;
 
 /**
  * A {@link Shader} that takes a scene, depth and blurred scene texture, and

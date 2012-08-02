@@ -49,8 +49,8 @@ import au.gov.ga.worldwind.common.layers.kml.KMLLayer;
 import au.gov.ga.worldwind.common.layers.model.LocalModelLayer;
 import au.gov.ga.worldwind.common.layers.model.gocad.GocadFactory;
 import au.gov.ga.worldwind.common.layers.model.gocad.GocadReaderParameters;
+import au.gov.ga.worldwind.common.render.fastshape.FastShape;
 import au.gov.ga.worldwind.common.util.AVKeyMore;
-import au.gov.ga.worldwind.common.util.FastShape;
 
 /**
  * Helper class used to load (non layer definition) files as layers. Examples of

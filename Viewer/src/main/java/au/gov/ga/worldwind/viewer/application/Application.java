@@ -19,9 +19,9 @@ import static au.gov.ga.worldwind.common.util.message.CommonMessageConstants.get
 import static au.gov.ga.worldwind.common.util.message.CommonMessageConstants.getVideocardFailureTitleKey;
 import static au.gov.ga.worldwind.common.util.message.MessageSourceAccessor.getMessage;
 import static au.gov.ga.worldwind.viewer.util.message.ViewerMessageConstants.*;
-import gov.nasa.worldwind.BasicModel;
 import gov.nasa.worldwind.Configuration;
 import gov.nasa.worldwind.Model;
+import gov.nasa.worldwind.SceneController;
 import gov.nasa.worldwind.WorldWind;
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.awt.WorldWindowGLCanvas;
@@ -112,13 +112,13 @@ import au.gov.ga.worldwind.viewer.layers.mouse.MouseLayer;
 import au.gov.ga.worldwind.viewer.panels.SideBar;
 import au.gov.ga.worldwind.viewer.panels.dataset.ILayerDefinition;
 import au.gov.ga.worldwind.viewer.panels.layers.AbstractLayersPanel;
-import au.gov.ga.worldwind.viewer.panels.layers.SectionListLayerList;
 import au.gov.ga.worldwind.viewer.panels.layers.ILayerNode;
 import au.gov.ga.worldwind.viewer.panels.layers.LayerEnabler;
 import au.gov.ga.worldwind.viewer.panels.layers.LayerNode;
 import au.gov.ga.worldwind.viewer.panels.layers.LayersPanel;
 import au.gov.ga.worldwind.viewer.panels.layers.QueryClickListener;
 import au.gov.ga.worldwind.viewer.panels.layers.SectionListCompoundElevationModel;
+import au.gov.ga.worldwind.viewer.panels.layers.SectionListLayerList;
 import au.gov.ga.worldwind.viewer.panels.other.GoToCoordinatePanel;
 import au.gov.ga.worldwind.viewer.retrieve.PolylineLayerRetrievalListener;
 import au.gov.ga.worldwind.viewer.settings.Settings;
@@ -150,6 +150,8 @@ public class Application
 	private static URL themeUrl;
 	private static Element themeElement;
 
+	private static Class<? extends SceneController> sceneControllerClass = StereoSceneController.class;
+
 	static
 	{
 		if (Configuration.isMacOS())
@@ -158,6 +160,10 @@ public class Application
 			System.setProperty("com.apple.mrj.application.apple.menu.about.name", "World Wind Viewer");
 			System.setProperty("com.apple.mrj.application.growbox.intrudes", "false");
 			System.setProperty("apple.awt.brushMetalLook", "true");
+		}
+		else if (Configuration.isWindowsOS())
+		{
+			System.setProperty("sun.awt.noerasebackground", "true"); // prevents flashing during window resizing
 		}
 
 		try
@@ -170,7 +176,6 @@ public class Application
 
 		Configuration.setValue(AVKey.LAYER_FACTORY, ViewerLayerFactory.class.getName());
 		Configuration.setValue(AVKey.ELEVATION_MODEL_FACTORY, ElevationModelFactory.class.getName());
-		Configuration.setValue(AVKey.SCENE_CONTROLLER_CLASS_NAME, StereoSceneController.class.getName());
 		Configuration.setValue(AVKey.VIEW_CLASS_NAME, StereoOrbitView.class.getName());
 		Configuration.setValue(AVKey.LAYERS_CLASS_NAMES, "");
 		Configuration.setValue(AVKey.RETRIEVAL_SERVICE_CLASS_NAME, ExtendedRetrievalService.class.getName());
@@ -179,10 +184,26 @@ public class Application
 		GDALDataHelper.init();
 	}
 
+	public static Class<? extends SceneController> getSceneControllerClass()
+	{
+		return sceneControllerClass;
+	}
+
+	public static void setSceneControllerClass(Class<? extends SceneController> sceneControllerClass)
+	{
+		Application.sceneControllerClass = sceneControllerClass;
+	}
+
 	public static void main(String[] args)
 	{
-		//first parse the command line options
+		startWithArgs(args);
+	}
 
+	public static Application startWithArgs(String[] args)
+	{
+		Configuration.setValue(AVKey.SCENE_CONTROLLER_CLASS_NAME, getSceneControllerClass().getName());
+
+		//first parse the command line options
 		CmdLineParser parser = new CmdLineParser();
 		CmdLineParser.Option urlRegexOption = parser.addStringOption('u', "url-regex");
 		CmdLineParser.Option urlReplacementOption = parser.addStringOption('r', "url-replacement");
@@ -253,20 +274,20 @@ public class Application
 		ThemeOpenDelegate delegate = new ThemeOpenDelegate()
 		{
 			@Override
-			public void opened(Theme theme, Element themeElement, URL themeUrl)
+			public Application opened(Theme theme, Element themeElement, URL themeUrl)
 			{
 				Application.themeElement = themeElement;
 				Application.themeUrl = themeUrl;
-				start(theme, false, true);
+				return start(theme, theme.isFullscreen(), true);
 			}
 		};
 		if (themeUrl == null)
 		{
-			ThemeOpener.openDefault(delegate);
+			return ThemeOpener.openDefault(delegate);
 		}
 		else
 		{
-			ThemeOpener.openTheme(themeUrl, delegate);
+			return ThemeOpener.openTheme(themeUrl, delegate);
 		}
 	}
 
@@ -311,11 +332,11 @@ public class Application
 	}
 
 	private final boolean fullscreen;
-	private Theme theme;
-	private JFrame frame;
+	private final Theme theme;
+	private final JFrame frame;
 	private JFrame fullscreenFrame;
 
-	private WorldWindowGLCanvas wwd;
+	private final WorldWindowGLCanvas wwd;
 	private MouseLayer mouseLayer;
 
 	private SideBar sideBar;
@@ -365,7 +386,9 @@ public class Application
 		frame.setIconImage(Icons.earth32.getIcon().getImage());
 
 		// show splashscreen
-		final SplashScreen splashScreen = showSplashScreen ? new SplashScreen(frame) : null;
+		final SplashScreen splashScreen =
+				showSplashScreen ? new SplashScreen(frame,
+						SplashScreen.class.getResource("/images/viewer-splash-400x230.png")) : null;
 
 		// create worldwind stuff
 		if (Settings.get().isHardwareStereoEnabled())
@@ -379,7 +402,7 @@ public class Application
 			splashScreen.addRenderingListener(wwd);
 		}
 
-		Model model = new BasicModel();
+		Model model = (Model) WorldWind.createConfigurationComponent(AVKey.MODEL_CLASS_NAME);
 		model.setLayers(new SectionListLayerList());
 		model.getGlobe().setElevationModel(new SectionListCompoundElevationModel());
 		wwd.setModel(model);
@@ -511,7 +534,7 @@ public class Application
 		splitPane.setOneTouchExpandable(true);
 		loadSplitLocation();
 
-		boolean anyPanels = !theme.getPanels().isEmpty();
+		boolean anyPanels = !theme.getPanels().isEmpty() && theme.hasSideBar();
 		if (anyPanels)
 		{
 			sideBar = new SideBar(theme, splitPane);
@@ -586,29 +609,6 @@ public class Application
 		catch (Exception e)
 		{
 		}
-
-		wmsBrowser = new WmsBrowser(getMessage(getApplicationTitleKey()));
-		wmsBrowser.registerLayerReceiver(new WmsLayerReceiver()
-		{
-			@Override
-			public void receive(WMSLayerInfo layerInfo)
-			{
-				addWmsLayer(layerInfo);
-			}
-		});
-
-		//		try
-		//		{
-		//			MutableScreenOverlayAttributesImpl attributes = new MutableScreenOverlayAttributesImpl(new URL("file:/c:/temp/demoSlide.html"));
-		//			attributes.setMinWidth("960px");
-		//			attributes.setMinHeight("720px");
-		//			ScreenOverlayLayer textLayer = new ScreenOverlayLayer(attributes);
-		//			wwd.getModel().getLayers().add(textLayer);
-		//		}
-		//		catch (Exception e)
-		//		{
-		//			
-		//		}
 	}
 
 	private void createActions()
@@ -1155,10 +1155,17 @@ public class Application
 				@Override
 				public void run()
 				{
-					quit(false);
-					Application application = restart(fullscreen);
-					copyStateBetweenWorldWindows(wwd, application.wwd);
-					dialog.dispose();
+					if (theme.isFullscreen())
+					{
+						quit(true);
+					}
+					else
+					{
+						quit(false);
+						Application application = restart(fullscreen);
+						copyStateBetweenWorldWindows(wwd, application.wwd);
+						dialog.dispose();
+					}
 				}
 			});
 			thread.start();
@@ -1496,6 +1503,18 @@ public class Application
 
 	private void showWmsBrowser()
 	{
+		if (wmsBrowser == null)
+		{
+			wmsBrowser = new WmsBrowser(getMessage(getApplicationTitleKey()));
+			wmsBrowser.registerLayerReceiver(new WmsLayerReceiver()
+			{
+				@Override
+				public void receive(WMSLayerInfo layerInfo)
+				{
+					addWmsLayer(layerInfo);
+				}
+			});
+		}
 		wmsBrowser.show();
 	}
 
@@ -1506,5 +1525,15 @@ public class Application
 		{
 			panel.addWmsLayer(layerInfo);
 		}
+	}
+
+	public Theme getTheme()
+	{
+		return theme;
+	}
+
+	public WorldWindowGLCanvas getWwd()
+	{
+		return wwd;
 	}
 }

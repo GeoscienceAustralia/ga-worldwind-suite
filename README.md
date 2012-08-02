@@ -12,6 +12,12 @@ The suite consists of a number of tools, found in the project subfolders. These 
 
 For more information on the project, see the [project wiki](https://github.com/ga-m3dv/ga-worldwind-suite/wiki).
 
+## Webstart previews ##
+We have created a separate [repository](https://github.com/ga-m3dv/ga-worldwind-webstart) containing webstart versions of some of the tools in this repository. To run these applications, use the following links:
+* [Viewer](https://raw.github.com/ga-m3dv/ga-worldwind-webstart/master/Webstart/jnlp/viewer.jnlp)
+* [Animator](https://raw.github.com/ga-m3dv/ga-worldwind-webstart/master/Webstart/jnlp/animator.jnlp)
+We will update these builds periodically to reflect the latest changes in the codebase.
+
 ## Reporting bugs and requesting features ##
 We are striving to ensure the `ga-worldwind-suite` is a high-quality and usable suite of tools. If you find any bugs/issues with the tools, or would like to see new features added, please report them via the [issue tracker](https://github.com/ga-m3dv/ga-worldwind-suite/issues). Better yet, implement the changes yourself and then open a [pull request](http://help.github.com/send-pull-requests/).
 

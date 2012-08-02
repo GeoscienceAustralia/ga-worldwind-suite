@@ -15,6 +15,7 @@
  ******************************************************************************/
 package au.gov.ga.worldwind.viewer.panels.layers;
 
+import gov.nasa.worldwind.layers.Layer;
 import gov.nasa.worldwindx.applications.worldwindow.core.WMSLayerInfo;
 
 import java.net.URL;
@@ -169,8 +170,12 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 		{
 			//set the opacity on both the layer node and the layer, so they match
 			layer.setOpacity(opacity);
-			enabler.getLayer(layer).setOpacity(opacity);
-			enabler.redrawWwd();
+			Layer l = enabler.getLayer(layer);
+			if (l != null)
+			{
+				l.setOpacity(opacity);
+				enabler.redrawWwd();
+			}
 		}
 	}
 
@@ -185,8 +190,12 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 		{
 			//set the expiry on both the layer node and the layer, so they match
 			layer.setExpiryTime(expiryTime);
-			enabler.getLayer(layer).setExpiryTime(expiryTime);
-			enabler.redrawWwd();
+			Layer l = enabler.getLayer(layer);
+			if (l != null)
+			{
+				l.setExpiryTime(expiryTime);
+				enabler.redrawWwd();
+			}
 		}
 	}
 
@@ -277,6 +286,7 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 
 			for (int i = startIndex; i < parents.size(); i++)
 			{
+				IData dataParent = i > 0 ? parents.get(i - 1) : null;
 				IData data = parents.get(i);
 				INode node = null;
 				for (int j = 0; j < currentParent.getChildCount(); j++)
@@ -291,7 +301,17 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 				if (node == null)
 				{
 					node = new FolderNode(data.getName(), data.getInfoURL(), data.getIconURL(), true);
-					insertNodeInto(node, currentParent, currentParent.getChildCount(), false);
+					int index = currentParent.getChildCount();
+					if (dataParent instanceof IDataset)
+					{
+						IDataset dataset = (IDataset) dataParent;
+						int insertionIndex = findInsertionIndex(data, dataset, currentParent);
+						if (insertionIndex >= 0)
+						{
+							index = insertionIndex;
+						}
+					}
+					insertNodeInto(node, currentParent, index, false);
 				}
 				expandPath.add(currentParent);
 				currentParent = node;
@@ -302,7 +322,7 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 
 		//attempt to insert the layer into the same position as it is defined in the dataset
 		int index = currentParent.getChildCount();
-		if (directParent != null && directParent instanceof IDataset)
+		if (directParent instanceof IDataset)
 		{
 			IDataset dataset = (IDataset) directParent;
 			int insertionIndex = findInsertionIndex(layer, dataset, currentParent);
@@ -328,25 +348,16 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 		});
 	}
 
-	protected int findInsertionIndex(ILayerDefinition layer, IDataset directParent, INode currentParent)
+	protected int findInsertionIndex(IData datasetOrLayer, IDataset directParent, INode currentParent)
 	{
-		List<ILayerDefinition> layers = new ArrayList<ILayerDefinition>();
 		List<IData> children = directParent.getChildren();
-		for (IData child : children)
-		{
-			if (child instanceof ILayerDefinition)
-			{
-				layers.add((ILayerDefinition) child);
-			}
-		}
-
-		int indexOfChild = layers.indexOf(layer);
+		int indexOfChild = children.indexOf(datasetOrLayer);
 		if (indexOfChild >= 0)
 		{
-			for (int i = indexOfChild + 1; i < layers.size(); i++)
+			for (int i = indexOfChild + 1; i < children.size(); i++)
 			{
-				ILayerDefinition l = layers.get(i);
-				int j = indexOfLayerName(l.getName(), currentParent);
+				IData d = children.get(i);
+				int j = indexOfDataName(d.getName(), currentParent);
 				if (j >= 0)
 				{
 					return j;
@@ -354,8 +365,8 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 			}
 			for (int i = indexOfChild - 1; i >= 0; i--)
 			{
-				ILayerDefinition l = layers.get(i);
-				int j = indexOfLayerName(l.getName(), currentParent);
+				IData d = children.get(i);
+				int j = indexOfDataName(d.getName(), currentParent);
 				if (j >= 0)
 				{
 					return j + 1;
@@ -365,11 +376,11 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 		return -1;
 	}
 
-	protected int indexOfLayerName(String layerName, INode parent)
+	protected int indexOfDataName(String dataName, INode parent)
 	{
 		for (int i = 0; i < parent.getChildCount(); i++)
 		{
-			if (layerName.equalsIgnoreCase(parent.getChild(i).getName()))
+			if (dataName.equalsIgnoreCase(parent.getChild(i).getName()))
 			{
 				return i;
 			}
@@ -414,6 +425,11 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 	public boolean containsLayer(ILayerDefinition layer)
 	{
 		return layerURLmap.containsKey(layer.getLayerURL());
+	}
+
+	public boolean containsLayer(URL layerURL)
+	{
+		return layerURLmap.containsKey(layerURL);
 	}
 
 	private void addAnyLayers(INode node, boolean rebuildLayersList)
@@ -579,13 +595,11 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 
 	public void insertNodeInto(INode newNode, INode parentNode, int index, boolean rebuildLayersList)
 	{
-		parentNode.insertChild(index, newNode);
-
 		if (newNode instanceof WmsRootNode)
 		{
 			this.wmsRootFolderNode = (WmsRootNode) newNode;
 		}
-
+		parentNode.insertChild(index, newNode);
 		nodeWasInserted(parentNode, index);
 		addAnyLayers(newNode, rebuildLayersList);
 	}
@@ -825,31 +839,55 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 		return nodes;
 	}
 
-	protected void fireTreeNodesChanged(Object source, Object[] path, int[] childIndices, Object[] children)
+	protected void fireTreeNodesChanged(final Object source, final Object[] path, final int[] childIndices,
+			final Object[] children)
 	{
-		TreeModelEvent e = new TreeModelEvent(source, path, childIndices, children);
-		for (int i = listeners.size() - 1; i >= 0; i--)
+		SwingUtil.invokeLaterTaskOnEDT(new Runnable()
 		{
-			listeners.get(i).treeNodesChanged(e);
-		}
+			@Override
+			public void run()
+			{
+				TreeModelEvent e = new TreeModelEvent(source, path, childIndices, children);
+				for (int i = listeners.size() - 1; i >= 0; i--)
+				{
+					listeners.get(i).treeNodesChanged(e);
+				}
+			}
+		});
 	}
 
-	private void fireTreeNodesInserted(Object source, Object[] path, int[] childIndices, Object[] children)
+	private void fireTreeNodesInserted(final Object source, final Object[] path, final int[] childIndices,
+			final Object[] children)
 	{
-		TreeModelEvent e = new TreeModelEvent(source, path, childIndices, children);
-		for (int i = listeners.size() - 1; i >= 0; i--)
+		SwingUtil.invokeLaterTaskOnEDT(new Runnable()
 		{
-			listeners.get(i).treeNodesInserted(e);
-		}
+			@Override
+			public void run()
+			{
+				TreeModelEvent e = new TreeModelEvent(source, path, childIndices, children);
+				for (int i = listeners.size() - 1; i >= 0; i--)
+				{
+					listeners.get(i).treeNodesInserted(e);
+				}
+			}
+		});
 	}
 
-	private void fireTreeNodesRemoved(Object source, Object[] path, int[] childIndices, Object[] children)
+	private void fireTreeNodesRemoved(final Object source, final Object[] path, final int[] childIndices,
+			final Object[] children)
 	{
-		TreeModelEvent e = new TreeModelEvent(source, path, childIndices, children);
-		for (int i = listeners.size() - 1; i >= 0; i--)
+		SwingUtil.invokeLaterTaskOnEDT(new Runnable()
 		{
-			listeners.get(i).treeNodesRemoved(e);
-		}
+			@Override
+			public void run()
+			{
+				TreeModelEvent e = new TreeModelEvent(source, path, childIndices, children);
+				for (int i = listeners.size() - 1; i >= 0; i--)
+				{
+					listeners.get(i).treeNodesRemoved(e);
+				}
+			}
+		});
 	}
 
 	List<ILayerNode> getLayerNodes()

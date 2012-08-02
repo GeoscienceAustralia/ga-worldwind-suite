@@ -26,6 +26,8 @@ import gov.nasa.worldwind.terrain.SectorGeometry;
 
 import javax.media.opengl.GL;
 
+import au.gov.ga.worldwind.common.util.exaggeration.VerticalExaggerationAccessor;
+
 /**
  * {@link SurfaceTileRenderer} that supports rendering surface tiles at an
  * elevation offset. Also supports rendering surface tiles on flat geometry (ie
@@ -69,7 +71,7 @@ public class ExtendedSurfaceTileRenderer extends MultiTextureSurfaceTileRenderer
 		//this is a bit dodgy to setup the ModelView matrix in this function, but the superclass calls the
 		//preComputeTextureTransform function at exactly the right time, which is why it's done here
 
-		double exaggeratedOffset = elevationOffset * dc.getVerticalExaggeration();
+		double exaggeratedOffset = VerticalExaggerationAccessor.applyVerticalExaggeration(dc, elevationOffset );
 		if (exaggeratedOffset != 0)
 		{
 			GL gl = dc.getGL();

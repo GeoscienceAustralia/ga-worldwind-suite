@@ -26,7 +26,7 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 
-import au.gov.ga.worldwind.common.util.FastShape;
+import au.gov.ga.worldwind.common.render.fastshape.FastShape;
 
 /**
  * Abstract implementation of the {@link ModelLayer}. Contains the common
@@ -48,6 +48,7 @@ public abstract class AbstractModelLayer extends AbstractLayer implements ModelL
 	protected Double lineWidth;
 	protected Double pointSize;
 	protected boolean wireframe = false;
+	protected boolean useOrderedRendering = false;
 
 	protected boolean reverseNormals = false;
 	protected boolean pointSprite = false;
@@ -182,6 +183,7 @@ public abstract class AbstractModelLayer extends AbstractLayer implements ModelL
 		shape.setPointTextureUrl(getClass().getResource("/images/pointsprite.png"));
 		shape.setWireframe(isWireframe());
 		shape.setReverseNormals(reverseNormals);
+		shape.setUseOrderedRendering(useOrderedRendering);
 
 		synchronized (shapes)
 		{

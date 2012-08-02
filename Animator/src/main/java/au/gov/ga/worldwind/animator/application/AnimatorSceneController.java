@@ -15,7 +15,6 @@
  ******************************************************************************/
 package au.gov.ga.worldwind.animator.application;
 
-import gov.nasa.worldwind.BasicSceneController;
 import gov.nasa.worldwind.render.DrawContext;
 import gov.nasa.worldwind.render.SurfaceObjectTileBuilder;
 
@@ -33,6 +32,7 @@ import au.gov.ga.worldwind.animator.animation.Animation;
 import au.gov.ga.worldwind.animator.application.effects.Effect;
 import au.gov.ga.worldwind.animator.application.render.OffscreenRenderer;
 import au.gov.ga.worldwind.animator.application.render.OffscreenSurfaceObjectRenderer;
+import au.gov.ga.worldwind.common.render.ExtendedSceneController;
 
 /**
  * A custom scene controller that supports {@link Effect}s, as well as pre/post
@@ -40,7 +40,7 @@ import au.gov.ga.worldwind.animator.application.render.OffscreenSurfaceObjectRen
  * 
  * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
-public class AnimatorSceneController extends BasicSceneController
+public class AnimatorSceneController extends ExtendedSceneController
 {
 	private final Queue<PaintTask> prePaintTasks = new LinkedList<PaintTask>();
 	private final Lock prePaintTasksLock = new ReentrantLock(true);
@@ -62,10 +62,30 @@ public class AnimatorSceneController extends BasicSceneController
 		gl.glHint(GL.GL_POLYGON_SMOOTH_HINT, GL.GL_NICEST);
 
 		doPrePaintTasks(dc);
-		super.doRepaint(dc);
+		performRepaint(dc);
 		doPostPaintTasks(dc);
 	}
 
+	private void performRepaint(DrawContext dc)
+    {
+        this.initializeFrame(dc);
+        try
+        {
+            this.applyView(dc);
+            this.createPickFrustum(dc);
+            this.createTerrain(dc);
+            this.preRender(dc);
+            this.clearFrame(dc);
+            this.pick(dc);
+            this.clearFrame(dc);
+            this.draw(dc);
+        }
+        finally
+        {
+            this.finalizeFrame(dc);
+        }
+    }
+	
 	@Override
 	protected void draw(DrawContext dc)
 	{

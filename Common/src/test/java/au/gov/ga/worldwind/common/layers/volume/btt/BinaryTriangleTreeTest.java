@@ -13,7 +13,6 @@ import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,7 +21,7 @@ import javax.imageio.ImageIO;
 import org.junit.Assert;
 import org.junit.Test;
 
-import au.gov.ga.worldwind.common.util.FastShape;
+import au.gov.ga.worldwind.common.render.fastshape.FastShape;
 
 public class BinaryTriangleTreeTest
 {
@@ -51,17 +50,16 @@ public class BinaryTriangleTreeTest
 
 		BinaryTriangleTree btt = new BinaryTriangleTree(positions, width, height);
 		FastShape shape = btt.buildMeshFromCenter(1, new Rectangle(29, 29, 119, 119));
-		
+
 		BufferedImage image = shapeToImage(shape, width, height);
 		BufferedImage reference = ImageIO.read(this.getClass().getResourceAsStream("reference.png"));
-		
+
 		Assert.assertTrue(areImagesEqual(image, reference));
 	}
 
 	protected BufferedImage shapeToImage(FastShape shape, int width, int height)
 	{
-		IntBuffer indices = shape.getIndices();
-		indices.rewind();
+		int[] indices = shape.getIndices();
 		List<Position> posi = shape.getPositions();
 
 		int s = (width - 1) * 8 + 1;
@@ -70,11 +68,11 @@ public class BinaryTriangleTreeTest
 		g.setColor(Color.white);
 		g.fillRect(0, 0, s, s);
 		g.setColor(Color.black);
-		while (indices.hasRemaining())
+		for (int i = 0; i < indices.length; i += 3)
 		{
-			Position left = posi.get(indices.get());
-			Position apex = posi.get(indices.get());
-			Position right = posi.get(indices.get());
+			Position left = posi.get(indices[i + 0]);
+			Position apex = posi.get(indices[i + 1]);
+			Position right = posi.get(indices[i + 2]);
 			g.drawLine((int) (left.longitude.degrees * (s - 1) / (width - 1)),
 					(int) (left.latitude.degrees * (s - 1) / (height - 1)),
 					(int) (apex.longitude.degrees * (s - 1) / (width - 1)),
@@ -104,13 +102,13 @@ public class BinaryTriangleTreeTest
 		{
 			for (int x = 0; x < i1.getWidth(); x++)
 			{
-				if(i1.getRGB(x, y) != i2.getRGB(x, y))
+				if (i1.getRGB(x, y) != i2.getRGB(x, y))
 				{
 					return false;
 				}
 			}
 		}
-		
+
 		return true;
 	}
 

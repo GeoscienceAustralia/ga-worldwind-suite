@@ -22,6 +22,22 @@
 	<property name="executable_jar_name" value="animator-all-in-one.jar" />
 	<property name="executable_batch_name" value="run.bat" />
 
+	<property name="webstart_dir" value="${target_dir}/webstart" />
+	<property name="webstart_unsigned_dir" value="${webstart_dir}/unsigned" />
+	<property name="webstart_selfsigned_dir" value="${webstart_dir}/selfsigned" />
+	<property name="webstart_resources_jar_name" value="resources.jar" />
+
+	<property name="ww_natives_windows_i586_jar" value="worldwind-natives-windows-i586.jar" />
+	<property name="ww_natives_windows_amd64_jar" value="worldwind-natives-windows-amd64.jar" />
+	<property name="ww_natives_macosx_universal_jar" value="worldwind-natives-macosx-universal.jar" />
+	<property name="ww_natives_linux_i586_jar" value="worldwind-natives-linux-i586.jar" />
+	<property name="ww_natives_linux_amd64_jar" value="worldwind-natives-linux-amd64.jar" />
+
+	<!-- Keystore configuration -->
+	<property name="keystore_file" value="${basedir}/keystore" />
+	<property name="keystore_alias" value="selfsigned" />
+	<property name="keystore_password" value="password" />
+
 	<property name="common_dir" value="${basedir}/../Common" />
 	<property name="common_lib_dir" value="${common_dir}/lib" />
 	<property name="common_build_lib_dir" value="${common_lib_dir}/build" />
@@ -64,6 +80,7 @@
 		<ant antfile="${common_build_script}" target="run" dir="${common_dir}" inheritall="false">
 			<property name="javac_debug" value="${javac_debug}" />
 			<property name="perform_unit_tests" value="${perform_unit_tests}" />
+			<property name="user.dir" value="${common_dir}" />
 		</ant>
 	</target>
 
@@ -121,6 +138,7 @@
 		<jar destfile="${package_dir}/${jar_name}">
 			<manifest>
 				<attribute name="Main-Class" value="au.gov.ga.worldwind.animator.application.Application" />
+				<attribute name="SplashScreen-Image" value="images/animator-splash-400x230.png" />
 			</manifest>
 			<fileset dir="${build_dir}" />
 		</jar>
@@ -151,12 +169,63 @@
 
 			<manifest>
 				<attribute name="Main-Class" value="au.gov.ga.worldwind.animator.application.Executable" />
+				<attribute name="SplashScreen-Image" value="images/animator-splash-400x230.png" />
 			</manifest>
 		</jar>
 
 		<echo file="${executable_dir}/${executable_batch_name}">java -Dsun.java2d.noddraw=true -Xmx1024m -jar ./${executable_jar_name}</echo>
 	</target>
 
-	<target name="run" depends="executable" />
+	<target name="webstart" depends="package">
+		<mkdir dir="${webstart_unsigned_dir}" />
+
+		<copy todir="${webstart_unsigned_dir}">
+			<fileset dir="${package_dir}">
+				<include name="**/*.jar" />
+			</fileset>
+			<fileset dir="${common_package_dir}">
+				<include name="**/*.jar" />
+			</fileset>
+			<fileset dir="${common_package_lib_dir}">
+				<include name="**/*.jar" />
+			</fileset>
+		</copy>
+
+		<jar destfile="${webstart_unsigned_dir}/${webstart_resources_jar_name}">
+			<fileset dir="${common_package_lib_dir}">
+				<exclude name="**/*.jar" />
+				<exclude name="native/" />
+			</fileset>
+		</jar>
+
+		<jar destfile="${webstart_unsigned_dir}/${ww_natives_windows_i586_jar}">
+			<fileset dir="${common_package_lib_dir}/native/windows-i586" />
+		</jar>
+		<jar destfile="${webstart_unsigned_dir}/${ww_natives_windows_amd64_jar}">
+			<fileset dir="${common_package_lib_dir}/native/windows-amd64" />
+		</jar>
+		<jar destfile="${webstart_unsigned_dir}/${ww_natives_macosx_universal_jar}">
+			<fileset dir="${common_package_lib_dir}/native/macosx-universal" />
+		</jar>
+		<jar destfile="${webstart_unsigned_dir}/${ww_natives_linux_i586_jar}">
+			<fileset dir="${common_package_lib_dir}/native/linux-i586" />
+		</jar>
+		<jar destfile="${webstart_unsigned_dir}/${ww_natives_linux_amd64_jar}">
+			<fileset dir="${common_package_lib_dir}/native/linux-amd64" />
+		</jar>
+	</target>
+
+	<target name="sign" depends="webstart">
+		<mkdir dir="${webstart_selfsigned_dir}" />
+
+		<signjar destDir="${webstart_selfsigned_dir}" keystore="${keystore_file}" alias="${keystore_alias}" storepass="${keystore_password}">
+			<path>
+				<fileset dir="${webstart_unsigned_dir}" includes="**/*.jar" />
+			</path>
+			<flattenmapper />
+		</signjar>
+	</target>
+
+	<target name="run" depends="executable, sign" />
 
 </project>

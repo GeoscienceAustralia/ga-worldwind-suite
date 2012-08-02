@@ -35,6 +35,6 @@ public class Executable
 			DirectDraw.disableDirectDraw();
 		}
 		NativeLibraries.init();
-		Application.main(args);
+		Application.startWithArgs(args);
 	}
 }
