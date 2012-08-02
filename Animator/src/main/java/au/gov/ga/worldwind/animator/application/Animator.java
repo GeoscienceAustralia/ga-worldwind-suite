@@ -17,7 +17,44 @@ package au.gov.ga.worldwind.animator.application;
 
 import static au.gov.ga.worldwind.animator.application.render.AnimationImageSequenceNameFactory.createImageSequenceFile;
 import static au.gov.ga.worldwind.animator.util.FileUtil.stripSequenceNumber;
-import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.*;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getAboutDialogTitleKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getAnimationMenuLabelKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getAnimatorApplicationTitleKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getCantOpenTutorialsCaptionKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getCantOpenTutorialsMessageKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getCantOpenUserGuideCaptionKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getCantOpenUserGuideMessageKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getConfirmOverwriteCaptionKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getConfirmOverwriteMessageKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getConfirmRenderOverwriteCaptionKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getConfirmRenderOverwriteMessageKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getDebugMenuLabelKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getFileMenuLabelKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getFrameMenuLabelKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getHelpMenuLabelKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getNewAnimationNameKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getOpenDialogTitleKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getOpenElevationModelFailedCaptionKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getOpenElevationModelFailedMessageKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getOpenFailedCaptionKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getOpenFailedMessageKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getOpenV1FileCaptionKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getOpenV1FileMessageKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getQuerySaveCaptionKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getQuerySaveMessageKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getQuerySmoothEyeSpeedCaptionKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getQuerySmoothEyeSpeedMessageKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getSaveAsDialogTitleKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getSaveFailedCaptionKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getSaveFailedMessageKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getSaveRenderDialogTitleKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getScaleAnimationCaptionKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getScaleAnimationMessageKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getSetDimensionFailedCaptionKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getSetDimensionFailedMessageKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getSetFrameCountCaptionKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getSetFrameCountMessageKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getWindowMenuLabelKey;
 import static au.gov.ga.worldwind.common.util.FileUtil.stripExtension;
 import static au.gov.ga.worldwind.common.util.message.MessageSourceAccessor.getMessage;
 import gov.nasa.worldwind.BasicModel;
@@ -273,7 +310,7 @@ public class Animator
 		GDALDataHelper.init();
 
 		loadSettings();
-		
+
 		initialiseApplicationWindow();
 		initialiseWorldWindow();
 
@@ -465,7 +502,8 @@ public class Animator
 	 */
 	private void showSplashScreen()
 	{
-		SplashScreen splashScreen = new SplashScreen(frame, Animator.class.getResource("/images/animator-splash-400x230.png"));
+		SplashScreen splashScreen =
+				new SplashScreen(frame, Animator.class.getResource("/images/animator-splash-400x230.png"));
 		splashScreen.addRenderingListener(wwd);
 	}
 
@@ -1044,9 +1082,27 @@ public class Animator
 
 	private void initialiseAnimationEventLogger()
 	{
-		eventLogger = new AnimationEventLogger("animationEvents.txt");
-		eventLogger.setEnabled(false);
-		getCurrentAnimation().addChangeListener(eventLogger);
+		try
+		{
+			eventLogger = new AnimationEventLogger("animationEvents.txt");
+		}
+		catch (IllegalArgumentException e)
+		{
+			try
+			{
+				File file = File.createTempFile("animationEvents", ".txt");
+				eventLogger = new AnimationEventLogger(file.getAbsolutePath());
+			}
+			catch (IOException ioe)
+			{
+				ioe.printStackTrace();
+			}
+		}
+		if (eventLogger != null)
+		{
+			eventLogger.setEnabled(false);
+			getCurrentAnimation().addChangeListener(eventLogger);
+		}
 	}
 
 	/**
@@ -1887,8 +1943,11 @@ public class Animator
 
 	void setEnableAnimationEventLogging(boolean enabled)
 	{
-		eventLogger.setEnabled(enabled);
-		Settings.get().setAnimationEventsLogged(enabled);
+		if (eventLogger != null)
+		{
+			eventLogger.setEnabled(enabled);
+			Settings.get().setAnimationEventsLogged(enabled);
+		}
 	}
 
 	public void setParameterEditorVisible(boolean visible)
@@ -1967,7 +2026,7 @@ public class Animator
 			updateSlider();
 		}
 	}
-	
+
 	void promptToSetProxy()
 	{
 		ProxyDialog.show(frame);
