@@ -105,13 +105,35 @@ public class Util
 		if (dataset == null)
 			dataset = "";
 
-		boolean isZip = false;
-		File parent = Util.getPathWithinContext(dataset, context);
+		boolean isZip = true;
+		int filenameLevel = 0;
+
+		//first try a zip file at the root level: Ternary.zip
+		File parent = Util.getPathWithinContext(dataset + ".zip", context);
+
+		//next try a zip file at the level level: Ternary/1.zip
 		if (parent == null)
 		{
-			//if the directory didn't exist, try a zip file
-			isZip = true;
-			parent = Util.getPathWithinContext(dataset + ".zip", context);
+			parent = Util.getPathWithinContext(dataset + File.separator + level + ".zip", context);
+			filenameLevel = 1;
+		}
+
+		//next try a zip file at the row level: Ternary/1/0002.zip
+		if (parent == null)
+		{
+			parent =
+					Util.getPathWithinContext(
+							dataset + File.separator + level + File.separator + Util.paddedInt(row, 4) + ".zip",
+							context);
+			filenameLevel = 2;
+		}
+
+		//finally find a file in the standard tileset directory structure (no zip parent)
+		if (parent == null)
+		{
+			parent = Util.getPathWithinContext(dataset, context);
+			isZip = false;
+			filenameLevel = 0;
 		}
 
 		if (parent == null)
@@ -141,9 +163,16 @@ public class Util
 				ext = "zip";
 		}
 
-		String filename =
-				level + File.separator + Util.paddedInt(row, 4) + File.separator + Util.paddedInt(row, 4) + "_"
-						+ Util.paddedInt(col, 4) + "." + ext;
+		//build the filename relative to the parent level found above
+		String filename = Util.paddedInt(row, 4) + "_" + Util.paddedInt(col, 4) + "." + ext;
+		if (filenameLevel < 2)
+		{
+			filename = Util.paddedInt(row, 4) + File.separator + filename;
+			if (filenameLevel < 1)
+			{
+				filename = level + File.separator + filename;
+			}
+		}
 
 		try
 		{
@@ -212,9 +241,9 @@ public class Util
 		{
 			try
 			{
-				File dir = new File(parent, path);
-				if (dir.exists())
-					return dir;
+				File file = new File(parent, path);
+				if (file.exists())
+					return file;
 			}
 			catch (Exception e)
 			{
@@ -222,9 +251,9 @@ public class Util
 		}
 
 		//otherwise ignore the parent and just attempt the path
-		File dir = new File(path);
-		if (dir.exists())
-			return dir;
+		File file = new File(path);
+		if (file.exists())
+			return file;
 		return null;
 	}
 
@@ -1025,8 +1054,8 @@ public class Util
 	{
 		if (s == null)
 			return null;
-		
-		if(truncatedSuffix == null)
+
+		if (truncatedSuffix == null)
 			truncatedSuffix = "";
 
 		int length = s.length();
