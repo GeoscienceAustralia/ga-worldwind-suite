@@ -34,6 +34,7 @@ import gov.nasa.worldwind.layers.LayerList;
 import gov.nasa.worldwind.layers.WorldMapLayer;
 import gov.nasa.worldwind.render.UserFacingIcon;
 import gov.nasa.worldwind.retrieve.RetrievalService;
+import gov.nasa.worldwind.terrain.RectangularTessellator;
 import gov.nasa.worldwind.terrain.Tessellator;
 import gov.nasa.worldwind.view.orbit.FlyToOrbitViewAnimator;
 import gov.nasa.worldwind.view.orbit.OrbitView;
@@ -151,6 +152,8 @@ public class Application
 	private static Element themeElement;
 
 	private static Class<? extends SceneController> sceneControllerClass = StereoSceneController.class;
+	private static Class<? extends RectangularTessellator> rectangularTessellatorClass =
+			WireframeRectangularTessellator.class;
 
 	static
 	{
@@ -179,7 +182,6 @@ public class Application
 		Configuration.setValue(AVKey.VIEW_CLASS_NAME, StereoOrbitView.class.getName());
 		Configuration.setValue(AVKey.LAYERS_CLASS_NAMES, "");
 		Configuration.setValue(AVKey.RETRIEVAL_SERVICE_CLASS_NAME, ExtendedRetrievalService.class.getName());
-		Configuration.setValue(AVKey.TESSELLATOR_CLASS_NAME, WireframeRectangularTessellator.class.getName());
 
 		GDALDataHelper.init();
 	}
@@ -194,6 +196,16 @@ public class Application
 		Application.sceneControllerClass = sceneControllerClass;
 	}
 
+	public static Class<? extends RectangularTessellator> getRectangularTessellatorClass()
+	{
+		return rectangularTessellatorClass;
+	}
+
+	public static void setRectangularTessellatorClass(Class<? extends RectangularTessellator> rectangularTessellatorClass)
+	{
+		Application.rectangularTessellatorClass = rectangularTessellatorClass;
+	}
+
 	public static void main(String[] args)
 	{
 		startWithArgs(args);
@@ -202,6 +214,7 @@ public class Application
 	public static Application startWithArgs(String[] args)
 	{
 		Configuration.setValue(AVKey.SCENE_CONTROLLER_CLASS_NAME, getSceneControllerClass().getName());
+		Configuration.setValue(AVKey.TESSELLATOR_CLASS_NAME, getRectangularTessellatorClass().getName());
 
 		//first parse the command line options
 		CmdLineParser parser = new CmdLineParser();
