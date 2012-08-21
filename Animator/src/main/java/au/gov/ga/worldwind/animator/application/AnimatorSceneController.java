@@ -26,7 +26,7 @@ import java.util.Queue;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 import au.gov.ga.worldwind.animator.animation.Animation;
 import au.gov.ga.worldwind.animator.application.effects.Effect;
@@ -54,12 +54,12 @@ public class AnimatorSceneController extends ExtendedSceneController
 	@Override
 	public void doRepaint(DrawContext dc)
 	{
-		GL gl = dc.getGL();
-		gl.glHint(GL.GL_FOG_HINT, GL.GL_NICEST);
-		gl.glHint(GL.GL_LINE_SMOOTH_HINT, GL.GL_NICEST);
-		gl.glHint(GL.GL_PERSPECTIVE_CORRECTION_HINT, GL.GL_NICEST);
-		gl.glHint(GL.GL_POINT_SMOOTH_HINT, GL.GL_NICEST);
-		gl.glHint(GL.GL_POLYGON_SMOOTH_HINT, GL.GL_NICEST);
+		GL2 gl = dc.getGL();
+		gl.glHint(GL2.GL_FOG_HINT, GL2.GL_NICEST);
+		gl.glHint(GL2.GL_LINE_SMOOTH_HINT, GL2.GL_NICEST);
+		gl.glHint(GL2.GL_PERSPECTIVE_CORRECTION_HINT, GL2.GL_NICEST);
+		gl.glHint(GL2.GL_POINT_SMOOTH_HINT, GL2.GL_NICEST);
+		gl.glHint(GL2.GL_POLYGON_SMOOTH_HINT, GL2.GL_NICEST);
 
 		doPrePaintTasks(dc);
 		performRepaint(dc);

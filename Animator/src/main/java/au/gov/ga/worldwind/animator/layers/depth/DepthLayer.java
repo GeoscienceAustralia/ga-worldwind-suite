@@ -24,7 +24,7 @@ import gov.nasa.worldwind.render.SurfaceTile;
 
 import java.util.List;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 /**
  * A layer that draws the elevation tiles with the OpenGL color mask disabled,
@@ -45,14 +45,14 @@ public class DepthLayer extends AbstractLayer
 	@Override
 	protected void doRender(DrawContext dc)
 	{
-		GL gl = dc.getGL();
-		gl.glPushAttrib(GL.GL_POLYGON_BIT);
+		GL2 gl = dc.getGL();
+		gl.glPushAttrib(GL2.GL_POLYGON_BIT);
 
 		try
 		{
-			gl.glPolygonMode(GL.GL_FRONT, GL.GL_FILL);
-			gl.glEnable(GL.GL_CULL_FACE);
-			gl.glCullFace(GL.GL_BACK);
+			gl.glPolygonMode(GL2.GL_FRONT, GL2.GL_FILL);
+			gl.glEnable(GL2.GL_CULL_FACE);
+			gl.glCullFace(GL2.GL_BACK);
 			gl.glColorMask(false, false, false, false);
 			dc.getGeographicSurfaceTileRenderer().renderTile(dc, tile);
 			gl.glColorMask(true, true, true, true);

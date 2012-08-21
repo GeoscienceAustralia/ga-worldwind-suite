@@ -4,7 +4,7 @@ import gov.nasa.worldwind.layers.StarsLayer;
 import gov.nasa.worldwind.render.DrawContext;
 import gov.nasa.worldwind.util.OGLStackHandler;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 /**
  * An extension of the WW default {@link StarsLayer} that extracts projection matrix initialisation into
@@ -44,12 +44,12 @@ public class ProjectionStarsLayer extends StarsLayer
 			return;
 		}
 
-        GL gl = dc.getGL();
+        GL2 gl = dc.getGL();
         OGLStackHandler ogsh = new OGLStackHandler();
 
         try
         {
-            gl.glDisable(GL.GL_DEPTH_TEST);
+            gl.glDisable(GL2.GL_DEPTH_TEST);
 
             // CHANGE HERE
             applyDrawProjection(dc, ogsh);
@@ -61,7 +61,7 @@ public class ProjectionStarsLayer extends StarsLayer
             gl.glRotatef((float) -this.latitudeOffset.degrees, 1.0f, 0.0f, 0.0f);
 
             // Draw
-            ogsh.pushClientAttrib(gl, GL.GL_CLIENT_VERTEX_ARRAY_BIT);
+            ogsh.pushClientAttrib(gl, GL2.GL_CLIENT_VERTEX_ARRAY_BIT);
 
             if (dc.getGLRuntimeCapabilities().isUseVertexBufferObject())
             {

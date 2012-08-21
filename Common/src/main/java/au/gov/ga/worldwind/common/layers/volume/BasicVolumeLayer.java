@@ -45,7 +45,7 @@ import java.net.URL;
 import java.util.Arrays;
 import java.util.Comparator;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 import org.gdal.osr.CoordinateTransformation;
 
@@ -60,7 +60,7 @@ import au.gov.ga.worldwind.common.util.Util;
 import au.gov.ga.worldwind.common.util.Validate;
 import au.gov.ga.worldwind.common.util.exaggeration.VerticalExaggerationAccessor;
 
-import com.sun.opengl.util.j2d.TextureRenderer;
+import com.jogamp.opengl.util.awt.TextureRenderer;
 
 /**
  * Basic implementation of the {@link VolumeLayer} interface.
@@ -860,7 +860,7 @@ public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wire
 	public void shapePreRender(DrawContext dc, FastShape shape)
 	{
 		//push the OpenGL clipping plane state on the attribute stack
-		dc.getGL().glPushAttrib(GL.GL_TRANSFORM_BIT);
+		dc.getGL().glPushAttrib(GL2.GL_TRANSFORM_BIT);
 		setupClippingPlanes(dc, shape == topSurface, shape == bottomSurface);
 	}
 
@@ -880,7 +880,7 @@ public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wire
 		boolean[] enabled;
 		double[] array;
 
-		GL gl = dc.getGL();
+		GL2 gl = dc.getGL();
 		if (top || bottom)
 		{
 			array = top ? topClippingPlanes : bottomClippingPlanes;
@@ -898,14 +898,14 @@ public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wire
 
 		for (int i = 0; i < 4; i++)
 		{
-			gl.glClipPlane(GL.GL_CLIP_PLANE0 + i, array, i * 4);
+			gl.glClipPlane(GL2.GL_CLIP_PLANE0 + i, array, i * 4);
 			if (enabled[i])
 			{
-				gl.glEnable(GL.GL_CLIP_PLANE0 + i);
+				gl.glEnable(GL2.GL_CLIP_PLANE0 + i);
 			}
 			else
 			{
-				gl.glDisable(GL.GL_CLIP_PLANE0 + i);
+				gl.glDisable(GL2.GL_CLIP_PLANE0 + i);
 			}
 		}
 	}

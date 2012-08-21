@@ -15,7 +15,7 @@
  ******************************************************************************/
 package au.gov.ga.worldwind.common.render;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 import gov.nasa.worldwind.render.DrawContext;
 import gov.nasa.worldwind.render.DrawContextImpl;
@@ -87,7 +87,7 @@ public class ExtendedDrawContext extends DrawContextImpl
 	 */
 	public static void applyWireframePolygonMode(DrawContext dc)
 	{
-		dc.getGL().glPolygonMode(GL.GL_FRONT_AND_BACK, isWireframe(dc) ? GL.GL_LINE : GL.GL_FILL);
+		dc.getGL().glPolygonMode(GL2.GL_FRONT_AND_BACK, isWireframe(dc) ? GL2.GL_LINE : GL2.GL_FILL);
 	}
 
 	@Override

@@ -27,7 +27,7 @@ import gov.nasa.worldwind.util.Logging;
 import gov.nasa.worldwind.view.BasicView;
 import gov.nasa.worldwind.view.ViewUtil;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 import au.gov.ga.worldwind.common.view.transform.TransformView;
 
@@ -74,7 +74,7 @@ public class FreeView extends BasicView implements TransformView
 	public java.awt.Rectangle computeViewport(DrawContext dc)
 	{
 		int[] viewportArray = new int[4];
-		this.dc.getGL().glGetIntegerv(GL.GL_VIEWPORT, viewportArray, 0);
+		this.dc.getGL().glGetIntegerv(GL2.GL_VIEWPORT, viewportArray, 0);
 		return new java.awt.Rectangle(viewportArray[0], viewportArray[1], viewportArray[2], viewportArray[3]);
 	}
 

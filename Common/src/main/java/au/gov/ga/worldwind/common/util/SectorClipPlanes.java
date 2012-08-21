@@ -22,7 +22,7 @@ import gov.nasa.worldwind.globes.FlatGlobe;
 import gov.nasa.worldwind.globes.Globe;
 import gov.nasa.worldwind.render.DrawContext;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 /**
  * Uses the OpenGL clipping planes to clip the geometry around a given sector.
@@ -77,17 +77,17 @@ public class SectorClipPlanes
 
 		if (planes != null)
 		{
-			GL gl = dc.getGL();
+			GL2 gl = dc.getGL();
 
-			gl.glClipPlane(GL.GL_CLIP_PLANE0, planes, 0);
-			gl.glClipPlane(GL.GL_CLIP_PLANE1, planes, 4);
-			gl.glClipPlane(GL.GL_CLIP_PLANE2, planes, 8);
-			gl.glClipPlane(GL.GL_CLIP_PLANE3, planes, 12);
+			gl.glClipPlane(GL2.GL_CLIP_PLANE0, planes, 0);
+			gl.glClipPlane(GL2.GL_CLIP_PLANE1, planes, 4);
+			gl.glClipPlane(GL2.GL_CLIP_PLANE2, planes, 8);
+			gl.glClipPlane(GL2.GL_CLIP_PLANE3, planes, 12);
 
-			gl.glEnable(GL.GL_CLIP_PLANE0);
-			gl.glEnable(GL.GL_CLIP_PLANE1);
-			gl.glEnable(GL.GL_CLIP_PLANE2);
-			gl.glEnable(GL.GL_CLIP_PLANE3);
+			gl.glEnable(GL2.GL_CLIP_PLANE0);
+			gl.glEnable(GL2.GL_CLIP_PLANE1);
+			gl.glEnable(GL2.GL_CLIP_PLANE2);
+			gl.glEnable(GL2.GL_CLIP_PLANE3);
 		}
 	}
 
@@ -98,12 +98,12 @@ public class SectorClipPlanes
 	 */
 	public void disableClipping(DrawContext dc)
 	{
-		GL gl = dc.getGL();
+		GL2 gl = dc.getGL();
 
-		gl.glDisable(GL.GL_CLIP_PLANE0);
-		gl.glDisable(GL.GL_CLIP_PLANE1);
-		gl.glDisable(GL.GL_CLIP_PLANE2);
-		gl.glDisable(GL.GL_CLIP_PLANE3);
+		gl.glDisable(GL2.GL_CLIP_PLANE0);
+		gl.glDisable(GL2.GL_CLIP_PLANE1);
+		gl.glDisable(GL2.GL_CLIP_PLANE2);
+		gl.glDisable(GL2.GL_CLIP_PLANE3);
 	}
 
 	/**

@@ -23,7 +23,7 @@ import gov.nasa.worldwind.util.WWXML;
 
 import java.awt.Dimension;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 import javax.xml.xpath.XPath;
 
 import org.w3c.dom.Element;
@@ -205,7 +205,7 @@ public class DepthOfFieldEffect extends EffectBase
 	@Override
 	protected void drawFrameBufferWithEffect(DrawContext dc, Dimension dimensions, FrameBuffer frameBuffer)
 	{
-		GL gl = dc.getGL();
+		GL2 gl = dc.getGL();
 
 		depthOfFieldShader.createIfRequired(gl);
 		gaussianBlurShader.createIfRequired(gl);
@@ -213,7 +213,7 @@ public class DepthOfFieldEffect extends EffectBase
 		try
 		{
 			//disable depth testing for the blur frame buffer, and change the viewport to match the frame buffer's dimensions
-			gl.glPushAttrib(GL.GL_VIEWPORT_BIT | GL.GL_DEPTH_BUFFER_BIT);
+			gl.glPushAttrib(GL2.GL_VIEWPORT_BIT | GL2.GL_DEPTH_BUFFER_BIT);
 			gl.glDepthMask(false);
 			gl.glViewport(0, 0, blurFrameBuffer.getDimensions().width, blurFrameBuffer.getDimensions().height);
 
@@ -222,7 +222,7 @@ public class DepthOfFieldEffect extends EffectBase
 			{
 				//bind and clear the blur frame buffer
 				blurFrameBuffer.bind(gl);
-				gl.glClear(GL.GL_COLOR_BUFFER_BIT);
+				gl.glClear(GL2.GL_COLOR_BUFFER_BIT);
 
 				//draw the scene, blurring vertically first, then horizontally
 				gaussianBlurShader.use(dc, blurFrameBuffer.getDimensions(), false);
@@ -256,7 +256,7 @@ public class DepthOfFieldEffect extends EffectBase
 	@Override
 	protected void releaseEffect(DrawContext dc)
 	{
-		GL gl = dc.getGL();
+		GL2 gl = dc.getGL();
 		depthOfFieldShader.deleteIfCreated(gl);
 		gaussianBlurShader.deleteIfCreated(gl);
 		blurFrameBuffer.deleteIfCreated(gl);

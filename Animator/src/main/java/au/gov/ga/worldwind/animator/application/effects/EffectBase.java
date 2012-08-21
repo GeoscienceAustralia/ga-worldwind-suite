@@ -23,7 +23,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 import au.gov.ga.worldwind.animator.animation.AnimatableBase;
 import au.gov.ga.worldwind.animator.animation.Animation;
@@ -93,7 +93,7 @@ public abstract class EffectBase extends AnimatableBase implements Effect
 	@Override
 	public final void bindFrameBuffer(DrawContext dc, Dimension dimensions)
 	{
-		GL gl = dc.getGL();
+		GL2 gl = dc.getGL();
 
 		//this will create the framebuffer if it doesn't exist
 		frameBuffer.resize(gl, dimensions);

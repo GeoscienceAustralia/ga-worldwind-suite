@@ -54,14 +54,15 @@ import java.nio.ByteBuffer;
 import java.util.Map;
 
 import javax.imageio.ImageIO;
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 import au.gov.ga.worldwind.animator.layers.file.FileRetriever;
 import au.gov.ga.worldwind.common.layers.delegate.reader.MaskImageReaderDelegate;
 import au.gov.ga.worldwind.common.layers.tiled.image.delegate.DelegatorTiledImageLayer;
 
-import com.sun.opengl.util.texture.TextureData;
-import com.sun.opengl.util.texture.TextureIO;
+import com.jogamp.opengl.util.texture.TextureData;
+import com.jogamp.opengl.util.texture.TextureIO;
+import javax.media.opengl.GLProfile;
 
 /**
  * {@link TiledImageLayer} that requests two textures per tile: one image
@@ -437,7 +438,7 @@ public class MaskTiledImageLayer extends TiledImageLayer
 	{
 		try
 		{
-			return TextureIO.newTextureData(url, useMipMaps, null);
+			return TextureIO.newTextureData(GLProfile.get(GLProfile.GL2), url, useMipMaps, null);
 		}
 		catch (Exception e)
 		{
@@ -815,10 +816,10 @@ public class MaskTiledImageLayer extends TiledImageLayer
 
 	protected void setBlendingFunction(DrawContext dc)
 	{
-		GL gl = dc.getGL();
+		GL2 gl = dc.getGL();
 		double alpha = this.getOpacity();
 		gl.glColor4d(1.0, 1.0, 1.0, alpha);
-		gl.glEnable(GL.GL_BLEND);
-		gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
+		gl.glEnable(GL2.GL_BLEND);
+		gl.glBlendFunc(GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA);
 	}
 }

@@ -21,12 +21,12 @@ import gov.nasa.worldwind.render.DrawContext;
 import gov.nasa.worldwind.util.Logging;
 import gov.nasa.worldwind.util.TileKey;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 import javax.media.opengl.GLContext;
 
-import com.sun.opengl.util.texture.Texture;
-import com.sun.opengl.util.texture.TextureData;
-import com.sun.opengl.util.texture.TextureIO;
+import com.jogamp.opengl.util.texture.Texture;
+import com.jogamp.opengl.util.texture.TextureData;
+import com.jogamp.opengl.util.texture.TextureIO;
 
 /**
  * Extension of the {@link CurtainTile} class which contains texture data for
@@ -291,7 +291,7 @@ public class CurtainTextureTile extends CurtainTile
 		}
 
 		this.setTexture(dc.getTextureCache(), t);
-		t.bind();
+		t.bind(dc.getGL());
 
 		this.setTextureParameters(dc, t);
 
@@ -307,7 +307,7 @@ public class CurtainTextureTile extends CurtainTile
 			throw new IllegalStateException(message);
 		}
 
-		GL gl = dc.getGL();
+		GL2 gl = dc.getGL();
 
 		// Use a mipmap minification filter when either of the following is true:
 		// a. The texture has mipmap data. This is typically true for formats with embedded mipmaps, such as DDS.
@@ -323,30 +323,30 @@ public class CurtainTextureTile extends CurtainTile
 		// surface is at a high slope to the eye.
 		if (useMipmapFilter)
 		{
-			gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_LINEAR_MIPMAP_LINEAR);
+			gl.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_MIN_FILTER, GL2.GL_LINEAR_MIPMAP_LINEAR);
 
 			// If the maximum degree of anisotropy is 2.0 or greater, then we know this graphics context supports
 			// the anisotropic texture filter.
 			double maxAnisotropy = dc.getGLRuntimeCapabilities().getMaxTextureAnisotropy();
 			if (dc.getGLRuntimeCapabilities().isUseAnisotropicTextureFilter() && maxAnisotropy >= 2.0)
 			{
-				gl.glTexParameterf(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAX_ANISOTROPY_EXT, (float) maxAnisotropy);
+				gl.glTexParameterf(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_MAX_ANISOTROPY_EXT, (float) maxAnisotropy);
 			}
 		}
 		// If the texture does not qualify for mipmaps, then apply a linear minification filter.
 		else
 		{
-			gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_LINEAR);
+			gl.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_MIN_FILTER, GL2.GL_LINEAR);
 		}
 
 		// Set the texture magnification filter to a linear filter. This will blur the texture as the eye gets very
 		// near, but this is still a better choice than nearest neighbor filtering.
-		gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER, GL.GL_LINEAR);
+		gl.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_MAG_FILTER, GL2.GL_LINEAR);
 
 		// Set the S and T wrapping modes to clamp to the texture edge. This way no border pixels will be sampled by
 		// either the minification or magnification filters.
-		gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_S, GL.GL_CLAMP_TO_EDGE);
-		gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_T, GL.GL_CLAMP_TO_EDGE);
+		gl.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_S, GL2.GL_CLAMP_TO_EDGE);
+		gl.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_T, GL2.GL_CLAMP_TO_EDGE);
 	}
 
 	public boolean bind(DrawContext dc)
@@ -381,7 +381,7 @@ public class CurtainTextureTile extends CurtainTile
 		}
 
 		if (t != null)
-			t.bind();
+			t.bind(dc.getGL());
 
 		return t != null;
 	}
@@ -405,8 +405,8 @@ public class CurtainTextureTile extends CurtainTile
 		{
 			if (t.getMustFlipVertically())
 			{
-				GL gl = GLContext.getCurrent().getGL();
-				gl.glMatrixMode(GL.GL_TEXTURE);
+				GL2 gl = GLContext.getCurrent().getGL().getGL2();
+				gl.glMatrixMode(GL2.GL_TEXTURE);
 				gl.glLoadIdentity();
 				gl.glScaled(1, -1, 1);
 				gl.glTranslated(0, -1, 0);
@@ -427,8 +427,8 @@ public class CurtainTextureTile extends CurtainTile
 			return;
 
 		// Apply necessary transforms to the fallback texture.
-		GL gl = GLContext.getCurrent().getGL();
-		gl.glMatrixMode(GL.GL_TEXTURE);
+		GL2 gl = GLContext.getCurrent().getGL().getGL2();
+		gl.glMatrixMode(GL2.GL_TEXTURE);
 		gl.glLoadIdentity();
 
 		if (t.getMustFlipVertically())

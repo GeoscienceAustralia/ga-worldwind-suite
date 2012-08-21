@@ -17,7 +17,7 @@ package au.gov.ga.worldwind.common.render;
 
 import java.awt.Dimension;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 /**
  * Class used by the {@link FrameBuffer} to generate/store the texture.
@@ -28,14 +28,14 @@ public class FrameBufferTexture
 {
 	private int id = 0;
 
-	private int target = GL.GL_TEXTURE_2D;
-	private int minificationFilter = GL.GL_LINEAR;
-	private int magnificationFilter = GL.GL_LINEAR;
-	private int internalFormat = GL.GL_RGBA8;
-	private int format = GL.GL_RGBA;
-	private int type = GL.GL_UNSIGNED_BYTE;
+	private int target = GL2.GL_TEXTURE_2D;
+	private int minificationFilter = GL2.GL_LINEAR;
+	private int magnificationFilter = GL2.GL_LINEAR;
+	private int internalFormat = GL2.GL_RGBA8;
+	private int format = GL2.GL_RGBA;
+	private int type = GL2.GL_UNSIGNED_BYTE;
 
-	protected void create(GL gl, Dimension dimensions)
+	protected void create(GL2 gl, Dimension dimensions)
 	{
 		delete(gl);
 
@@ -49,18 +49,18 @@ public class FrameBufferTexture
 
 		gl.glBindTexture(getTarget(), id);
 
-		gl.glTexParameteri(getTarget(), GL.GL_TEXTURE_MAG_FILTER, getMagnificationFilter());
-		gl.glTexParameteri(getTarget(), GL.GL_TEXTURE_MIN_FILTER, getMinificationFilter());
-		gl.glTexParameteri(getTarget(), GL.GL_TEXTURE_WRAP_S, GL.GL_CLAMP);
-		gl.glTexParameteri(getTarget(), GL.GL_TEXTURE_WRAP_T, GL.GL_CLAMP);
-		gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_MODE, GL.GL_MODULATE);
+		gl.glTexParameteri(getTarget(), GL2.GL_TEXTURE_MAG_FILTER, getMagnificationFilter());
+		gl.glTexParameteri(getTarget(), GL2.GL_TEXTURE_MIN_FILTER, getMinificationFilter());
+		gl.glTexParameteri(getTarget(), GL2.GL_TEXTURE_WRAP_S, GL2.GL_CLAMP);
+		gl.glTexParameteri(getTarget(), GL2.GL_TEXTURE_WRAP_T, GL2.GL_CLAMP);
+		gl.glTexEnvf(GL2.GL_TEXTURE_ENV, GL2.GL_TEXTURE_ENV_MODE, GL2.GL_MODULATE);
 
 		gl.glTexImage2D(getTarget(), 0, getInternalFormat(), dimensions.width, dimensions.height, 0, getFormat(),
 				getType(), null);
 		gl.glBindTexture(getTarget(), 0);
 	}
 
-	protected void delete(GL gl)
+	protected void delete(GL2 gl)
 	{
 		if (isCreated())
 		{

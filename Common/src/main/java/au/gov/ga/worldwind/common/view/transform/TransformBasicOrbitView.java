@@ -22,7 +22,7 @@ import gov.nasa.worldwind.util.Logging;
 import gov.nasa.worldwind.view.orbit.OrbitViewInputSupport;
 import gov.nasa.worldwind.view.orbit.OrientationBasicOrbitView;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 /**
  * Orbit view that adds {@link TransformView} support.
@@ -40,7 +40,7 @@ public class TransformBasicOrbitView extends OrientationBasicOrbitView implement
 	public java.awt.Rectangle computeViewport(DrawContext dc)
 	{
 		int[] viewportArray = new int[4];
-		this.dc.getGL().glGetIntegerv(GL.GL_VIEWPORT, viewportArray, 0);
+		this.dc.getGL().glGetIntegerv(GL2.GL_VIEWPORT, viewportArray, 0);
 		return new java.awt.Rectangle(viewportArray[0], viewportArray[1], viewportArray[2], viewportArray[3]);
 	}
 

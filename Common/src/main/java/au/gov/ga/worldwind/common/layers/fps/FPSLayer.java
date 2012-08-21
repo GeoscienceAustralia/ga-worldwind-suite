@@ -30,9 +30,9 @@ import java.awt.Font;
 import java.awt.Point;
 import java.awt.geom.Rectangle2D;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
-import com.sun.opengl.util.j2d.TextRenderer;
+import com.jogamp.opengl.util.awt.TextRenderer;
 
 /**
  * Layer that shows an FPS counter.
@@ -372,15 +372,15 @@ public class FPSLayer extends AbstractLayer
 		}
 
 
-		GL gl = dc.getGL();
+		GL2 gl = dc.getGL();
 
 		OGLStackHandler ogsh = new OGLStackHandler();
 
 		try
 		{
-			ogsh.pushAttrib(gl, GL.GL_TRANSFORM_BIT);
+			ogsh.pushAttrib(gl, GL2.GL_TRANSFORM_BIT);
 
-			gl.glDisable(GL.GL_DEPTH_TEST);
+			gl.glDisable(GL2.GL_DEPTH_TEST);
 
 			double width = this.size.width;
 			double height = this.size.height;
@@ -402,8 +402,8 @@ public class FPSLayer extends AbstractLayer
 			gl.glScaled(scale, scale, 1);
 
 			// Draw fps
-			gl.glEnable(GL.GL_BLEND);
-			gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
+			gl.glEnable(GL2.GL_BLEND);
+			gl.glBlendFunc(GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA);
 
 			float[] colorRGB = this.color.getRGBColorComponents(null);
 			gl.glColor4d(colorRGB[0], colorRGB[1], colorRGB[2], this.getOpacity());
@@ -412,19 +412,19 @@ public class FPSLayer extends AbstractLayer
 			int divWidth = 0;
 			String label = fps + " fps";
 			gl.glLoadIdentity();
-			gl.glDisable(GL.GL_CULL_FACE);
+			gl.glDisable(GL2.GL_CULL_FACE);
 			drawLabel(dc, label,
 					locationSW.add3(new Vec4(divWidth * scale / 2 + (width - divWidth) / 2, height * scale, 0)));
 		}
 		finally
 		{
 			gl.glColor4d(1d, 1d, 1d, 1d); // restore the default OpenGL color
-			gl.glEnable(GL.GL_DEPTH_TEST);
+			gl.glEnable(GL2.GL_DEPTH_TEST);
 
 			if (!dc.isPickingMode())
 			{
-				gl.glBlendFunc(GL.GL_ONE, GL.GL_ZERO); // restore to default blend function
-				gl.glDisable(GL.GL_BLEND); // restore to default blend state
+				gl.glBlendFunc(GL2.GL_ONE, GL2.GL_ZERO); // restore to default blend function
+				gl.glDisable(GL2.GL_BLEND); // restore to default blend state
 			}
 
 			ogsh.pop(gl);

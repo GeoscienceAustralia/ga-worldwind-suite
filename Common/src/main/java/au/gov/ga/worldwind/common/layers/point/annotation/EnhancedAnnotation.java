@@ -28,7 +28,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 /**
  * An enhanced annotation that supports:
@@ -225,7 +225,7 @@ public class EnhancedAnnotation extends GlobeAnnotation
 		double finalScale = scale * this.computeScale(dc);
 		java.awt.Point offset = this.getAttributes().getDrawOffset();
 
-		GL gl = dc.getGL();
+		GL2 gl = dc.getGL();
 		gl.glTranslated(x, y, 0);
 		gl.glScaled(finalScale, finalScale, 1);
 		gl.glTranslated(offset.x, offset.y, 0);

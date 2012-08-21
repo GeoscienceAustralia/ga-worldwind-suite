@@ -23,7 +23,7 @@ import gov.nasa.worldwind.render.airspaces.Curtain;
 import gov.nasa.worldwind.render.airspaces.Geometry;
 import gov.nasa.worldwind.util.OGLStackHandler;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 /**
  * An extension of the {@link Curtain} airspace that can render the generating
@@ -89,7 +89,7 @@ public class ShapeOutlineCurtain extends Curtain implements ShapeOutlineAirspace
 		}
 
 		Geometry shapeOutlineElementGeometry = new Geometry();
-		shapeOutlineElementGeometry.setElementData(GL.GL_LINES, count, shapeIndices);
+		shapeOutlineElementGeometry.setElementData(GL2.GL_LINES, count, shapeIndices);
 
 		drawShapeOutline(dc, refCenter, vertexGeometry, shapeOutlineElementGeometry);
 	}
@@ -110,7 +110,7 @@ public class ShapeOutlineCurtain extends Curtain implements ShapeOutlineAirspace
 		}
 
 		Geometry shapeOutlineElementGeometry = new Geometry();
-		shapeOutlineElementGeometry.setElementData(GL.GL_LINES, count, shapeIndices);
+		shapeOutlineElementGeometry.setElementData(GL2.GL_LINES, count, shapeIndices);
 
 		drawShapeOutline(dc, refCenter, vertexGeometry, shapeOutlineElementGeometry);
 	}
@@ -120,11 +120,11 @@ public class ShapeOutlineCurtain extends Curtain implements ShapeOutlineAirspace
 	{
 
 		dc.getView().pushReferenceCenter(dc, refCenter);
-		GL gl = dc.getGL();
+		GL2 gl = dc.getGL();
 		OGLStackHandler stack = new OGLStackHandler();
-		stack.pushAttrib(gl, GL.GL_CURRENT_BIT | GL.GL_HINT_BIT | GL.GL_ENABLE_BIT | GL.GL_DEPTH_BUFFER_BIT
-				| GL.GL_POINT_BIT | GL.GL_COLOR_BUFFER_BIT | GL.GL_LIGHTING_BIT | GL.GL_POINT_BIT);
-		stack.pushClientAttrib(gl, GL.GL_CLIENT_VERTEX_ARRAY_BIT);
+		stack.pushAttrib(gl, GL2.GL_CURRENT_BIT | GL2.GL_HINT_BIT | GL2.GL_ENABLE_BIT | GL2.GL_DEPTH_BUFFER_BIT
+				| GL2.GL_POINT_BIT | GL2.GL_COLOR_BUFFER_BIT | GL2.GL_LIGHTING_BIT | GL2.GL_POINT_BIT);
+		stack.pushClientAttrib(gl, GL2.GL_CLIENT_VERTEX_ARRAY_BIT);
 		try
 		{
 			// Points are drawn over the line to prevent gaps forming when 
@@ -146,15 +146,15 @@ public class ShapeOutlineCurtain extends Curtain implements ShapeOutlineAirspace
 		}
 	}
 
-	private void setupDrawParams(DrawContext dc, GL gl)
+	private void setupDrawParams(DrawContext dc, GL2 gl)
 	{
-		gl.glShadeModel(GL.GL_SMOOTH);
-		gl.glEnable(GL.GL_LINE_SMOOTH);
-		gl.glEnable(GL.GL_POINT_SMOOTH);
-		gl.glEnable(GL.GL_BLEND);
-		gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
-		gl.glHint(GL.GL_LINE_SMOOTH_HINT, GL.GL_NICEST);
-		gl.glHint(GL.GL_POINT_SMOOTH_HINT, GL.GL_NICEST);
+		gl.glShadeModel(GL2.GL_SMOOTH);
+		gl.glEnable(GL2.GL_LINE_SMOOTH);
+		gl.glEnable(GL2.GL_POINT_SMOOTH);
+		gl.glEnable(GL2.GL_BLEND);
+		gl.glBlendFunc(GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA);
+		gl.glHint(GL2.GL_LINE_SMOOTH_HINT, GL2.GL_NICEST);
+		gl.glHint(GL2.GL_POINT_SMOOTH_HINT, GL2.GL_NICEST);
 		getAttributes().applyOutline(dc, false);
 		gl.glPointSize((float) getAttributes().getOutlineWidth());
 	}
@@ -166,7 +166,7 @@ public class ShapeOutlineCurtain extends Curtain implements ShapeOutlineAirspace
 
 	private void drawShapeOutlineAsPoints(DrawContext dc, Geometry shapeOutlineElementGeometry, Geometry vertexGeometry)
 	{
-		getRenderer().drawGeometry(dc, GL.GL_POINTS, shapeOutlineElementGeometry.getCount(GEOMETRY_TYPE_ELEMENT),
+		getRenderer().drawGeometry(dc, GL2.GL_POINTS, shapeOutlineElementGeometry.getCount(GEOMETRY_TYPE_ELEMENT),
 				shapeOutlineElementGeometry.getGLType(GEOMETRY_TYPE_ELEMENT),
 				shapeOutlineElementGeometry.getBuffer(GEOMETRY_TYPE_ELEMENT), vertexGeometry);
 	}

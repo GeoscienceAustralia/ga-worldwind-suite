@@ -23,7 +23,7 @@ import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 import au.gov.ga.worldwind.common.layers.data.AbstractDataProvider;
 import au.gov.ga.worldwind.common.layers.volume.btt.BinaryTriangleTree;
@@ -247,7 +247,7 @@ public abstract class AbstractVolumeDataProvider extends AbstractDataProvider<Vo
 			textureCoordinateBuffer[i++] = u;
 			textureCoordinateBuffer[i++] = 1;
 		}
-		TopBottomFastShape shape = new TopBottomFastShape(positions, GL.GL_TRIANGLE_STRIP);
+		TopBottomFastShape shape = new TopBottomFastShape(positions, GL2.GL_TRIANGLE_STRIP);
 		shape.setTextureCoordinateBuffer(textureCoordinateBuffer);
 		return shape;
 	}
@@ -271,7 +271,7 @@ public abstract class AbstractVolumeDataProvider extends AbstractDataProvider<Vo
 			textureCoordinateBuffer[i++] = u;
 			textureCoordinateBuffer[i++] = 1;
 		}
-		TopBottomFastShape shape = new TopBottomFastShape(positions, GL.GL_TRIANGLE_STRIP);
+		TopBottomFastShape shape = new TopBottomFastShape(positions, GL2.GL_TRIANGLE_STRIP);
 		shape.setTextureCoordinateBuffer(textureCoordinateBuffer);
 		return shape;
 	}
@@ -329,7 +329,7 @@ public abstract class AbstractVolumeDataProvider extends AbstractDataProvider<Vo
 			j += (i % 2 == 0 ? getXSize() : getYSize()) - 1;
 		}
 
-		TopBottomFastShape shape = new TopBottomFastShape(positions, indices, GL.GL_LINES);
+		TopBottomFastShape shape = new TopBottomFastShape(positions, indices, GL2.GL_LINES);
 		shape.setBottomElevationOffset(-getDepth());
 		shape.setLineWidth(2.0);
 		return shape;

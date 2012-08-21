@@ -19,7 +19,7 @@ import java.nio.Buffer;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 /**
  * Abstract class representing an OpenGL VBO (Vertex Buffer Object). Contains
@@ -94,7 +94,7 @@ public abstract class AbstractVBO<ARRAY>
 	 * @param gl
 	 *            OpenGL context
 	 */
-	public void bind(GL gl)
+	public void bind(GL2 gl)
 	{
 		if (vboId < 0)
 		{
@@ -121,7 +121,7 @@ public abstract class AbstractVBO<ARRAY>
 				try
 				{
 					Buffer b = wrapBuffer(buffer);
-					gl.glBufferData(getTarget(), b.limit() * getDataSize(), b.rewind(), GL.GL_STATIC_DRAW);
+					gl.glBufferData(getTarget(), b.limit() * getDataSize(), b.rewind(), GL2.GL_STATIC_DRAW);
 					dirty = false;
 				}
 				finally
@@ -138,7 +138,7 @@ public abstract class AbstractVBO<ARRAY>
 	 * @param gl
 	 *            OpenGL context
 	 */
-	public void unbind(GL gl)
+	public void unbind(GL2 gl)
 	{
 		gl.glBindBuffer(getTarget(), 0);
 	}

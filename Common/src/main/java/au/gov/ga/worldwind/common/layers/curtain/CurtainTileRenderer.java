@@ -21,7 +21,7 @@ import gov.nasa.worldwind.util.Logging;
 import java.util.ArrayList;
 import java.util.logging.Level;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 import au.gov.ga.worldwind.common.render.ExtendedDrawContext;
 
@@ -67,43 +67,43 @@ public class CurtainTileRenderer
 
 		ExtendedDrawContext.applyWireframePolygonMode(dc);
 
-		GL gl = dc.getGL();
+		GL2 gl = dc.getGL();
 
-		gl.glPushAttrib(GL.GL_COLOR_BUFFER_BIT // for alpha func
-				| GL.GL_ENABLE_BIT | GL.GL_CURRENT_BIT | GL.GL_DEPTH_BUFFER_BIT // for depth func
-				| GL.GL_TEXTURE_BIT // for texture env
-				| GL.GL_TRANSFORM_BIT);
+		gl.glPushAttrib(GL2.GL_COLOR_BUFFER_BIT // for alpha func
+				| GL2.GL_ENABLE_BIT | GL2.GL_CURRENT_BIT | GL2.GL_DEPTH_BUFFER_BIT // for depth func
+				| GL2.GL_TEXTURE_BIT // for texture env
+				| GL2.GL_TRANSFORM_BIT);
 
 		try
 		{
-			gl.glDisable(GL.GL_CULL_FACE);
+			gl.glDisable(GL2.GL_CULL_FACE);
 
-			gl.glEnable(GL.GL_DEPTH_TEST);
-			gl.glDepthFunc(GL.GL_LEQUAL);
+			gl.glEnable(GL2.GL_DEPTH_TEST);
+			gl.glDepthFunc(GL2.GL_LEQUAL);
 
-			gl.glEnable(GL.GL_ALPHA_TEST);
-			gl.glAlphaFunc(GL.GL_GREATER, 0.01f);
+			gl.glEnable(GL2.GL_ALPHA_TEST);
+			gl.glAlphaFunc(GL2.GL_GREATER, 0.01f);
 
-			gl.glActiveTexture(GL.GL_TEXTURE0);
-			gl.glEnable(GL.GL_TEXTURE_2D);
-			gl.glMatrixMode(GL.GL_TEXTURE);
+			gl.glActiveTexture(GL2.GL_TEXTURE0);
+			gl.glEnable(GL2.GL_TEXTURE_2D);
+			gl.glMatrixMode(GL2.GL_TEXTURE);
 			gl.glPushMatrix();
 			if (!dc.isPickingMode())
 			{
-				gl.glTexEnvi(GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_MODE, GL.GL_MODULATE);
+				gl.glTexEnvi(GL2.GL_TEXTURE_ENV, GL2.GL_TEXTURE_ENV_MODE, GL2.GL_MODULATE);
 			}
 			else
 			{
-				gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_MODE, GL.GL_COMBINE);
-				gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_SRC0_RGB, GL.GL_PREVIOUS);
-				gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_COMBINE_RGB, GL.GL_REPLACE);
+				gl.glTexEnvf(GL2.GL_TEXTURE_ENV, GL2.GL_TEXTURE_ENV_MODE, GL2.GL_COMBINE);
+				gl.glTexEnvf(GL2.GL_TEXTURE_ENV, GL2.GL_SRC0_RGB, GL2.GL_PREVIOUS);
+				gl.glTexEnvf(GL2.GL_TEXTURE_ENV, GL2.GL_COMBINE_RGB, GL2.GL_REPLACE);
 			}
 
 			for (CurtainTextureTile tile : tiles)
 			{
 				if (tile.bind(dc))
 				{
-					gl.glMatrixMode(GL.GL_TEXTURE);
+					gl.glMatrixMode(GL2.GL_TEXTURE);
 					gl.glLoadIdentity();
 					tile.applyInternalTransform(dc);
 
@@ -112,10 +112,10 @@ public class CurtainTileRenderer
 				}
 			}
 
-			gl.glActiveTexture(GL.GL_TEXTURE0);
-			gl.glMatrixMode(GL.GL_TEXTURE);
+			gl.glActiveTexture(GL2.GL_TEXTURE0);
+			gl.glMatrixMode(GL2.GL_TEXTURE);
 			gl.glPopMatrix();
-			gl.glDisable(GL.GL_TEXTURE_2D);
+			gl.glDisable(GL2.GL_TEXTURE_2D);
 		}
 		catch (Exception e)
 		{

@@ -53,7 +53,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 import javax.swing.Timer;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -447,7 +447,7 @@ public class RSSEarthquakesLayer extends RenderableLayer implements Setupable, L
 		{
 			double finalScale = scale * this.computeScale(dc);
 
-			GL gl = dc.getGL();
+			GL2 gl = dc.getGL();
 			gl.glTranslated(x, y, 0);
 			gl.glScaled(finalScale, finalScale, 1);
 		}
@@ -512,7 +512,7 @@ public class RSSEarthquakesLayer extends RenderableLayer implements Setupable, L
 			}
 
 			dc.getGL().glTranslated(-size / 2, -size / 2, 0);
-			FrameFactory.drawBuffer(dc, GL.GL_TRIANGLE_FAN, this.shapeBuffer);
+			FrameFactory.drawBuffer(dc, GL2.GL_TRIANGLE_FAN, this.shapeBuffer);
 		}
 	}
 
@@ -543,7 +543,7 @@ public class RSSEarthquakesLayer extends RenderableLayer implements Setupable, L
 			}
 
 			dc.getGL().glTranslated(-size / 2, -2, 0);
-			FrameFactory.drawBuffer(dc, GL.GL_TRIANGLE_FAN, this.shapeBuffer);
+			FrameFactory.drawBuffer(dc, GL2.GL_TRIANGLE_FAN, this.shapeBuffer);
 
 
 			//if this is the subsurface annotation, draw a connected line
@@ -554,7 +554,7 @@ public class RSSEarthquakesLayer extends RenderableLayer implements Setupable, L
 
 				if (drawPoint != null && surfacePoint != null)
 				{
-					GL gl = dc.getGL();
+					GL2 gl = dc.getGL();
 					OGLStackHandler stack = new OGLStackHandler();
 
 					try
@@ -565,7 +565,7 @@ public class RSSEarthquakesLayer extends RenderableLayer implements Setupable, L
 								.getProjectionMatrix());
 
 						gl.glLineWidth(1f);
-						gl.glBegin(GL.GL_LINES);
+						gl.glBegin(GL2.GL_LINES);
 						{
 							gl.glVertex3d(drawPoint.x, drawPoint.y, drawPoint.z);
 							gl.glVertex3d(surfacePoint.x, surfacePoint.y, surfacePoint.z);

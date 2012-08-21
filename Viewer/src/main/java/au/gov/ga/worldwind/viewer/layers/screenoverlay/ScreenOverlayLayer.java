@@ -32,13 +32,15 @@ import java.net.URL;
 import java.nio.DoubleBuffer;
 
 import javax.imageio.ImageIO;
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 import au.gov.ga.worldwind.common.util.Validate;
 
-import com.sun.opengl.util.texture.Texture;
-import com.sun.opengl.util.texture.TextureCoords;
-import com.sun.opengl.util.texture.TextureIO;
+import com.jogamp.opengl.util.texture.Texture;
+import com.jogamp.opengl.util.texture.TextureCoords;
+import com.jogamp.opengl.util.texture.TextureIO;
+import com.jogamp.opengl.util.texture.awt.AWTTextureIO;
+import javax.media.opengl.GLProfile;
 
 /**
  * A layer that can display html formatted text and images overlayed on the screen.
@@ -136,7 +138,7 @@ public class ScreenOverlayLayer extends AbstractLayer
 			return;
 		}
 		
-		GL gl = dc.getGL();
+		GL2 gl = dc.getGL();
 
         boolean attribsPushed = false;
         boolean modelviewPushed = false;
@@ -144,23 +146,23 @@ public class ScreenOverlayLayer extends AbstractLayer
 
         try
         {
-            gl.glPushAttrib(GL.GL_DEPTH_BUFFER_BIT
-                | GL.GL_COLOR_BUFFER_BIT
-                | GL.GL_ENABLE_BIT
-                | GL.GL_TEXTURE_BIT
-                | GL.GL_TRANSFORM_BIT
-                | GL.GL_VIEWPORT_BIT
-                | GL.GL_CURRENT_BIT
-                | GL.GL_LINE_BIT);
+            gl.glPushAttrib(GL2.GL_DEPTH_BUFFER_BIT
+                | GL2.GL_COLOR_BUFFER_BIT
+                | GL2.GL_ENABLE_BIT
+                | GL2.GL_TEXTURE_BIT
+                | GL2.GL_TRANSFORM_BIT
+                | GL2.GL_VIEWPORT_BIT
+                | GL2.GL_CURRENT_BIT
+                | GL2.GL_LINE_BIT);
             attribsPushed = true;
 
-            gl.glDisable(GL.GL_DEPTH_TEST);
+            gl.glDisable(GL2.GL_DEPTH_TEST);
 
             Rectangle viewport = dc.getView().getViewport();
             Rectangle overlay = new Rectangle((int)attributes.getWidth(viewport.width), (int)attributes.getHeight(viewport.height));
 
             // Parallel projection 
-            gl.glMatrixMode(javax.media.opengl.GL.GL_PROJECTION);
+            gl.glMatrixMode(GL2.GL_PROJECTION);
             gl.glPushMatrix();
             projectionPushed = true;
             gl.glLoadIdentity();
@@ -168,7 +170,7 @@ public class ScreenOverlayLayer extends AbstractLayer
             gl.glOrtho(0d, viewport.width, 0d, viewport.height, -0.6 * maxwh, 0.6 * maxwh);
 
             // Translate to the correct position
-            gl.glMatrixMode(GL.GL_MODELVIEW);
+            gl.glMatrixMode(GL2.GL_MODELVIEW);
             gl.glPushMatrix();
             modelviewPushed = true;
             gl.glLoadIdentity();
@@ -189,12 +191,12 @@ public class ScreenOverlayLayer extends AbstractLayer
         {
             if (projectionPushed)
             {
-                gl.glMatrixMode(GL.GL_PROJECTION);
+                gl.glMatrixMode(GL2.GL_PROJECTION);
                 gl.glPopMatrix();
             }
             if (modelviewPushed)
             {
-                gl.glMatrixMode(GL.GL_MODELVIEW);
+                gl.glMatrixMode(GL2.GL_MODELVIEW);
                 gl.glPopMatrix();
             }
             if (attribsPushed)
@@ -211,24 +213,24 @@ public class ScreenOverlayLayer extends AbstractLayer
 									  			(overlay.width + attributes.getBorderWidth() * 2), 
 									  			(overlay.height + attributes.getBorderWidth() * 2), 
 									  			0, buffer);
-		GL gl = dc.getGL();
+		GL2 gl = dc.getGL();
 		
-		gl.glEnable(GL.GL_LINE_SMOOTH);
-		gl.glHint(GL.GL_LINE_SMOOTH_HINT, GL.GL_NICEST);
+		gl.glEnable(GL2.GL_LINE_SMOOTH);
+		gl.glHint(GL2.GL_LINE_SMOOTH_HINT, GL2.GL_NICEST);
 		
 		gl.glLineWidth(attributes.getBorderWidth());
 		
-		gl.glEnable(GL.GL_BLEND);
+		gl.glEnable(GL2.GL_BLEND);
 		float[] compArray = new float[4];
 		attributes.getBorderColor().getRGBComponents(compArray);
 		compArray[3] = (float)this.getOpacity();
 		gl.glColor4fv(compArray, 0);
 		
-		gl.glEnable(GL.GL_BLEND);
-	    gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
+		gl.glEnable(GL2.GL_BLEND);
+	    gl.glBlendFunc(GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA);
 		
 		gl.glTranslated(-attributes.getBorderWidth()/2, -attributes.getBorderWidth()/2, 0);
-		FrameFactory.drawBuffer(dc, GL.GL_LINE_STRIP, buffer.remaining() / 2, buffer);
+		FrameFactory.drawBuffer(dc, GL2.GL_LINE_STRIP, buffer.remaining() / 2, buffer);
 		gl.glTranslated(attributes.getBorderWidth(), attributes.getBorderWidth(), 0);
 	}
 	
@@ -237,13 +239,13 @@ public class ScreenOverlayLayer extends AbstractLayer
 		Texture overlayTexture = getTexture(dc, overlay);
 		if (overlayTexture != null)
 		{
-			GL gl = dc.getGL();
-		    gl.glEnable(GL.GL_TEXTURE_2D);
-		    overlayTexture.bind();
+			GL2 gl = dc.getGL();
+		    gl.glEnable(GL2.GL_TEXTURE_2D);
+		    overlayTexture.bind(gl);
 
 		    gl.glColor4d(1d, 1d, 1d, this.getOpacity());
-		    gl.glEnable(GL.GL_BLEND);
-		    gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
+		    gl.glEnable(GL2.GL_BLEND);
+		    gl.glBlendFunc(GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA);
 		    TextureCoords texCoords = overlayTexture.getImageTexCoords();
 		    gl.glScaled(overlay.width, overlay.height, 1d);
 		    dc.drawUnitQuad(texCoords);
@@ -277,18 +279,18 @@ public class ScreenOverlayLayer extends AbstractLayer
 				image = ImageIO.read(attributes.getSourceUrl());
 			}
 			
-			texture = TextureIO.newTexture(image, false);
+			texture = AWTTextureIO.newTexture(GLProfile.get(GLProfile.GL2), image, false);
 			dc.getTextureCache().put(attributes.getSourceId(), texture);
 			
-			GL gl = dc.getGL();
-	        gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_MODE, GL.GL_MODULATE);
-	        gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_LINEAR);
-	        gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER, GL.GL_LINEAR);
-	        gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_S, GL.GL_CLAMP_TO_EDGE);
-	        gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_T, GL.GL_CLAMP_TO_EDGE);
+			GL2 gl = dc.getGL();
+	        gl.glTexEnvf(GL2.GL_TEXTURE_ENV, GL2.GL_TEXTURE_ENV_MODE, GL2.GL_MODULATE);
+	        gl.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_MIN_FILTER, GL2.GL_LINEAR);
+	        gl.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_MAG_FILTER, GL2.GL_LINEAR);
+	        gl.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_S, GL2.GL_CLAMP_TO_EDGE);
+	        gl.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_T, GL2.GL_CLAMP_TO_EDGE);
 	        int[] maxAnisotropy = new int[1];
-	        gl.glGetIntegerv(GL.GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, maxAnisotropy, 0);
-	        gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAX_ANISOTROPY_EXT, maxAnisotropy[0]);
+	        gl.glGetIntegerv(GL2.GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, maxAnisotropy, 0);
+	        gl.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_MAX_ANISOTROPY_EXT, maxAnisotropy[0]);
 			
 			return texture;
 		}

@@ -40,7 +40,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.PriorityBlockingQueue;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 import javax.xml.xpath.XPath;
 
 import org.w3c.dom.Element;
@@ -49,7 +49,7 @@ import au.gov.ga.worldwind.common.layers.Bounded;
 import au.gov.ga.worldwind.common.util.AVKeyMore;
 import au.gov.ga.worldwind.common.util.exaggeration.VerticalExaggerationAccessor;
 
-import com.sun.opengl.util.j2d.TextRenderer;
+import com.jogamp.opengl.util.awt.TextRenderer;
 
 /**
  * {@link Layer} which renders a textured surface along a horizontal line (ie a
@@ -678,21 +678,21 @@ public abstract class TiledCurtainLayer extends AbstractLayer implements Bounded
 			sortedTiles = this.currentTiles.toArray(sortedTiles);
 			Arrays.sort(sortedTiles, levelComparer);
 
-			GL gl = dc.getGL();
+			GL2 gl = dc.getGL();
 
 			if (this.isUseTransparentTextures() || this.getOpacity() < 1)
 			{
-				gl.glPushAttrib(GL.GL_COLOR_BUFFER_BIT | GL.GL_POLYGON_BIT | GL.GL_CURRENT_BIT);
+				gl.glPushAttrib(GL2.GL_COLOR_BUFFER_BIT | GL2.GL_POLYGON_BIT | GL2.GL_CURRENT_BIT);
 				this.setBlendingFunction(dc);
 			}
 			else
 			{
-				gl.glPushAttrib(GL.GL_COLOR_BUFFER_BIT | GL.GL_POLYGON_BIT);
+				gl.glPushAttrib(GL2.GL_COLOR_BUFFER_BIT | GL2.GL_POLYGON_BIT);
 			}
 
-			gl.glPolygonMode(GL.GL_FRONT, GL.GL_FILL);
-			gl.glEnable(GL.GL_CULL_FACE);
-			gl.glCullFace(GL.GL_BACK);
+			gl.glPolygonMode(GL2.GL_FRONT, GL2.GL_FILL);
+			gl.glEnable(GL2.GL_CULL_FACE);
+			gl.glCullFace(GL2.GL_BACK);
 
 			dc.setPerFrameStatistic(PerformanceStatistic.IMAGE_TILE_COUNT, this.tileCountName, this.currentTiles.size());
 			renderer.renderTiles(dc, this.currentTiles, getPath(), getCurtainTop(), getCurtainBottom(),
@@ -736,12 +736,12 @@ public abstract class TiledCurtainLayer extends AbstractLayer implements Bounded
 		// color as a premultiplied color, so that any incoming premultiplied color will be properly combined with the
 		// base color.
 
-		GL gl = dc.getGL();
+		GL2 gl = dc.getGL();
 
 		double alpha = this.getOpacity();
 		gl.glColor4d(alpha, alpha, alpha, alpha);
-		gl.glEnable(GL.GL_BLEND);
-		gl.glBlendFunc(GL.GL_ONE, GL.GL_ONE_MINUS_SRC_ALPHA);
+		gl.glEnable(GL2.GL_BLEND);
+		gl.glBlendFunc(GL2.GL_ONE, GL2.GL_ONE_MINUS_SRC_ALPHA);
 	}
 
 	protected void sendRequests()
@@ -825,9 +825,9 @@ public abstract class TiledCurtainLayer extends AbstractLayer implements Bounded
 				OGLTextRenderer.getOrCreateTextRenderer(dc.getTextRendererCache(),
 						java.awt.Font.decode("Arial-Plain-13"));
 
-		dc.getGL().glDisable(GL.GL_DEPTH_TEST);
-		dc.getGL().glDisable(GL.GL_BLEND);
-		dc.getGL().glDisable(GL.GL_TEXTURE_2D);
+		dc.getGL().glDisable(GL2.GL_DEPTH_TEST);
+		dc.getGL().glDisable(GL2.GL_BLEND);
+		dc.getGL().glDisable(GL2.GL_TEXTURE_2D);
 
 		textRenderer.beginRendering(viewport.width, viewport.height);
 		textRenderer.setColor(java.awt.Color.YELLOW);
@@ -849,7 +849,7 @@ public abstract class TiledCurtainLayer extends AbstractLayer implements Bounded
 	protected void drawBoundingVolumes(DrawContext dc, List<CurtainTextureTile> tiles)
 	{
 		float[] previousColor = new float[4];
-		dc.getGL().glGetFloatv(GL.GL_CURRENT_COLOR, previousColor, 0);
+		dc.getGL().glGetFloatv(GL2.GL_CURRENT_COLOR, previousColor, 0);
 		dc.getGL().glColor3d(0, 1, 0);
 
 		for (CurtainTextureTile tile : tiles)

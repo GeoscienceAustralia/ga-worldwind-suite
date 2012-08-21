@@ -24,13 +24,13 @@ import gov.nasa.worldwind.util.OGLStackHandler;
 import java.awt.Color;
 import java.nio.DoubleBuffer;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 import au.gov.ga.worldwind.animator.animation.Animation;
 import au.gov.ga.worldwind.animator.animation.KeyFrame;
 import au.gov.ga.worldwind.common.util.HSLColor;
 
-import com.sun.opengl.util.BufferUtil;
+import com.jogamp.common.nio.Buffers;
 
 /**
  * Base class for camera position paths
@@ -73,10 +73,10 @@ public abstract class AbstractCameraPositionPath implements Renderable
 	public void resetPath()
 	{
 		frameCount = animation.getFrameCount();
-		this.pathVertexFrontBuffer = BufferUtil.newDoubleBuffer(frameCount * 3);
-		this.pathVertexBackBuffer = BufferUtil.newDoubleBuffer(frameCount * 3);
-		this.pathColourFrontBuffer = BufferUtil.newDoubleBuffer(frameCount * 3);
-		this.pathColourBackBuffer = BufferUtil.newDoubleBuffer(frameCount * 3);
+		this.pathVertexFrontBuffer = Buffers.newDirectDoubleBuffer(frameCount * 3);
+		this.pathVertexBackBuffer = Buffers.newDirectDoubleBuffer(frameCount * 3);
+		this.pathColourFrontBuffer = Buffers.newDirectDoubleBuffer(frameCount * 3);
+		this.pathColourBackBuffer = Buffers.newDirectDoubleBuffer(frameCount * 3);
 	}
 
 	@Override
@@ -95,11 +95,11 @@ public abstract class AbstractCameraPositionPath implements Renderable
 			return;
 		}
 
-		GL gl = dc.getGL();
+		GL2 gl = dc.getGL();
 		OGLStackHandler stack = new OGLStackHandler();
-		stack.pushAttrib(gl, GL.GL_CURRENT_BIT | GL.GL_POINT_BIT | GL.GL_LINE_BIT | GL.GL_HINT_BIT | GL.GL_LIGHTING_BIT
-				| GL.GL_DEPTH_BUFFER_BIT);
-		stack.pushClientAttrib(gl, GL.GL_CLIENT_VERTEX_ARRAY_BIT);
+		stack.pushAttrib(gl, GL2.GL_CURRENT_BIT | GL2.GL_POINT_BIT | GL2.GL_LINE_BIT | GL2.GL_HINT_BIT | GL2.GL_LIGHTING_BIT
+				| GL2.GL_DEPTH_BUFFER_BIT);
+		stack.pushClientAttrib(gl, GL2.GL_CLIENT_VERTEX_ARRAY_BIT);
 		boolean popRefCenter = false;
 		try
 		{
@@ -113,15 +113,15 @@ public abstract class AbstractCameraPositionPath implements Renderable
 
 				// Points are drawn over the line to prevent gaps forming when 
 				// antialiasing and smoothing is applied to the line
-				gl.glEnableClientState(GL.GL_VERTEX_ARRAY);
-				gl.glEnableClientState(GL.GL_COLOR_ARRAY);
-				gl.glShadeModel(GL.GL_SMOOTH);
-				gl.glEnable(GL.GL_LINE_SMOOTH);
-				gl.glEnable(GL.GL_POINT_SMOOTH);
-				gl.glEnable(GL.GL_BLEND);
-				gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
-				gl.glHint(GL.GL_LINE_SMOOTH_HINT, GL.GL_NICEST);
-				gl.glHint(GL.GL_POINT_SMOOTH_HINT, GL.GL_NICEST);
+				gl.glEnableClientState(GL2.GL_VERTEX_ARRAY);
+				gl.glEnableClientState(GL2.GL_COLOR_ARRAY);
+				gl.glShadeModel(GL2.GL_SMOOTH);
+				gl.glEnable(GL2.GL_LINE_SMOOTH);
+				gl.glEnable(GL2.GL_POINT_SMOOTH);
+				gl.glEnable(GL2.GL_BLEND);
+				gl.glBlendFunc(GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA);
+				gl.glHint(GL2.GL_LINE_SMOOTH_HINT, GL2.GL_NICEST);
+				gl.glHint(GL2.GL_POINT_SMOOTH_HINT, GL2.GL_NICEST);
 				gl.glLineWidth(2.0f);
 				gl.glPointSize(2.0f);
 				int numberOfPointsInPath = animation.getFrameOfLastKeyFrame() - animation.getFrameOfFirstKeyFrame() + 1;
@@ -135,28 +135,28 @@ public abstract class AbstractCameraPositionPath implements Renderable
 
 				if (enableDepthTesting)
 				{
-					gl.glEnable(GL.GL_DEPTH_TEST);
+					gl.glEnable(GL2.GL_DEPTH_TEST);
 				}
 				else
 				{
-					gl.glDisable(GL.GL_DEPTH_TEST);
+					gl.glDisable(GL2.GL_DEPTH_TEST);
 				}
 
 				//use flat shading, so that each segment is colored with the previous first vertex's color
 				//instead of interpolating between the two vertices colors
-				gl.glShadeModel(GL.GL_FLAT);
+				gl.glShadeModel(GL2.GL_FLAT);
 
-				gl.glColorPointer(3, GL.GL_DOUBLE, 0, pathColourFrontBuffer);
-				gl.glVertexPointer(3, GL.GL_DOUBLE, 0, pathVertexFrontBuffer);
+				gl.glColorPointer(3, GL2.GL_DOUBLE, 0, pathColourFrontBuffer);
+				gl.glVertexPointer(3, GL2.GL_DOUBLE, 0, pathVertexFrontBuffer);
 
 				// Draw a smooth line without modifying the depth buffer, filling gaps with points
 				gl.glDepthMask(false);
-				gl.glDrawArrays(GL.GL_LINE_STRIP, 0, numberOfPointsInPath);
-				gl.glDrawArrays(GL.GL_POINTS, 0, numberOfPointsInPath);
+				gl.glDrawArrays(GL2.GL_LINE_STRIP, 0, numberOfPointsInPath);
+				gl.glDrawArrays(GL2.GL_POINTS, 0, numberOfPointsInPath);
 				gl.glDepthMask(true);
 
 				// Now redraw the line, writing to the depth buffer, to ensure line looks correct with markers
-				gl.glDrawArrays(GL.GL_LINE_STRIP, 0, numberOfPointsInPath);
+				gl.glDrawArrays(GL2.GL_LINE_STRIP, 0, numberOfPointsInPath);
 			}
 		}
 		finally

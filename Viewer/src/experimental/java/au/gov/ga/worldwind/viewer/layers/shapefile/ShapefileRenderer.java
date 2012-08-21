@@ -13,6 +13,7 @@ import java.awt.Color;
 import java.util.List;
 
 import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 import au.gov.ga.worldwind.common.util.HSLColor;
 import au.gov.ga.worldwind.viewer.retrieve.SectorPolyline;
@@ -46,15 +47,15 @@ public class ShapefileRenderer
 
 		GL gl = dc.getGL();
 
-		gl.glClear(GL.GL_DEPTH_BUFFER_BIT);
+		gl.glClear(GL2.GL_DEPTH_BUFFER_BIT);
 		
-		gl.glEnable(GL.GL_CULL_FACE);
-		gl.glCullFace(GL.GL_FRONT);
+		gl.glEnable(GL2.GL_CULL_FACE);
+		gl.glCullFace(GL2.GL_FRONT);
 		gl.glColorMask(false, false, false, false);
 		dc.getGeographicSurfaceTileRenderer().renderTile(dc, depthTile);
 		gl.glColorMask(true, true, true, true);
 		
-		gl.glDisable(GL.GL_CULL_FACE); //TODO ?
+		gl.glDisable(GL2.GL_CULL_FACE); //TODO ?
 		
 
 		if (isEnableDepthOffset())
@@ -118,25 +119,25 @@ public class ShapefileRenderer
 			throw new IllegalStateException(message);
 		}
 
-		GL gl = dc.getGL();
+		GL2 gl = dc.getGL();
 
-		gl.glPushClientAttrib(GL.GL_CLIENT_VERTEX_ARRAY_BIT);
-		gl.glEnableClientState(GL.GL_VERTEX_ARRAY);
+		gl.glPushClientAttrib(GL2.GL_CLIENT_VERTEX_ARRAY_BIT);
+		gl.glEnableClientState(GL2.GL_VERTEX_ARRAY);
 
 		if (!dc.isPickingMode())
 		{
-			int attribMask = (this.isEnableLighting() ? GL.GL_LIGHTING_BIT : 0) // For lighting, material, and matrix mode
-					| GL.GL_COLOR_BUFFER_BIT // For color write mask. If blending is enabled: for blending src and func, and alpha func.
-					| GL.GL_CURRENT_BIT // For current color.
-					| GL.GL_DEPTH_BUFFER_BIT // For depth test, depth func, depth write mask.
-					| GL.GL_LINE_BIT // For line width, line smoothing.
-					| GL.GL_POLYGON_BIT // For polygon mode, polygon offset.
-					| GL.GL_TRANSFORM_BIT; // For matrix mode.
+			int attribMask = (this.isEnableLighting() ? GL2.GL_LIGHTING_BIT : 0) // For lighting, material, and matrix mode
+					| GL2.GL_COLOR_BUFFER_BIT // For color write mask. If blending is enabled: for blending src and func, and alpha func.
+					| GL2.GL_CURRENT_BIT // For current color.
+					| GL2.GL_DEPTH_BUFFER_BIT // For depth test, depth func, depth write mask.
+					| GL2.GL_LINE_BIT // For line width, line smoothing.
+					| GL2.GL_POLYGON_BIT // For polygon mode, polygon offset.
+					| GL2.GL_TRANSFORM_BIT; // For matrix mode.
 			gl.glPushAttrib(attribMask);
 
 			if (this.isDrawWireframe())
 			{
-				gl.glPolygonMode(GL.GL_FRONT_AND_BACK, GL.GL_LINE);
+				gl.glPolygonMode(GL2.GL_FRONT_AND_BACK, GL2.GL_LINE);
 			}
 
 			if (this.isEnableBlending())
@@ -146,30 +147,30 @@ public class ShapefileRenderer
 
 			if (this.isEnableLighting())
 			{
-				gl.glEnableClientState(GL.GL_NORMAL_ARRAY);
+				gl.glEnableClientState(GL2.GL_NORMAL_ARRAY);
 				this.setLighting(dc);
 			}
 
 			if (this.isEnableAntialiasing())
 			{
-				gl.glEnable(GL.GL_LINE_SMOOTH);
+				gl.glEnable(GL2.GL_LINE_SMOOTH);
 			}
 		}
 		else
 		{
-			int attribMask = GL.GL_CURRENT_BIT // For current color.
-					| GL.GL_DEPTH_BUFFER_BIT // For depth test and depth func.
-					| GL.GL_LINE_BIT; // For line width.
+			int attribMask = GL2.GL_CURRENT_BIT // For current color.
+					| GL2.GL_DEPTH_BUFFER_BIT // For depth test and depth func.
+					| GL2.GL_LINE_BIT; // For line width.
 			gl.glPushAttrib(attribMask);
 		}
 
 		if (this.isEnableDepthOffset())
 		{
-			gl.glEnable(GL.GL_POLYGON_OFFSET_FILL);
+			gl.glEnable(GL2.GL_POLYGON_OFFSET_FILL);
 		}
 
-		gl.glEnable(GL.GL_DEPTH_TEST);
-		gl.glDepthFunc(GL.GL_LEQUAL);
+		gl.glEnable(GL2.GL_DEPTH_TEST);
+		gl.glDepthFunc(GL2.GL_LEQUAL);
 	}
 
 	protected void endRendering(DrawContext dc)
@@ -187,7 +188,7 @@ public class ShapefileRenderer
 			throw new IllegalStateException(message);
 		}
 
-		GL gl = dc.getGL();
+		GL2 gl = dc.getGL();
 
 		gl.glPopAttrib();
 		gl.glPopClientAttrib();
@@ -208,7 +209,7 @@ public class ShapefileRenderer
 			throw new IllegalStateException(message);
 		}
 
-		GL gl = dc.getGL();
+		GL2 gl = dc.getGL();
 
 		if (this.isUseEXTBlendFuncSeparate())
 		{
@@ -216,10 +217,10 @@ public class ShapefileRenderer
 					.isExtensionAvailable(EXT_BLEND_FUNC_SEPARATE_STRING));
 		}
 
-		gl.glEnable(GL.GL_ALPHA_TEST);
-		gl.glAlphaFunc(GL.GL_GREATER, 0.0f);
+		gl.glEnable(GL2.GL_ALPHA_TEST);
+		gl.glAlphaFunc(GL2.GL_GREATER, 0.0f);
 
-		gl.glEnable(GL.GL_BLEND);
+		gl.glEnable(GL2.GL_BLEND);
 		// The separate blend function correctly handles regular (non-premultiplied) colors. We want
 		//     Cd = Cs*As + Cf*(1-As)
 		//     Ad = As    + Af*(1-As)
@@ -227,14 +228,14 @@ public class ShapefileRenderer
 		// alpha.
 		if (this.isUseEXTBlendFuncSeparate() && this.isHaveEXTBlendFuncSeparate())
 		{
-			gl.glBlendFuncSeparate(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA, // rgb   blending factors
-					GL.GL_ONE, GL.GL_ONE_MINUS_SRC_ALPHA); // alpha blending factors
+			gl.glBlendFuncSeparate(GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA, // rgb   blending factors
+					GL2.GL_ONE, GL2.GL_ONE_MINUS_SRC_ALPHA); // alpha blending factors
 		}
 		// Fallback to a single blending factor for source color and source alpha. The destination alpha will be
 		// incorrect.
 		else
 		{
-			gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA); // rgba  blending factors
+			gl.glBlendFunc(GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA); // rgba  blending factors
 		}
 	}
 
@@ -253,15 +254,15 @@ public class ShapefileRenderer
 			throw new IllegalStateException(message);
 		}
 
-		GL gl = dc.getGL();
+		GL2 gl = dc.getGL();
 
-		gl.glEnable(GL.GL_LIGHTING);
+		gl.glEnable(GL2.GL_LIGHTING);
 		setLightModel(gl);
 		setShadeModel(gl);
 
-		gl.glEnable(GL.GL_LIGHT0);
-		setLightMaterial(gl, GL.GL_LIGHT0, this.lightMaterial);
-		setLightDirection(gl, GL.GL_LIGHT0, this.lightDirection);
+		gl.glEnable(GL2.GL_LIGHT0);
+		setLightMaterial(gl, GL2.GL_LIGHT0, this.lightMaterial);
+		setLightDirection(gl, GL2.GL_LIGHT0, this.lightDirection);
 	}
 
 	private Color getColor(int level)
@@ -370,7 +371,7 @@ public class ShapefileRenderer
 		this.depthOffsetUnits = depthOffsetUnits;
 	}
 
-	protected static void setLightModel(GL gl)
+	protected static void setLightModel(GL2 gl)
 	{
 		if (gl == null)
 		{
@@ -385,12 +386,12 @@ public class ShapefileRenderer
 		modelAmbient[2] = 1.0f;
 		modelAmbient[3] = 0.0f;
 
-		gl.glLightModelfv(GL.GL_LIGHT_MODEL_AMBIENT, modelAmbient, 0);
-		gl.glLightModeli(GL.GL_LIGHT_MODEL_LOCAL_VIEWER, GL.GL_TRUE);
-		gl.glLightModeli(GL.GL_LIGHT_MODEL_TWO_SIDE, GL.GL_FALSE);
+		gl.glLightModelfv(GL2.GL_LIGHT_MODEL_AMBIENT, modelAmbient, 0);
+		gl.glLightModeli(GL2.GL_LIGHT_MODEL_LOCAL_VIEWER, GL2.GL_TRUE);
+		gl.glLightModeli(GL2.GL_LIGHT_MODEL_TWO_SIDE, GL2.GL_FALSE);
 	}
 
-	protected static void setShadeModel(GL gl)
+	protected static void setShadeModel(GL2 gl)
 	{
 		if (gl == null)
 		{
@@ -399,10 +400,10 @@ public class ShapefileRenderer
 			throw new IllegalStateException(message);
 		}
 
-		gl.glShadeModel(GL.GL_SMOOTH);
+		gl.glShadeModel(GL2.GL_SMOOTH);
 	}
 
-	protected static void setLightMaterial(GL gl, int light, Material material)
+	protected static void setLightMaterial(GL2 gl, int light, Material material)
 	{
 		if (gl == null)
 		{
@@ -428,12 +429,12 @@ public class ShapefileRenderer
 		material.getSpecular().getRGBColorComponents(specular);
 		ambient[3] = diffuse[3] = specular[3] = 0.0f;
 
-		gl.glLightfv(light, GL.GL_AMBIENT, ambient, 0);
-		gl.glLightfv(light, GL.GL_DIFFUSE, diffuse, 0);
-		gl.glLightfv(light, GL.GL_SPECULAR, specular, 0);
+		gl.glLightfv(light, GL2.GL_AMBIENT, ambient, 0);
+		gl.glLightfv(light, GL2.GL_DIFFUSE, diffuse, 0);
+		gl.glLightfv(light, GL2.GL_SPECULAR, specular, 0);
 	}
 
-	protected static void setLightDirection(GL gl, int light, Vec4 direction)
+	protected static void setLightDirection(GL2 gl, int light, Vec4 direction)
 	{
 		if (gl == null)
 		{
@@ -461,11 +462,11 @@ public class ShapefileRenderer
 		params[2] = (float) vec.z;
 		params[3] = 0.0f;
 
-		gl.glMatrixMode(GL.GL_MODELVIEW);
+		gl.glMatrixMode(GL2.GL_MODELVIEW);
 		gl.glPushMatrix();
 		gl.glLoadIdentity();
 
-		gl.glLightfv(light, GL.GL_POSITION, params, 0);
+		gl.glLightfv(light, GL2.GL_POSITION, params, 0);
 
 		gl.glPopMatrix();
 	}

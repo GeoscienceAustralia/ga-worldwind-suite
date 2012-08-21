@@ -235,9 +235,22 @@ public class ImmediateRetrievalService implements RetrievalService
 			this.retriever = retriever;
 		}
 
+		@Override
 		public Retriever getRetriever()
 		{
 			return this.retriever;
 		}
+	}
+
+	@Override
+	public void setSSLExceptionListener(SSLExceptionListener listener)
+	{
+		delegate.setSSLExceptionListener(listener);
+	}
+
+	@Override
+	public SSLExceptionListener getSSLExceptionListener()
+	{
+		return delegate.getSSLExceptionListener();
 	}
 }

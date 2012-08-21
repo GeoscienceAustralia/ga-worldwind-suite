@@ -36,7 +36,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.ZipInputStream;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 import javax.xml.xpath.XPath;
 
 import org.w3c.dom.Document;
@@ -287,7 +287,7 @@ public class HistoricEarthquakesLayer extends AbstractLayer implements Loader
 		FloatBuffer colorBuffer = FloatBuffer.allocate(positions.size() * 3);
 		generateColorBuffer(colorBuffer, earthquakes);
 
-		FastShape shape = new FastShape(positions, GL.GL_POINTS);
+		FastShape shape = new FastShape(positions, GL2.GL_POINTS);
 		shape.setColorBuffer(colorBuffer.array());
 		shape.setColorBufferElementSize(3);
 

@@ -19,8 +19,6 @@ import org.junit.Test;
 import au.gov.ga.worldwind.common.layers.earthquakes.HistoricEarthquakesLayer.Earthquake;
 import au.gov.ga.worldwind.common.util.HSLColor;
 
-import com.sun.opengl.util.BufferUtil;
-
 /**
  * Unit tests for the {@link HistoricEarthquakesLayer} class
  */

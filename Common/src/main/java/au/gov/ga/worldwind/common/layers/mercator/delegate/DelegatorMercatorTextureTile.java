@@ -25,7 +25,7 @@ import gov.nasa.worldwind.util.TileKey;
 import au.gov.ga.worldwind.common.layers.delegate.IDelegatorTile;
 import au.gov.ga.worldwind.common.layers.delegate.ITileFactoryDelegate;
 
-import com.sun.opengl.util.texture.Texture;
+import com.jogamp.opengl.util.texture.Texture;
 
 /**
  * Extension of the {@link MercatorTextureTile} class which uses a

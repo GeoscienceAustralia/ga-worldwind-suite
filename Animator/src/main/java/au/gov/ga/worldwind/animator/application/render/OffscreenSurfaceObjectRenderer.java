@@ -19,7 +19,7 @@ import gov.nasa.worldwind.render.DrawContext;
 import gov.nasa.worldwind.render.SurfaceObjectTileBuilder;
 import gov.nasa.worldwind.util.OGLRenderToTextureSupport;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 import au.gov.ga.worldwind.common.render.FrameBuffer;
 import au.gov.ga.worldwind.common.render.FrameBufferStack;
@@ -51,8 +51,8 @@ public class OffscreenSurfaceObjectRenderer extends SurfaceObjectTileBuilder
 		{
 			int[] framebuffers = new int[1];
 
-			GL gl = dc.getGL();
-			gl.glGenFramebuffersEXT(1, framebuffers, 0);
+			GL2 gl = dc.getGL();
+			gl.glGenFramebuffers(1, framebuffers, 0);
 			FrameBufferStack.push(gl, framebuffers[0]);
 
 			this.framebufferObject = framebuffers[0];
@@ -67,9 +67,9 @@ public class OffscreenSurfaceObjectRenderer extends SurfaceObjectTileBuilder
 		{
 			int[] framebuffers = new int[] { this.framebufferObject };
 
-			GL gl = dc.getGL();
+			GL2 gl = dc.getGL();
 			FrameBufferStack.pop(gl);
-			gl.glDeleteFramebuffersEXT(1, framebuffers, 0);
+			gl.glDeleteFramebuffers(1, framebuffers, 0);
 
 			this.framebufferObject = 0;
 		}

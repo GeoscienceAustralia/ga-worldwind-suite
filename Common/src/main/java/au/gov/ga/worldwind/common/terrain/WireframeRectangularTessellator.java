@@ -34,7 +34,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 /**
  * Subclass of the {@link RectangularTessellator} that adds several features:
@@ -133,26 +133,26 @@ public class WireframeRectangularTessellator extends RectangularTessellatorAcces
 
 		dc.getView().pushReferenceCenter(dc, ri.getReferenceCenter());
 
-		javax.media.opengl.GL gl = dc.getGL();
-		gl.glPushAttrib(GL.GL_DEPTH_BUFFER_BIT | GL.GL_POLYGON_BIT | GL.GL_TEXTURE_BIT | GL.GL_ENABLE_BIT
-				| GL.GL_CURRENT_BIT);
+		GL2 gl = dc.getGL();
+		gl.glPushAttrib(GL2.GL_DEPTH_BUFFER_BIT | GL2.GL_POLYGON_BIT | GL2.GL_TEXTURE_BIT | GL2.GL_ENABLE_BIT
+				| GL2.GL_CURRENT_BIT);
 		//gl.glEnable(GL.GL_BLEND);
 		//gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE);
 		//gl.glDisable(javax.media.opengl.GL.GL_DEPTH_TEST);
-		gl.glEnable(javax.media.opengl.GL.GL_CULL_FACE);
-		gl.glCullFace(javax.media.opengl.GL.GL_BACK);
-		gl.glDisable(javax.media.opengl.GL.GL_TEXTURE_2D);
+		gl.glEnable(GL2.GL_CULL_FACE);
+		gl.glCullFace(GL2.GL_BACK);
+		gl.glDisable(GL2.GL_TEXTURE_2D);
 		gl.glColor4d(0.6, 0.8, 0.8, 1.0);
-		gl.glPolygonMode(javax.media.opengl.GL.GL_FRONT, javax.media.opengl.GL.GL_LINE);
+		gl.glPolygonMode(GL2.GL_FRONT, GL2.GL_LINE);
 
 		if (isWireframeDepthTesting())
 		{
-			gl.glEnable(GL.GL_POLYGON_OFFSET_LINE);
+			gl.glEnable(GL2.GL_POLYGON_OFFSET_LINE);
 			gl.glPolygonOffset(-1, 1);
 		}
 		else
 		{
-			gl.glDisable(javax.media.opengl.GL.GL_DEPTH_TEST);
+			gl.glDisable(GL2.GL_DEPTH_TEST);
 		}
 
 		if (showTriangles)
@@ -161,15 +161,15 @@ public class WireframeRectangularTessellator extends RectangularTessellatorAcces
 
 			try
 			{
-				ogsh.pushClientAttrib(gl, GL.GL_CLIENT_VERTEX_ARRAY_BIT);
+				ogsh.pushClientAttrib(gl, GL2.GL_CLIENT_VERTEX_ARRAY_BIT);
 
-				gl.glEnableClientState(GL.GL_VERTEX_ARRAY);
+				gl.glEnableClientState(GL2.GL_VERTEX_ARRAY);
 
 				FloatBuffer vertices = ri.getVertices();
 				IntBuffer indices = ri.getIndices();
-				gl.glVertexPointer(3, GL.GL_FLOAT, 0, vertices.rewind());
-				gl.glDrawElements(javax.media.opengl.GL.GL_TRIANGLE_STRIP, indices.limit(),
-						javax.media.opengl.GL.GL_UNSIGNED_INT, indices.rewind());
+				gl.glVertexPointer(3, GL2.GL_FLOAT, 0, vertices.rewind());
+				gl.glDrawElements(GL2.GL_TRIANGLE_STRIP, indices.limit(),
+						GL2.GL_UNSIGNED_INT, indices.rewind());
 			}
 			finally
 			{
@@ -192,7 +192,7 @@ public class WireframeRectangularTessellator extends RectangularTessellatorAcces
 	{
 		if (!backfaceCulling)
 		{
-			dc.getGL().glDisable(GL.GL_CULL_FACE);
+			dc.getGL().glDisable(GL2.GL_CULL_FACE);
 		}
 		return super.render(dc, tile, numTextureUnits);
 	}
@@ -366,16 +366,16 @@ public class WireframeRectangularTessellator extends RectangularTessellatorAcces
 
 		if (dc.getGLRuntimeCapabilities().isUseVertexBufferObject())
 		{
-			GL gl = dc.getGL();
+			GL2 gl = dc.getGL();
 			OGLStackHandler ogsh = new OGLStackHandler();
 
 			try
 			{
-				ogsh.pushClientAttrib(gl, GL.GL_CLIENT_VERTEX_ARRAY_BIT);
+				ogsh.pushClientAttrib(gl, GL2.GL_CLIENT_VERTEX_ARRAY_BIT);
 
 				int[] vboIds = (int[]) dc.getGpuResourceCache().get(tile.getRi().getVboCacheKey());
-				gl.glBindBuffer(GL.GL_ARRAY_BUFFER, vboIds[0]);
-				gl.glBufferData(GL.GL_ARRAY_BUFFER, vertices.limit() * 4, vertices.rewind(), GL.GL_DYNAMIC_DRAW);
+				gl.glBindBuffer(GL2.GL_ARRAY_BUFFER, vboIds[0]);
+				gl.glBufferData(GL2.GL_ARRAY_BUFFER, vertices.limit() * 4, vertices.rewind(), GL2.GL_DYNAMIC_DRAW);
 			}
 			finally
 			{

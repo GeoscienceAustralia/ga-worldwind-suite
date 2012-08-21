@@ -13,7 +13,7 @@ import java.io.InputStreamReader;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 import javax.swing.JFrame;
 import javax.swing.JSlider;
 import javax.swing.event.ChangeEvent;
@@ -125,7 +125,7 @@ public class ShaderRenderDelegate implements IRenderDelegate
 			initShader(dc);
 		}
 
-		GL gl = dc.getGL();
+		GL2 gl = dc.getGL();
 		gl.glUseProgram(shaderProgram);
 
 		gl.glUniform1f(exaggerationUniform, (float) exaggeration);
@@ -152,9 +152,9 @@ public class ShaderRenderDelegate implements IRenderDelegate
 
 	protected void initShader(DrawContext dc)
 	{
-		GL gl = dc.getGL();
-		int v = gl.glCreateShader(GL.GL_VERTEX_SHADER);
-		int f = gl.glCreateShader(GL.GL_FRAGMENT_SHADER);
+		GL2 gl = dc.getGL();
+		int v = gl.glCreateShader(GL2.GL_VERTEX_SHADER);
+		int f = gl.glCreateShader(GL2.GL_FRAGMENT_SHADER);
 		String vsrc = "", fsrc = "", line;
 
 		try

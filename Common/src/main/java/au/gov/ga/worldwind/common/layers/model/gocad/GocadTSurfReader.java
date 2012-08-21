@@ -29,7 +29,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 import au.gov.ga.worldwind.common.render.fastshape.FastShape;
 import au.gov.ga.worldwind.common.util.ColorMap;
@@ -273,7 +273,7 @@ public class GocadTSurfReader implements GocadReader<FastShape>
 			name = "TSurf";
 		}
 
-		FastShape shape = new FastShape(positions, indicesBuffer.array(), GL.GL_TRIANGLES);
+		FastShape shape = new FastShape(positions, indicesBuffer.array(), GL2.GL_TRIANGLES);
 		shape.setName(name);
 		shape.setLighted(true);
 		shape.setTwoSidedLighting(true);

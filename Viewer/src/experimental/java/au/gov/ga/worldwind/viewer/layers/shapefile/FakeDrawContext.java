@@ -18,6 +18,7 @@ import gov.nasa.worldwind.layers.LayerList;
 import gov.nasa.worldwind.pick.PickedObject;
 import gov.nasa.worldwind.pick.PickedObjectList;
 import gov.nasa.worldwind.render.AnnotationRenderer;
+import gov.nasa.worldwind.render.DeclutteringTextRenderer;
 import gov.nasa.worldwind.render.DrawContext;
 import gov.nasa.worldwind.render.GLRuntimeCapabilities;
 import gov.nasa.worldwind.render.LightingModel;
@@ -46,12 +47,12 @@ import java.util.Map.Entry;
 import java.util.Queue;
 import java.util.Set;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 import javax.media.opengl.GLContext;
 import javax.media.opengl.GLDrawable;
 import javax.media.opengl.glu.GLU;
 
-import com.sun.opengl.util.texture.TextureCoords;
+import com.jogamp.opengl.util.texture.TextureCoords;
 
 public class FakeDrawContext implements DrawContext
 {
@@ -205,7 +206,7 @@ public class FakeDrawContext implements DrawContext
 	}
 
 	@Override
-	public GL getGL()
+	public GL2 getGL()
 	{
 
 		return null;
@@ -764,13 +765,13 @@ public class FakeDrawContext implements DrawContext
 	{
 		return null;
 	}
-	
+
 	@Override
 	public boolean isPreRenderMode()
 	{
 		return false;
 	}
-	
+
 	@Override
 	public void addOrderedRenderable(OrderedRenderable orderedRenderable, boolean isBehind)
 	{
@@ -825,46 +826,58 @@ public class FakeDrawContext implements DrawContext
 	}
 
 	@Override
-	public PickedObjectList getObjectsInPickRectangle() {
-		// TODO Auto-generated method stub
+	public PickedObjectList getObjectsInPickRectangle()
+	{
 		return null;
 	}
 
 	@Override
-	public void addObjectInPickRectangle(PickedObject pickedObject) {
-		// TODO Auto-generated method stub
-		
+	public void addObjectInPickRectangle(PickedObject pickedObject)
+	{
 	}
 
 	@Override
-	public int getPickColorAtPoint(Point point) {
-		// TODO Auto-generated method stub
+	public int getPickColorAtPoint(Point point)
+	{
 		return 0;
 	}
 
 	@Override
-	public int[] getPickColorsInRectangle(Rectangle rectangle,
-			int[] minAndMaxColorCodes) {
-		// TODO Auto-generated method stub
+	public int[] getPickColorsInRectangle(Rectangle rectangle, int[] minAndMaxColorCodes)
+	{
 		return null;
 	}
 
 	@Override
-	public Rectangle getPickRectangle() {
-		// TODO Auto-generated method stub
+	public Rectangle getPickRectangle()
+	{
 		return null;
 	}
 
 	@Override
-	public void setPickRectangle(Rectangle pickRect) {
-		// TODO Auto-generated method stub
-		
+	public void setPickRectangle(Rectangle pickRect)
+	{
 	}
 
 	@Override
-	public void addPickRectangleFrustum() {
-		// TODO Auto-generated method stub
-		
+	public void addPickRectangleFrustum()
+	{
 	}
 
+	@Override
+	public Vec4 computePointFromPosition(Position position, int altitudeMode)
+	{
+		return null;
+	}
+
+	@Override
+	public DeclutteringTextRenderer getDeclutteringTextRenderer()
+	{
+		return null;
+	}
+
+	@Override
+	public void applyDeclutterFilter()
+	{
+	}
 }

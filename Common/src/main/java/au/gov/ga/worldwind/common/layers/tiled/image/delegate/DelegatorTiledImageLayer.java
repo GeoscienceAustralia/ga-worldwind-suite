@@ -69,8 +69,10 @@ import au.gov.ga.worldwind.common.util.AVKeyMore;
 import au.gov.ga.worldwind.common.util.DDSUncompressor;
 import au.gov.ga.worldwind.common.util.XMLUtil;
 
-import com.sun.opengl.util.texture.TextureData;
-import com.sun.opengl.util.texture.TextureIO;
+import com.jogamp.opengl.util.texture.TextureData;
+import com.jogamp.opengl.util.texture.TextureIO;
+import javax.media.opengl.GLProfile;
+import com.jogamp.opengl.util.texture.awt.AWTTextureIO;
 
 /**
  * TiledImageLayer which uses delegates to perform the various tiled image layer
@@ -333,7 +335,7 @@ public class DelegatorTiledImageLayer extends URLTransformerBasicTiledImageLayer
 		{
 			//if the file is a DDS file, just read it directly (skip all delegate readers/transformers)
 			if (url.toString().toLowerCase().endsWith("dds"))
-				return TextureIO.newTextureData(url, isUseMipMaps(), null);
+				return TextureIO.newTextureData(GLProfile.get(GLProfile.GL2), url, isUseMipMaps(), null);
 
 			BufferedImage image = readImage(tile, url);
 
@@ -354,11 +356,11 @@ public class DelegatorTiledImageLayer extends URLTransformerBasicTiledImageLayer
 				}
 
 				//return the dds image as TextureData
-				return TextureIO.newTextureData(WWIO.getInputStreamFromByteBuffer(buffer), isUseMipMaps(), null);
+				return TextureIO.newTextureData(GLProfile.get(GLProfile.GL2), WWIO.getInputStreamFromByteBuffer(buffer), isUseMipMaps(), null);
 			}
 
 			//return the image as TextureData
-			return TextureIO.newTextureData(image, isUseMipMaps());
+			return AWTTextureIO.newTextureData(GLProfile.get(GLProfile.GL2), image, isUseMipMaps());
 		}
 		catch (Exception e)
 		{

@@ -15,7 +15,7 @@
  ******************************************************************************/
 package au.gov.ga.worldwind.common.view.transform;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 import gov.nasa.worldwind.geom.Frustum;
 import gov.nasa.worldwind.geom.Matrix;
@@ -40,7 +40,7 @@ public class TransformBasicFlyView extends BasicFlyView implements TransformView
 	public java.awt.Rectangle computeViewport(DrawContext dc)
 	{
 		int[] viewportArray = new int[4];
-		this.dc.getGL().glGetIntegerv(GL.GL_VIEWPORT, viewportArray, 0);
+		this.dc.getGL().glGetIntegerv(GL2.GL_VIEWPORT, viewportArray, 0);
 		return new java.awt.Rectangle(viewportArray[0], viewportArray[1], viewportArray[2], viewportArray[3]);
 	}
 

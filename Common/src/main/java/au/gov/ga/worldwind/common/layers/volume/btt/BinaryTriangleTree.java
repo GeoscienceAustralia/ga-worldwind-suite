@@ -23,7 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 import au.gov.ga.worldwind.common.render.fastshape.FastShape;
 import au.gov.ga.worldwind.common.util.Util;
@@ -273,7 +273,7 @@ public class BinaryTriangleTree
 			}
 		}
 
-		FastShape shape = new FastShape(positions, indices, forceGLTriangles ? GL.GL_TRIANGLES : GL.GL_TRIANGLE_STRIP);
+		FastShape shape = new FastShape(positions, indices, forceGLTriangles ? GL2.GL_TRIANGLES : GL2.GL_TRIANGLE_STRIP);
 
 		if (generateTextureCoordinates)
 		{
@@ -666,7 +666,7 @@ public class BinaryTriangleTree
 			indices[i++] = rightIndex;
 		}
 
-		FastShape shape = new FastShape(positions, indices, GL.GL_TRIANGLES);
+		FastShape shape = new FastShape(positions, indices, GL2.GL_TRIANGLES);
 
 		if (generateTextureCoordinates)
 		{

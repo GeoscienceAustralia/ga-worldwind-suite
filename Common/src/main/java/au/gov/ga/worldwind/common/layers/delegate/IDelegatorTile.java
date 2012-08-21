@@ -20,7 +20,7 @@ import gov.nasa.worldwind.util.TileKey;
 
 import java.net.MalformedURLException;
 
-import com.sun.opengl.util.texture.TextureData;
+import com.jogamp.opengl.util.texture.TextureData;
 
 /**
  * An individual tile used by an {@link IDelegatorLayer}.

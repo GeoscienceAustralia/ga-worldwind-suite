@@ -17,7 +17,7 @@ package au.gov.ga.worldwind.common.render;
 
 import java.awt.Dimension;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 import au.gov.ga.worldwind.common.util.Validate;
 
@@ -83,7 +83,7 @@ public class FrameBuffer
 	 * @param dimensions
 	 *            Frame buffer dimensions
 	 */
-	public void create(GL gl, Dimension dimensions)
+	public void create(GL2 gl, Dimension dimensions)
 	{
 		//generate a texture, depth buffer, and frame buffer
 		frameBufferId = generateFrameBuffer(gl);
@@ -96,20 +96,20 @@ public class FrameBuffer
 		//bind the frame buffer
 		bind(gl);
 		//bind the color and depth attachments to the frame buffer
-		int colorAttachment = GL.GL_COLOR_ATTACHMENT0_EXT;
+		int colorAttachment = GL2.GL_COLOR_ATTACHMENT0;
 		for (FrameBufferTexture texture : textures)
 		{
-			gl.glFramebufferTexture2DEXT(GL.GL_FRAMEBUFFER_EXT, colorAttachment++, texture.getTarget(),
+			gl.glFramebufferTexture2D(GL2.GL_FRAMEBUFFER, colorAttachment++, texture.getTarget(),
 					texture.getId(), 0);
 		}
 		if (depth.isTexture())
 		{
-			gl.glFramebufferTexture2DEXT(GL.GL_FRAMEBUFFER_EXT, GL.GL_DEPTH_ATTACHMENT_EXT, GL.GL_TEXTURE_2D,
+			gl.glFramebufferTexture2D(GL2.GL_FRAMEBUFFER, GL2.GL_DEPTH_ATTACHMENT, GL2.GL_TEXTURE_2D,
 					depth.getId(), 0);
 		}
 		else
 		{
-			gl.glFramebufferRenderbufferEXT(GL.GL_FRAMEBUFFER_EXT, GL.GL_DEPTH_ATTACHMENT_EXT, GL.GL_RENDERBUFFER_EXT,
+			gl.glFramebufferRenderbuffer(GL2.GL_FRAMEBUFFER, GL2.GL_DEPTH_ATTACHMENT, GL2.GL_RENDERBUFFER,
 					depth.getId());
 		}
 
@@ -131,7 +131,7 @@ public class FrameBuffer
 	 * @param gl
 	 * @param dimensions
 	 */
-	public void resize(GL gl, Dimension dimensions)
+	public void resize(GL2 gl, Dimension dimensions)
 	{
 		Validate.notNull(dimensions, "Dimensions cannot be null");
 
@@ -147,7 +147,7 @@ public class FrameBuffer
 	/**
 	 * Bind the frame buffer
 	 */
-	public void bind(GL gl)
+	public void bind(GL2 gl)
 	{
 		FrameBufferStack.push(gl, frameBufferId);
 	}
@@ -155,7 +155,7 @@ public class FrameBuffer
 	/**
 	 * Unbind the frame buffer
 	 */
-	public void unbind(GL gl)
+	public void unbind(GL2 gl)
 	{
 		FrameBufferStack.pop(gl);
 	}
@@ -163,11 +163,11 @@ public class FrameBuffer
 	/**
 	 * Performs necessary cleanup to remove the frame buffer
 	 */
-	public void delete(GL gl)
+	public void delete(GL2 gl)
 	{
 		if (isCreated())
 		{
-			gl.glDeleteFramebuffersEXT(1, new int[] { frameBufferId }, 0);
+			gl.glDeleteFramebuffers(1, new int[] { frameBufferId }, 0);
 			frameBufferId = 0;
 		}
 		for (FrameBufferTexture texture : textures)
@@ -184,7 +184,7 @@ public class FrameBuffer
 	 * @param gl
 	 * @see FrameBuffer#delete(GL)
 	 */
-	public void deleteIfCreated(GL gl)
+	public void deleteIfCreated(GL2 gl)
 	{
 		if (isCreated())
 		{
@@ -220,10 +220,10 @@ public class FrameBuffer
 	/**
 	 * @return The ID of the generated frame buffer object
 	 */
-	protected int generateFrameBuffer(GL gl)
+	protected int generateFrameBuffer(GL2 gl)
 	{
 		int[] frameBuffers = new int[1];
-		gl.glGenFramebuffersEXT(1, frameBuffers, 0);
+		gl.glGenFramebuffers(1, frameBuffers, 0);
 		if (frameBuffers[0] <= 0)
 		{
 			throw new IllegalStateException("Error generating frame buffer");
@@ -234,14 +234,14 @@ public class FrameBuffer
 	/**
 	 * Check that the frame buffer is complete; if not, throws an exception
 	 */
-	protected void checkFrameBuffer(GL gl)
+	protected void checkFrameBuffer(GL2 gl)
 	{
-		int status = gl.glCheckFramebufferStatusEXT(GL.GL_FRAMEBUFFER_EXT);
-		if (status == GL.GL_FRAMEBUFFER_UNSUPPORTED_EXT)
+		int status = gl.glCheckFramebufferStatus(GL2.GL_FRAMEBUFFER);
+		if (status == GL2.GL_FRAMEBUFFER_UNSUPPORTED)
 		{
 			throw new IllegalStateException("Frame buffer unsupported, or parameters incorrect");
 		}
-		else if (status != GL.GL_FRAMEBUFFER_COMPLETE_EXT)
+		else if (status != GL2.GL_FRAMEBUFFER_COMPLETE)
 		{
 			throw new IllegalStateException("Frame buffer incomplete");
 		}
@@ -250,34 +250,34 @@ public class FrameBuffer
 	/**
 	 * Draw a texture on a quad, covering the entire viewport
 	 */
-	public static void renderTexturedQuad(GL gl, int... textureIds)
+	public static void renderTexturedQuad(GL2 gl, int... textureIds)
 	{
-		renderTexturedQuadUsingTarget(gl, GL.GL_TEXTURE_2D, textureIds);
+		renderTexturedQuadUsingTarget(gl, GL2.GL_TEXTURE_2D, textureIds);
 	}
 
 	/**
 	 * Draw a texture on a quad, covering the entire viewport
 	 */
-	public static void renderTexturedQuadUsingTarget(GL gl, int target, int... textureIds)
+	public static void renderTexturedQuadUsingTarget(GL2 gl, int target, int... textureIds)
 	{
-		gl.glMatrixMode(GL.GL_MODELVIEW);
+		gl.glMatrixMode(GL2.GL_MODELVIEW);
 		gl.glPushMatrix();
 		gl.glLoadIdentity();
-		gl.glMatrixMode(GL.GL_PROJECTION);
+		gl.glMatrixMode(GL2.GL_PROJECTION);
 		gl.glPushMatrix();
 		gl.glLoadIdentity();
-		gl.glPushAttrib(GL.GL_ENABLE_BIT);
+		gl.glPushAttrib(GL2.GL_ENABLE_BIT);
 
 		try
 		{
 			gl.glEnable(target);
 			for (int i = 0; i < textureIds.length; i++)
 			{
-				gl.glActiveTexture(GL.GL_TEXTURE0 + i);
+				gl.glActiveTexture(GL2.GL_TEXTURE0 + i);
 				gl.glBindTexture(target, textureIds[i]);
 			}
 
-			gl.glBegin(GL.GL_QUADS);
+			gl.glBegin(GL2.GL_QUADS);
 			{
 				gl.glTexCoord2f(0, 0);
 				gl.glVertex3i(-1, -1, -1);
@@ -293,7 +293,7 @@ public class FrameBuffer
 		finally
 		{
 			gl.glPopMatrix();
-			gl.glMatrixMode(GL.GL_MODELVIEW);
+			gl.glMatrixMode(GL2.GL_MODELVIEW);
 			gl.glPopMatrix();
 			gl.glPopAttrib();
 		}
