@@ -23,8 +23,8 @@ import gov.nasa.worldwind.Configuration;
 import gov.nasa.worldwind.Model;
 import gov.nasa.worldwind.SceneController;
 import gov.nasa.worldwind.WorldWind;
+import gov.nasa.worldwind.WorldWindow;
 import gov.nasa.worldwind.avlist.AVKey;
-import gov.nasa.worldwind.awt.WorldWindowGLCanvas;
 import gov.nasa.worldwind.event.RenderingExceptionListener;
 import gov.nasa.worldwind.exception.WWAbsentRequirementException;
 import gov.nasa.worldwind.geom.Angle;
@@ -90,6 +90,9 @@ import nasa.worldwind.retrieve.ExtendedRetrievalService;
 import org.w3c.dom.Element;
 
 import au.gov.ga.worldwind.common.downloader.DownloaderStatusBar;
+import au.gov.ga.worldwind.common.newt.NewtInputHandler;
+import au.gov.ga.worldwind.common.newt.WorldWindowNewtAutoDrawable;
+import au.gov.ga.worldwind.common.newt.WorldWindowNewtCanvas;
 import au.gov.ga.worldwind.common.render.ExtendedDrawContext;
 import au.gov.ga.worldwind.common.terrain.ElevationModelFactory;
 import au.gov.ga.worldwind.common.terrain.WireframeRectangularTessellator;
@@ -349,7 +352,7 @@ public class Application
 	private final JFrame frame;
 	private JFrame fullscreenFrame;
 
-	private final WorldWindowGLCanvas wwd;
+	private final WorldWindowNewtCanvas wwd;
 	private MouseLayer mouseLayer;
 
 	private SideBar sideBar;
@@ -400,7 +403,7 @@ public class Application
 
 		// show splashscreen
 		final SplashScreen splashScreen =
-				showSplashScreen ? new SplashScreen(frame,
+				showSplashScreen ? new SplashScreen(null,
 						SplashScreen.class.getResource("/images/viewer-splash-400x230.png")) : null;
 
 		// create worldwind stuff
@@ -408,7 +411,9 @@ public class Application
 		{
 			System.setProperty(AVKey.STEREO_MODE, "device");
 		}
-		wwd = new WorldWindowGLCanvas();
+		Configuration.setValue(AVKey.WORLD_WINDOW_CLASS_NAME, WorldWindowNewtAutoDrawable.class.getName());
+		Configuration.setValue(AVKey.INPUT_HANDLER_CLASS_NAME, NewtInputHandler.class.getName());
+		wwd = new WorldWindowNewtCanvas();
 		wwd.setMinimumSize(new Dimension(1, 1));
 		if (splashScreen != null)
 		{
@@ -605,7 +610,7 @@ public class Application
 
 		try
 		{
-			SwingUtil.invokeTaskOnEDT(new Runnable()
+			SwingUtil.invokeLaterTaskOnEDT(new Runnable()
 			{
 				@Override
 				public void run()
@@ -1003,15 +1008,9 @@ public class Application
 			}
 			if (file != null)
 			{
-				Screenshotter.takeScreenshot(wwd, wwd, file);
+				Screenshotter.takeScreenshot(wwd, file);
 			}
 		}
-	}
-
-	@SuppressWarnings("unused")
-	private void takeScreenshot(int width, int height, final File file)
-	{
-		Screenshotter.takeScreenshot(wwd, width, height, file);
 	}
 
 	private void addWindowListeners()
@@ -1185,7 +1184,7 @@ public class Application
 		}
 	}
 
-	protected void copyStateBetweenWorldWindows(WorldWindowGLCanvas src, WorldWindowGLCanvas dst)
+	protected void copyStateBetweenWorldWindows(WorldWindow src, WorldWindow dst)
 	{
 		dst.setView(src.getView());
 	}
@@ -1545,7 +1544,7 @@ public class Application
 		return theme;
 	}
 
-	public WorldWindowGLCanvas getWwd()
+	public WorldWindow getWwd()
 	{
 		return wwd;
 	}
