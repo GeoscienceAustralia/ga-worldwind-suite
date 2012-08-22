@@ -168,8 +168,7 @@ public class WireframeRectangularTessellator extends RectangularTessellatorAcces
 				FloatBuffer vertices = ri.getVertices();
 				IntBuffer indices = ri.getIndices();
 				gl.glVertexPointer(3, GL2.GL_FLOAT, 0, vertices.rewind());
-				gl.glDrawElements(GL2.GL_TRIANGLE_STRIP, indices.limit(),
-						GL2.GL_UNSIGNED_INT, indices.rewind());
+				gl.glDrawElements(GL2.GL_TRIANGLE_STRIP, indices.limit(), GL2.GL_UNSIGNED_INT, indices.rewind());
 			}
 			finally
 			{
@@ -374,8 +373,11 @@ public class WireframeRectangularTessellator extends RectangularTessellatorAcces
 				ogsh.pushClientAttrib(gl, GL2.GL_CLIENT_VERTEX_ARRAY_BIT);
 
 				int[] vboIds = (int[]) dc.getGpuResourceCache().get(tile.getRi().getVboCacheKey());
-				gl.glBindBuffer(GL2.GL_ARRAY_BUFFER, vboIds[0]);
-				gl.glBufferData(GL2.GL_ARRAY_BUFFER, vertices.limit() * 4, vertices.rewind(), GL2.GL_DYNAMIC_DRAW);
+				if (vboIds != null)
+				{
+					gl.glBindBuffer(GL2.GL_ARRAY_BUFFER, vboIds[0]);
+					gl.glBufferData(GL2.GL_ARRAY_BUFFER, vertices.limit() * 4, vertices.rewind(), GL2.GL_DYNAMIC_DRAW);
+				}
 			}
 			finally
 			{
