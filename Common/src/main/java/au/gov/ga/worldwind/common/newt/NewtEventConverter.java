@@ -18,10 +18,15 @@ package au.gov.ga.worldwind.common.newt;
 import java.awt.Component;
 import java.awt.Window;
 
+import javax.swing.SwingUtilities;
+
 import jogamp.newt.awt.event.AWTNewtEventFactory;
 
 import com.jogamp.common.util.IntIntHashMap;
+import com.jogamp.newt.event.KeyEvent;
+import com.jogamp.newt.event.MouseEvent;
 import com.jogamp.newt.event.NEWTEvent;
+import com.jogamp.newt.event.WindowEvent;
 
 /**
  * Helper class used to convert NEWT events to corresponding AWT events. Similar
@@ -127,6 +132,34 @@ public class NewtEventConverter
 	}
 
 	/**
+	 * Create an {@link java.awt.AWTEvent} from the given
+	 * com.jogamp.newt.event.NEWTEvent.
+	 * 
+	 * @param event
+	 *            NEWT event to convert
+	 * @param awtSourceComponent
+	 *            Component to set as the AWT event source
+	 * @return AWT event corresponding to the given NEWT event
+	 */
+	public static final java.awt.AWTEvent createEvent(com.jogamp.newt.event.NEWTEvent event,
+			java.awt.Component awtSourceComponent)
+	{
+		if (event instanceof KeyEvent)
+		{
+			return createKeyEvent((KeyEvent) event, awtSourceComponent);
+		}
+		else if (event instanceof MouseEvent)
+		{
+			return createMouseEvent((MouseEvent) event, awtSourceComponent);
+		}
+		else if (event instanceof WindowEvent)
+		{
+			return createComponentEvent((WindowEvent) event, awtSourceComponent);
+		}
+		return null;
+	}
+
+	/**
 	 * Create an AWT {@link java.awt.event.ComponentEvent} from the given NEWT
 	 * {@link com.jogamp.newt.event.WindowEvent}. Return object type may be a
 	 * {@link java.awt.event.ComponentEvent}, or one of its subclasses
@@ -155,8 +188,7 @@ public class NewtEventConverter
 			case java.awt.event.ComponentEvent.COMPONENT_RESIZED:
 				return new ComponentEventFromNewt(event, awtSource, id);
 			default:
-				java.awt.Window window = awtSource instanceof java.awt.Window ? (java.awt.Window) awtSource : null;
-				return new WindowEventFromNewt(event, window, id);
+				return new WindowEventFromNewt(event, SwingUtilities.getWindowAncestor(awtSource), id);
 			}
 		}
 		return null;

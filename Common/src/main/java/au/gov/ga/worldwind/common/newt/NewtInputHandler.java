@@ -28,8 +28,7 @@ import com.jogamp.newt.opengl.GLWindow;
 
 /**
  * {@link InputHandler} implementation that captures NEWT events from a
- * {@link GLWindow} and forwards them on to its {@link AWTInputHandler}
- * superclass.
+ * {@link GLWindow} and dispatches them as AWT events to the event source.
  * 
  * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
@@ -69,7 +68,7 @@ public class NewtInputHandler extends AWTInputHandler
 			return;
 		}
 
-		eventProcessor = new NewtEventProcessor(this, this, this, this, this, (Component) newWorldWindow);
+		eventProcessor = new NewtEventProcessor((Component) newWorldWindow);
 		window.addMouseListener(eventProcessor);
 		window.addKeyListener(eventProcessor);
 		window.addWindowListener(eventProcessor);
