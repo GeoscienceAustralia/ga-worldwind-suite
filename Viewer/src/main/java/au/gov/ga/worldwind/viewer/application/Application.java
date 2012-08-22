@@ -149,9 +149,6 @@ public class Application
 {
 	private static final String HELP_URL = getMessage(getHelpUrlKey());
 
-	private static URL themeUrl;
-	private static Element themeElement;
-
 	private static Class<? extends SceneController> sceneControllerClass = StereoSceneController.class;
 	private static Class<? extends RectangularTessellator> rectangularTessellatorClass =
 			WireframeRectangularTessellator.class;
@@ -291,8 +288,6 @@ public class Application
 			@Override
 			public Application opened(Theme theme, Element themeElement, URL themeUrl)
 			{
-				Application.themeElement = themeElement;
-				Application.themeUrl = themeUrl;
 				return start(theme, true);
 			}
 		};
