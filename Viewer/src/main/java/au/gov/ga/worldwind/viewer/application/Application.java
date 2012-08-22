@@ -72,7 +72,6 @@ import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JOptionPane;
@@ -129,7 +128,6 @@ import au.gov.ga.worldwind.viewer.settings.Settings;
 import au.gov.ga.worldwind.viewer.settings.SettingsDialog;
 import au.gov.ga.worldwind.viewer.stereo.StereoSceneController;
 import au.gov.ga.worldwind.viewer.theme.Theme;
-import au.gov.ga.worldwind.viewer.theme.ThemeFactory;
 import au.gov.ga.worldwind.viewer.theme.ThemeHUD;
 import au.gov.ga.worldwind.viewer.theme.ThemeLayer;
 import au.gov.ga.worldwind.viewer.theme.ThemeOpener;
@@ -204,7 +202,8 @@ public class Application
 		return rectangularTessellatorClass;
 	}
 
-	public static void setRectangularTessellatorClass(Class<? extends RectangularTessellator> rectangularTessellatorClass)
+	public static void setRectangularTessellatorClass(
+			Class<? extends RectangularTessellator> rectangularTessellatorClass)
 	{
 		Application.rectangularTessellatorClass = rectangularTessellatorClass;
 	}
@@ -294,7 +293,7 @@ public class Application
 			{
 				Application.themeElement = themeElement;
 				Application.themeUrl = themeUrl;
-				return start(theme, theme.isFullscreen(), true);
+				return start(theme, true);
 			}
 		};
 		if (themeUrl == null)
@@ -307,13 +306,7 @@ public class Application
 		}
 	}
 
-	private static Application restart(boolean fullscreen)
-	{
-		Theme theme = ThemeFactory.createFromXML(themeElement, themeUrl);
-		return start(theme, fullscreen, false);
-	}
-
-	private static Application start(Theme theme, boolean fullscreen, boolean showSplashScreen)
+	private static Application start(Theme theme, boolean showSplashScreen)
 	{
 		if (theme.getInitialLatitude() != null)
 		{
@@ -344,13 +337,13 @@ public class Application
 			}
 		}
 
-		return new Application(theme, fullscreen, showSplashScreen);
+		return new Application(theme, showSplashScreen);
 	}
 
-	private final boolean fullscreen;
 	private final Theme theme;
 	private final JFrame frame;
 	private JFrame fullscreenFrame;
+	private boolean fullscreen;
 
 	private final WorldWindowNewtCanvas wwd;
 	private MouseLayer mouseLayer;
@@ -386,10 +379,11 @@ public class Application
 
 	private WmsBrowser wmsBrowser;
 
-	private Application(Theme theme, final boolean fullscreen, boolean showSplashScreen)
+	private Application(Theme theme, boolean showSplashScreen)
 	{
+		//TODO implement theme.isFullscreen()
+
 		this.theme = theme;
-		this.fullscreen = fullscreen;
 		Settings.get().loadThemeProperties(theme);
 
 		//initialize frame
@@ -465,84 +459,6 @@ public class Application
 			frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
 		}
 
-		if (fullscreen)
-		{
-			fullscreenFrame = new JFrame(frame.getTitle());
-			fullscreenFrame.setIconImage(frame.getIconImage());
-			fullscreenFrame.setUndecorated(true);
-			fullscreenFrame.setAlwaysOnTop(true);
-
-			JPanel fullscreenPanel = new JPanel(new BorderLayout());
-			fullscreenFrame.setContentPane(fullscreenPanel);
-			fullscreenPanel.add(wwd, BorderLayout.CENTER);
-
-			fullscreenFrame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-			fullscreenFrame.addWindowListener(new WindowAdapter()
-			{
-				@Override
-				public void windowClosing(WindowEvent e)
-				{
-					setFullscreen(false);
-				}
-			});
-
-			Action action = new AbstractAction()
-			{
-				@Override
-				public void actionPerformed(ActionEvent e)
-				{
-					setFullscreen(false);
-				}
-			};
-			fullscreenPanel.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(
-					KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), action);
-			fullscreenPanel.getActionMap().put(action, action);
-
-
-			boolean span = Settings.get().isSpanDisplays();
-			String id = Settings.get().getDisplayId();
-			GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-			Rectangle fullscreenBounds;
-			Rectangle frameBounds = frame.getBounds();
-
-			//the wwd is not in the frame, so shrink it to the width of the sidebar
-			int splitLocation = Settings.get().getSplitLocation();
-			frameBounds.width = splitLocation + 10;
-
-			if (span)
-			{
-				Rectangle fullBounds = new Rectangle();
-				GraphicsDevice[] gds = ge.getScreenDevices();
-				for (GraphicsDevice g : gds)
-				{
-					GraphicsConfiguration gc = g.getDefaultConfiguration();
-					fullBounds = fullBounds.union(gc.getBounds());
-				}
-				fullscreenBounds = fullBounds;
-			}
-			else
-			{
-				GraphicsDevice fullscreenDevice = getGraphicsDeviceForId(id, ge);
-				fullscreenBounds = fullscreenDevice.getDefaultConfiguration().getBounds();
-
-				//check if the frame bounds are within the fullscreen device
-				//we want to show the frame on a different monitor to the fullscreen frame if possible
-				GraphicsDevice frameDevice = getGraphicsDeviceContainingBounds(frameBounds, ge);
-				if (frameDevice == fullscreenDevice)
-				{
-					GraphicsDevice otherDevice = getOtherGraphicsDevice(fullscreenDevice, ge);
-					if (otherDevice != null)
-					{
-						Rectangle otherDeviceBounds = otherDevice.getDefaultConfiguration().getBounds();
-						frameBounds.setLocation(otherDeviceBounds.getLocation());
-					}
-				}
-			}
-
-			frame.setBounds(frameBounds);
-			fullscreenFrame.setBounds(fullscreenBounds);
-		}
-
 		splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, true);
 		panel.add(splitPane, BorderLayout.CENTER);
 		if (!fullscreen)
@@ -616,10 +532,6 @@ public class Application
 				public void run()
 				{
 					frame.setVisible(true);
-					if (fullscreen)
-					{
-						fullscreenFrame.setVisible(true);
-					}
 					wwd.createBufferStrategy(2);
 				}
 			});
@@ -1150,37 +1062,99 @@ public class Application
 	{
 		if (fullscreen != isFullscreen())
 		{
-			final JDialog dialog = new JDialog();
-			dialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
-			dialog.setLayout(new BorderLayout());
-			String mode = fullscreen ? "fullscreen" : "windowed";
-			JLabel label = new JLabel("Switching to " + mode + " mode, please wait...");
-			label.setIcon(Icons.newLoadingIcon());
-			label.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-			dialog.add(label, BorderLayout.CENTER);
-			dialog.pack();
-			dialog.setLocationRelativeTo(null);
-			dialog.setVisible(true);
+			this.fullscreen = fullscreen;
 
-			Thread thread = new Thread(new Runnable()
+			if (!fullscreen)
 			{
-				@Override
-				public void run()
+				splitPane.setRightComponent(wwd);
+				frame.setBounds(Settings.get().getWindowBounds());
+				if (Settings.get().isWindowMaximized())
 				{
-					if (theme.isFullscreen())
+					frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+				}
+				loadSplitLocation();
+				fullscreenFrame.dispose();
+				fullscreenFrame = null;
+			}
+			else
+			{
+				fullscreenFrame = new JFrame(frame.getTitle());
+				fullscreenFrame.setIconImage(frame.getIconImage());
+				fullscreenFrame.setUndecorated(true);
+				fullscreenFrame.setAlwaysOnTop(true);
+
+				JPanel fullscreenPanel = new JPanel(new BorderLayout());
+				fullscreenFrame.setContentPane(fullscreenPanel);
+				fullscreenPanel.add(wwd, BorderLayout.CENTER);
+
+				fullscreenFrame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+				fullscreenFrame.addWindowListener(new WindowAdapter()
+				{
+					@Override
+					public void windowClosing(WindowEvent e)
 					{
-						quit(true);
+						setFullscreen(false);
 					}
-					else
+				});
+
+				Action action = new AbstractAction()
+				{
+					@Override
+					public void actionPerformed(ActionEvent e)
 					{
-						quit(false);
-						Application application = restart(fullscreen);
-						copyStateBetweenWorldWindows(wwd, application.wwd);
-						dialog.dispose();
+						setFullscreen(false);
+					}
+				};
+				fullscreenPanel.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(
+						KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), action);
+				fullscreenPanel.getActionMap().put(action, action);
+
+
+				boolean span = Settings.get().isSpanDisplays();
+				String id = Settings.get().getDisplayId();
+				GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+				Rectangle fullscreenBounds;
+				Rectangle frameBounds = frame.getBounds();
+
+				//the wwd is not in the frame, so shrink it to the width of the sidebar
+				int splitLocation = Settings.get().getSplitLocation();
+				frameBounds.width = splitLocation + 10;
+
+				if (span)
+				{
+					Rectangle fullBounds = new Rectangle();
+					GraphicsDevice[] gds = ge.getScreenDevices();
+					for (GraphicsDevice g : gds)
+					{
+						GraphicsConfiguration gc = g.getDefaultConfiguration();
+						fullBounds = fullBounds.union(gc.getBounds());
+					}
+					fullscreenBounds = fullBounds;
+				}
+				else
+				{
+					GraphicsDevice fullscreenDevice = getGraphicsDeviceForId(id, ge);
+					fullscreenBounds = fullscreenDevice.getDefaultConfiguration().getBounds();
+
+					//check if the frame bounds are within the fullscreen device
+					//we want to show the frame on a different monitor to the fullscreen frame if possible
+					GraphicsDevice frameDevice = getGraphicsDeviceContainingBounds(frameBounds, ge);
+					if (frameDevice == fullscreenDevice)
+					{
+						GraphicsDevice otherDevice = getOtherGraphicsDevice(fullscreenDevice, ge);
+						if (otherDevice != null)
+						{
+							Rectangle otherDeviceBounds = otherDevice.getDefaultConfiguration().getBounds();
+							frameBounds.setLocation(otherDeviceBounds.getLocation());
+						}
 					}
 				}
-			});
-			thread.start();
+
+				frame.setExtendedState(JFrame.NORMAL);
+				frame.setBounds(frameBounds);
+				fullscreenFrame.setBounds(fullscreenBounds);
+				fullscreenFrame.setVisible(true);
+			}
 		}
 	}
 
