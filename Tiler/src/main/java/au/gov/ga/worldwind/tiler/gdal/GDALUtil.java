@@ -61,6 +61,20 @@ public class GDALUtil
 
 			gdalDirectoryFound = true;
 		}
+		else
+		{
+			String gdalDataDirectory = System.getenv(GDAL_DATA_PATH);
+			String gdalDriverDirectory = System.getenv(GDAL_DRIVER_PATH);
+			
+			if (gdalDataDirectory != null && gdalDriverDirectory != null &&
+					new File(gdalDataDirectory).exists() && new File(gdalDriverDirectory).exists())
+			{
+				gdal.SetConfigOption(GDAL_DATA_PATH, new File(gdalDataDirectory).getAbsolutePath());
+				gdal.SetConfigOption(GDAL_DRIVER_PATH, new File(gdalDriverDirectory).getAbsolutePath());
+
+				gdalDirectoryFound = true;
+			}
+		}
 
 		gdal.AllRegister();
 	}
