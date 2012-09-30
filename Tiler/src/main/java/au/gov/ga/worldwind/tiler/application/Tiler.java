@@ -395,9 +395,19 @@ public class Tiler
 			iwp.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
 			iwp.setCompressionQuality(jpegQuality);
 			iwp.setOptimizeHuffmanTables(true);
-			writer.setOutput(new FileImageOutputStream(file));
-			IIOImage iioimage = new IIOImage(image, null, null);
-			writer.write(null, iioimage, iwp);
+			FileImageOutputStream ios = null;
+			try
+			{
+				ios = new FileImageOutputStream(file);
+				writer.setOutput(ios);
+				IIOImage iioimage = new IIOImage(image, null, null);
+				writer.write(null, iioimage, iwp);
+			}
+			finally
+			{
+				if (ios != null)
+					ios.close();
+			}
 		}
 		else
 		{
