@@ -61,6 +61,20 @@ public class GDALUtil
 
 			gdalDirectoryFound = true;
 		}
+		else
+		{
+			String gdalDataDirectory = System.getenv(GDAL_DATA_PATH);
+			String gdalDriverDirectory = System.getenv(GDAL_DRIVER_PATH);
+			
+			if (gdalDataDirectory != null && gdalDriverDirectory != null &&
+					new File(gdalDataDirectory).exists() && new File(gdalDriverDirectory).exists())
+			{
+				gdal.SetConfigOption(GDAL_DATA_PATH, new File(gdalDataDirectory).getAbsolutePath());
+				gdal.SetConfigOption(GDAL_DRIVER_PATH, new File(gdalDriverDirectory).getAbsolutePath());
+
+				gdalDirectoryFound = true;
+			}
+		}
 
 		gdal.AllRegister();
 	}
@@ -147,7 +161,16 @@ public class GDALUtil
 					SpatialReference geog = proj.CloneGeogCS();
 					if (geog != null)
 					{
+						// This is a temporary fix for a bug in GDAL versions earlier than v2.0
+						// Otherwise the program will crash if there is no transform between the two projections found
+						// See http://trac.osgeo.org/gdal/ticket/4836 for more info
+						// TODO: After updating to GDAL v2.0 change this to the new osr.CreateCoordinateTransformation function
+						gdal.PushErrorHandler("CPLQuietErrorHandler"); 
 						CoordinateTransformation transform = new CoordinateTransformation(proj, geog);
+						gdal.PopErrorHandler();
+						if (gdal.GetLastErrorMsg().indexOf("Unable to load PROJ.4 library") != -1)
+							transform = null;
+						
 						if (transform != null)
 						{
 							double[] transPoint = new double[3];

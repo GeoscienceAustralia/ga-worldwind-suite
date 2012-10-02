@@ -121,6 +121,7 @@ public class Application implements UncaughtExceptionHandler
 	private final static String LOGGER = "TilerLogger";
 
 	public final static String OUTPUT_DIR_KEY = "Last Output Directory";
+	public final static String INPUT_DIR_KEY = "Last Input Directory";
 
 	private Logger logger;
 	private JTextPane textLog;
@@ -2115,7 +2116,7 @@ public class Application implements UncaughtExceptionHandler
 			mapnikOverviewsCheck.setEnabled(standard && mapnik);
 			reprojectCheck.setEnabled(standard);
 			bilinearCheck.setEnabled(standard && !mapnik);
-			bilinearOverviewsCheck.setEnabled(standard);
+			bilinearOverviewsCheck.setEnabled(overviewsCheck.isSelected() && standard);
 			overrideLevelsCheck.setEnabled(standard && !mapnik);
 			pngRadio.setEnabled(standard);
 			tilesizeField.setEnabled(standard);
@@ -2338,8 +2339,7 @@ public class Application implements UncaughtExceptionHandler
 
 	private void setupInputFile()
 	{
-		String preferenceKey = "Last Input Directory";
-		JFileChooser chooser = new JFileChooser(preferences.get(preferenceKey, null));
+		JFileChooser chooser = new JFileChooser(preferences.get(INPUT_DIR_KEY, null));
 		if (gdalRadio.isSelected())
 		{
 			chooser.setFileFilter(new GDALFileFilter());
@@ -2352,7 +2352,7 @@ public class Application implements UncaughtExceptionHandler
 		if (chooser.showOpenDialog(frame) == JFileChooser.APPROVE_OPTION)
 		{
 			File file = chooser.getSelectedFile();
-			preferences.put(preferenceKey, file.getParentFile().getAbsolutePath());
+			preferences.put(INPUT_DIR_KEY, file.getParentFile().getAbsolutePath());
 			openDataset(file);
 		}
 	}
