@@ -29,6 +29,7 @@ import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageWriteParam;
 import javax.imageio.ImageWriter;
+import javax.imageio.plugins.jpeg.JPEGImageWriteParam;
 import javax.imageio.stream.FileImageOutputStream;
 
 import org.gdal.gdal.Dataset;
@@ -390,12 +391,23 @@ public class Tiler
 		{
 			Iterator<ImageWriter> writers = ImageIO.getImageWritersByFormatName("jpeg");
 			ImageWriter writer = writers.next();
-			ImageWriteParam iwp = writer.getDefaultWriteParam();
+			JPEGImageWriteParam iwp = (JPEGImageWriteParam) writer.getDefaultWriteParam();
 			iwp.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
 			iwp.setCompressionQuality(jpegQuality);
-			writer.setOutput(new FileImageOutputStream(file));
-			IIOImage iioimage = new IIOImage(image, null, null);
-			writer.write(null, iioimage, iwp);
+			iwp.setOptimizeHuffmanTables(true);
+			FileImageOutputStream ios = null;
+			try
+			{
+				ios = new FileImageOutputStream(file);
+				writer.setOutput(ios);
+				IIOImage iioimage = new IIOImage(image, null, null);
+				writer.write(null, iioimage, iwp);
+			}
+			finally
+			{
+				if (ios != null)
+					ios.close();
+			}
 		}
 		else
 		{
