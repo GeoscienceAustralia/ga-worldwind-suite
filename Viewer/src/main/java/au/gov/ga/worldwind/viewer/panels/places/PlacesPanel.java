@@ -123,6 +123,8 @@ public class PlacesPanel extends AbstractThemePanel
 	private RenderingListener opacityChanger;
 	private RenderingListener exaggerationChanger;
 
+	private final List<PlacesPlayingListener> playingListeners = new ArrayList<PlacesPlayingListener>();
+
 	public class ListItem
 	{
 		public final JCheckBox check;
@@ -407,8 +409,10 @@ public class PlacesPanel extends AbstractThemePanel
 				deleteSelected();
 			}
 		});
-		
-		deleteAllAction = new BasicAction(getMessage(getPlacesDeleteAllLabelKey()), getMessage(getPlacesDeleteAllTooltipKey()), Icons.deleteall.getIcon());
+
+		deleteAllAction =
+				new BasicAction(getMessage(getPlacesDeleteAllLabelKey()), getMessage(getPlacesDeleteAllTooltipKey()),
+						Icons.deleteall.getIcon());
 		deleteAllAction.addActionListener(new ActionListener()
 		{
 			@Override
@@ -417,7 +421,7 @@ public class PlacesPanel extends AbstractThemePanel
 				promptToDeleteAllPlaces();
 			}
 		});
-		
+
 		playAction =
 				new BasicAction(getMessage(getPlacesPlayLabelKey()), getMessage(getPlacesPlayTooltipKey()),
 						Icons.run.getIcon());
@@ -620,10 +624,11 @@ public class PlacesPanel extends AbstractThemePanel
 		ListItem item = (ListItem) list.getSelectedValue();
 		if (item != null)
 		{
-			int value = JOptionPane.showConfirmDialog(this,
-												  	 getMessage(getDeletePlaceWarnMessageKey(), item.place.getLabel()),
-												  	 getMessage(getDeletePlaceWarnTitleKey()),
-												  	 JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+			int value =
+					JOptionPane.showConfirmDialog(this,
+							getMessage(getDeletePlaceWarnMessageKey(), item.place.getLabel()),
+							getMessage(getDeletePlaceWarnTitleKey()), JOptionPane.YES_NO_OPTION,
+							JOptionPane.QUESTION_MESSAGE);
 			if (value == JOptionPane.YES_OPTION)
 			{
 				model.removeElement(item);
@@ -641,10 +646,10 @@ public class PlacesPanel extends AbstractThemePanel
 
 	private void promptToDeleteAllPlaces()
 	{
-		int value = JOptionPane.showConfirmDialog(frame, 
-												  getMessage(getDeleteAllPlacesWarnMessageKey()), 
-												  getMessage(getDeleteAllPlacesWarnTitleKey()), 
-												  JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+		int value =
+				JOptionPane.showConfirmDialog(frame, getMessage(getDeleteAllPlacesWarnMessageKey()),
+						getMessage(getDeleteAllPlacesWarnTitleKey()), JOptionPane.YES_NO_OPTION,
+						JOptionPane.WARNING_MESSAGE);
 		if (value == JOptionPane.YES_OPTION)
 		{
 			deleteAllPlaces();
@@ -684,10 +689,15 @@ public class PlacesPanel extends AbstractThemePanel
 		{
 			wwd.getView().stopAnimations();
 		}
+		boolean wasPlaying = playing;
 		playing = false;
 		playAction.setIcon(Icons.run.getIcon());
 		playAction.setToolTipText(getMessage(getPlacesPlayTooltipKey()));
 		enableActions();
+		if (wasPlaying)
+		{
+			notifyPlacesPlayingListeners(playing);
+		}
 	}
 
 	private synchronized void nextPlace()
@@ -696,7 +706,7 @@ public class PlacesPanel extends AbstractThemePanel
 		{
 			return;
 		}
-		
+
 		stopAllMotion();
 
 		int index = getSelectedPlaceIndex();
@@ -718,7 +728,7 @@ public class PlacesPanel extends AbstractThemePanel
 		{
 			return;
 		}
-		
+
 		stopAllMotion();
 
 		int index = getSelectedPlaceIndex();
@@ -750,8 +760,9 @@ public class PlacesPanel extends AbstractThemePanel
 		{
 			return;
 		}
-		
-		if (!playing)
+
+		boolean wasPlaying = playing;
+		if (!wasPlaying)
 		{
 			playing = true;
 			wwd.getInputHandler().addMouseListener(new MouseAdapter()
@@ -785,7 +796,8 @@ public class PlacesPanel extends AbstractThemePanel
 						final Place place = places.get(index);
 						if (!place.isExcludeFromPlaylist())
 						{
-							SwingUtil.invokeTaskOnEDT(new Runnable(){
+							SwingUtil.invokeTaskOnEDT(new Runnable()
+							{
 								@Override
 								public void run()
 								{
@@ -852,6 +864,11 @@ public class PlacesPanel extends AbstractThemePanel
 		playAction.setIcon(Icons.stop.getIcon());
 		playAction.setToolTipText(getMessage(getPlacesStopTooltipKey()));
 		enableActions();
+
+		if (!wasPlaying)
+		{
+			notifyPlacesPlayingListeners(playing);
+		}
 	}
 
 	public long flyToPlace(Place place)
@@ -1422,5 +1439,23 @@ public class PlacesPanel extends AbstractThemePanel
 			index = 0;
 		}
 		return index;
+	}
+
+	public void addPlacesPlayingListener(PlacesPlayingListener listener)
+	{
+		playingListeners.add(listener);
+	}
+
+	public void removePlacesPlayingListener(PlacesPlayingListener listener)
+	{
+		playingListeners.remove(listener);
+	}
+
+	protected void notifyPlacesPlayingListeners(boolean playing)
+	{
+		for (int i = playingListeners.size() - 1; i >= 0; i--)
+		{
+			playingListeners.get(i).playingChanged(playing);
+		}
 	}
 }
