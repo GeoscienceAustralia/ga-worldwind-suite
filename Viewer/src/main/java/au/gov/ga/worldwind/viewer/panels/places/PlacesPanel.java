@@ -678,7 +678,7 @@ public class PlacesPanel extends AbstractThemePanel
 		wwd.redraw();
 	}
 
-	private synchronized void stopPlaces()
+	public synchronized void stopPlaces()
 	{
 		if (wwd != null)
 		{
@@ -744,7 +744,7 @@ public class PlacesPanel extends AbstractThemePanel
 		wwd.getView().stopAnimations();
 	}
 
-	private synchronized void playPlaces()
+	public synchronized void playPlaces()
 	{
 		if (places.isEmpty())
 		{
