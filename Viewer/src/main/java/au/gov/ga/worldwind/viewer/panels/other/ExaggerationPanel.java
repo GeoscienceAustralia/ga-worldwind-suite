@@ -168,18 +168,18 @@ public class ExaggerationPanel extends AbstractThemePanel
 	}
 
 	//logarithmic vertical exaggeration slider
-
-	private int exaggerationToSlider(double exaggeration)
+	
+	private static int exaggerationToSlider(double exaggeration)
 	{
 		double y = exaggeration;
-		double x = Math.log10(y + (1000d - y) / 1000d);
+		double x = Math.log10(y + (100d - y) / 100d);
 		return (int) Math.round(x * 1000d);
 	}
 
-	private double sliderToExaggeration(int slider)
+	private static double sliderToExaggeration(int slider)
 	{
 		double x = slider / 1000d;
-		double y = Math.pow(10d, x) - (2d - x) / 2d;
+		double y = (Math.pow(10d, x + 2) - 100d) / 99d;
 		return y;
 	}
 
