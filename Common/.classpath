@@ -12,19 +12,19 @@
 	<classpathentry exported="true" kind="lib" path="lib/test/hamcrest-library-1.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/test/jmock-2.5.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/test/junit-4.8.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/build/gluegen-rt.jar" sourcepath="lib/src/gluegen-java-src.zip"/>
 	<classpathentry exported="true" kind="lib" path="lib/package/gdal.jar">
 		<attributes>
 			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="Common/lib/package/native/windows-i586"/>
 		</attributes>
 	</classpathentry>
 	<classpathentry exported="true" kind="lib" path="lib/package/jhlabs-filters.jar" sourcepath="lib/src/jhlabs-filters-src.zip"/>
-	<classpathentry exported="true" kind="lib" path="lib/build/jogl.all.jar" sourcepath="lib/src/jogl-java-src.zip"/>
 	<classpathentry exported="true" kind="lib" path="lib/debug/worldwind-debug.jar" sourcepath="lib/src/worldwind-src.zip">
 		<attributes>
 			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="Common/lib/package/native/windows-i586"/>
 		</attributes>
 	</classpathentry>
 	<classpathentry exported="true" kind="lib" path="lib/debug/worldwindx-debug.jar" sourcepath="lib/src/worldwind-src.zip"/>
+	<classpathentry exported="true" kind="lib" path="lib/package/gluegen-rt.jar" sourcepath="lib/src/gluegen-java-src.zip"/>
+	<classpathentry exported="true" kind="lib" path="lib/package/jogl.all.jar" sourcepath="lib/src/jogl-java-src.zip"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
