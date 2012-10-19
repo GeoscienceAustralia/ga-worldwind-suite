@@ -974,7 +974,7 @@ public class Application
 		});
 	}
 
-	private void resetView()
+	public void resetView()
 	{
 		if (!(wwd.getView() instanceof OrbitView))
 		{
