@@ -683,6 +683,11 @@ public class PlacesPanel extends AbstractThemePanel
 		wwd.redraw();
 	}
 
+	public boolean isPlaying()
+	{
+		return playing;
+	}
+
 	public synchronized void stopPlaces()
 	{
 		if (wwd != null)
