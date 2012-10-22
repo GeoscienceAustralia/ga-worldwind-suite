@@ -1517,4 +1517,9 @@ public class Application
 	{
 		return wwd;
 	}
+
+	public JFrame getFrame()
+	{
+		return frame;
+	}
 }
