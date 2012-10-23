@@ -1,0 +1,51 @@
+<?xml version="1.0" ?>
+
+<project name="AndroidRemoteShared" basedir="." default="run">
+
+	<property name="javac_debug" value="true" />
+
+	<property name="src_dir" value="${basedir}/src" />
+
+	<property name="target_dir" value="${basedir}/target" />
+	<property name="build_dir" value="${target_dir}/classes" />
+	<property name="package_dir" value="${target_dir}/package" />
+	<property name="jar_name" value="android-remote-shared.jar" />
+	<property name="copy_dir" value="${basedir}/../AndroidRemoteClient/libs" />
+
+	<property name="lib_dir" value="${basedir}/lib" />
+
+	<path id="classpath">
+		<fileset dir="${lib_dir}">
+			<include name="**/*.jar" />
+		</fileset>
+	</path>
+
+	<patternset id="manifest_exclude">
+		<exclude name="META-INF/**" />
+	</patternset>
+
+	<target name="clean">
+		<delete dir="${target_dir}" />
+	</target>
+
+	<target name="build">
+		<mkdir dir="${build_dir}" />
+		<javac source="1.6" target="1.6" destdir="${build_dir}" classpathref="classpath" listfiles="no" fork="true" debug="${javac_debug}" includeantruntime="no">
+			<src path="${src_dir}" />
+		</javac>
+	</target>
+
+	<target name="package" depends="build">
+		<mkdir dir="${package_dir}" />
+		<jar destfile="${package_dir}/${jar_name}">
+			<fileset dir="${build_dir}" />
+		</jar>
+	</target>
+
+	<target name="copy" depends="package">
+		<copy file="${package_dir}/${jar_name}" todir="${copy_dir}" />
+	</target>
+
+	<target name="run" depends="copy" />
+
+</project>
