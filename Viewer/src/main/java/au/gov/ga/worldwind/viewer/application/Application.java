@@ -25,6 +25,7 @@ import gov.nasa.worldwind.SceneController;
 import gov.nasa.worldwind.WorldWind;
 import gov.nasa.worldwind.WorldWindow;
 import gov.nasa.worldwind.avlist.AVKey;
+import gov.nasa.worldwind.awt.WorldWindowGLCanvas;
 import gov.nasa.worldwind.event.RenderingExceptionListener;
 import gov.nasa.worldwind.exception.WWAbsentRequirementException;
 import gov.nasa.worldwind.geom.Angle;
@@ -43,6 +44,7 @@ import gov.nasa.worldwindx.examples.ClickAndGoSelectListener;
 import jargs.gnu.CmdLineParser;
 
 import java.awt.BorderLayout;
+import java.awt.Canvas;
 import java.awt.Dimension;
 import java.awt.GraphicsConfiguration;
 import java.awt.GraphicsDevice;
@@ -209,8 +211,13 @@ public class Application
 	{
 		startWithArgs(args);
 	}
-
+	
 	public static Application startWithArgs(String[] args)
+	{
+		return startWithArgs(args, true);
+	}
+
+	public static Application startWithArgs(String[] args, final boolean useNewt)
 	{
 		Configuration.setValue(AVKey.SCENE_CONTROLLER_CLASS_NAME, getSceneControllerClass().getName());
 		Configuration.setValue(AVKey.TESSELLATOR_CLASS_NAME, getRectangularTessellatorClass().getName());
@@ -288,7 +295,7 @@ public class Application
 			@Override
 			public Application opened(Theme theme, Element themeElement, URL themeUrl)
 			{
-				return start(theme, true);
+				return start(theme, true, useNewt);
 			}
 		};
 		if (themeUrl == null)
@@ -301,7 +308,7 @@ public class Application
 		}
 	}
 
-	private static Application start(Theme theme, boolean showSplashScreen)
+	private static Application start(Theme theme, boolean showSplashScreen, boolean useNewt)
 	{
 		if (theme.getInitialLatitude() != null)
 		{
@@ -332,7 +339,7 @@ public class Application
 			}
 		}
 
-		return new Application(theme, showSplashScreen);
+		return new Application(theme, showSplashScreen, useNewt);
 	}
 
 	private final Theme theme;
@@ -340,7 +347,8 @@ public class Application
 	private JFrame fullscreenFrame;
 	private boolean fullscreen;
 
-	private final WorldWindowNewtCanvas wwd;
+	private final WorldWindow wwd;
+	private final Canvas wwdCanvas;
 	private MouseLayer mouseLayer;
 
 	private SideBar sideBar;
@@ -374,7 +382,7 @@ public class Application
 
 	private WmsBrowser wmsBrowser;
 
-	private Application(Theme theme, boolean showSplashScreen)
+	private Application(Theme theme, boolean showSplashScreen, boolean useNewt)
 	{
 		//TODO implement theme.isFullscreen()
 
@@ -400,10 +408,18 @@ public class Application
 		{
 			System.setProperty(AVKey.STEREO_MODE, "device");
 		}
-		Configuration.setValue(AVKey.WORLD_WINDOW_CLASS_NAME, WorldWindowNewtAutoDrawable.class.getName());
-		Configuration.setValue(AVKey.INPUT_HANDLER_CLASS_NAME, NewtInputHandler.class.getName());
-		wwd = new WorldWindowNewtCanvas();
-		wwd.setMinimumSize(new Dimension(1, 1));
+		if (useNewt)
+		{
+			Configuration.setValue(AVKey.WORLD_WINDOW_CLASS_NAME, WorldWindowNewtAutoDrawable.class.getName());
+			Configuration.setValue(AVKey.INPUT_HANDLER_CLASS_NAME, NewtInputHandler.class.getName());
+			wwd = new WorldWindowNewtCanvas();
+		}
+		else
+		{
+			wwd = new WorldWindowGLCanvas();
+		}
+		wwdCanvas = (Canvas) wwd;
+		wwdCanvas.setMinimumSize(new Dimension(1, 1));
 		if (splashScreen != null)
 		{
 			splashScreen.addRenderingListener(wwd);
@@ -458,7 +474,7 @@ public class Application
 		panel.add(splitPane, BorderLayout.CENTER);
 		if (!fullscreen)
 		{
-			splitPane.setRightComponent(wwd);
+			splitPane.setRightComponent(wwdCanvas);
 		}
 		splitPane.setOneTouchExpandable(true);
 		loadSplitLocation();
@@ -527,7 +543,7 @@ public class Application
 				public void run()
 				{
 					frame.setVisible(true);
-					wwd.createBufferStrategy(2);
+					wwdCanvas.createBufferStrategy(2);
 				}
 			});
 		}
@@ -1061,7 +1077,7 @@ public class Application
 
 			if (!fullscreen)
 			{
-				splitPane.setRightComponent(wwd);
+				splitPane.setRightComponent(wwdCanvas);
 				frame.setBounds(Settings.get().getWindowBounds());
 				if (Settings.get().isWindowMaximized())
 				{
@@ -1080,7 +1096,7 @@ public class Application
 
 				JPanel fullscreenPanel = new JPanel(new BorderLayout());
 				fullscreenFrame.setContentPane(fullscreenPanel);
-				fullscreenPanel.add(wwd, BorderLayout.CENTER);
+				fullscreenPanel.add(wwdCanvas, BorderLayout.CENTER);
 
 				fullscreenFrame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 				fullscreenFrame.addWindowListener(new WindowAdapter()
