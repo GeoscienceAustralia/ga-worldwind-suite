@@ -138,7 +138,7 @@ public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wire
 		{
 			coordinateTransformation = CoordinateTransformationUtil.getTransformationToWGS84(s);
 		}
-		
+
 		s = (String) params.getValue(AVKeyMore.PAINTED_VARIABLE);
 		if (s != null)
 		{
@@ -308,14 +308,6 @@ public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wire
 		bottomSurface.setReverseNormals(!reverseNormals);
 		bottomSurface.setElevation(bottomElevation);
 		bottomSurface.setUseOrderedRendering(useOrderedRendering);
-
-		//create the textures
-		topTexture = new TextureRenderer(dataProvider.getXSize(), dataProvider.getYSize(), true, true);
-		bottomTexture = new TextureRenderer(dataProvider.getXSize(), dataProvider.getYSize(), true, true);
-		minLonTexture = new TextureRenderer(dataProvider.getYSize(), dataProvider.getZSize(), true, true);
-		maxLonTexture = new TextureRenderer(dataProvider.getYSize(), dataProvider.getZSize(), true, true);
-		minLatTexture = new TextureRenderer(dataProvider.getXSize(), dataProvider.getZSize(), true, true);
-		maxLatTexture = new TextureRenderer(dataProvider.getXSize(), dataProvider.getZSize(), true, true);
 
 		//update each shape's wireframe property so they match the layer's
 		setWireframe(isWireframe());
@@ -771,7 +763,7 @@ public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wire
 	{
 		return paintedVariable;
 	}
-	
+
 	@Override
 	protected void doPick(DrawContext dc, Point point)
 	{
@@ -793,6 +785,21 @@ public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wire
 
 		synchronized (dataLock)
 		{
+			if (!dataAvailable)
+			{
+				return;
+			}
+
+			if (topTexture == null)
+			{
+				topTexture = new TextureRenderer(dataProvider.getXSize(), dataProvider.getYSize(), true, true);
+				bottomTexture = new TextureRenderer(dataProvider.getXSize(), dataProvider.getYSize(), true, true);
+				minLonTexture = new TextureRenderer(dataProvider.getYSize(), dataProvider.getZSize(), true, true);
+				maxLonTexture = new TextureRenderer(dataProvider.getYSize(), dataProvider.getZSize(), true, true);
+				minLatTexture = new TextureRenderer(dataProvider.getXSize(), dataProvider.getZSize(), true, true);
+				maxLatTexture = new TextureRenderer(dataProvider.getXSize(), dataProvider.getZSize(), true, true);
+			}
+
 			//recalculate surfaces and clipping planes each frame (in case user drags one of the surfaces)
 			recalculateSurfaces();
 			recalculateClippingPlanes(dc);
