@@ -16,7 +16,7 @@ For more information on the project, see the [project wiki](https://github.com/g
 
 **Update: March 2013**
 
-The GA-M3DV team is no longer actively maintaining this project. We have moved our development effort to the [EarthSci platform]((https://github.com/ga-m3dv/ga-earthsci-rcp). 
+The GA-M3DV team is no longer actively maintaining this project. We have moved our development effort to the [EarthSci platform](https://github.com/ga-m3dv/ga-earthsci-rcp). 
 
 This platform is an open source project that will fill the same niche as the `ga-worldwind-suite`, but has been redesigned from the ground-up to be a flexible earth science visualisation platform. It is built on Eclipse E4AP and has a powerful plugin architecture that makes it easier to add new functionality without having to change the core codebase.
 
