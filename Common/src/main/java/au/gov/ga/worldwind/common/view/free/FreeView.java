@@ -74,7 +74,7 @@ public class FreeView extends BasicView implements TransformView
 	public java.awt.Rectangle computeViewport(DrawContext dc)
 	{
 		int[] viewportArray = new int[4];
-		this.dc.getGL().glGetIntegerv(GL2.GL_VIEWPORT, viewportArray, 0);
+		this.dc.getGL().getGL2().glGetIntegerv(GL2.GL_VIEWPORT, viewportArray, 0);
 		return new java.awt.Rectangle(viewportArray[0], viewportArray[1], viewportArray[2], viewportArray[3]);
 	}
 
@@ -109,7 +109,7 @@ public class FreeView extends BasicView implements TransformView
 			throw new IllegalArgumentException(message);
 		}
 
-		if (dc.getGL() == null)
+		if (dc.getGL().getGL2() == null)
 		{
 			String message = Logging.getMessage("nullValue.DrawingContextGLIsNull");
 			Logging.logger().severe(message);

@@ -17,7 +17,7 @@ public class ProjectionStarsLayer extends StarsLayer
 	{
 		//copied from super's doRender() function
 		
-		ogsh.pushProjectionIdentity(dc.getGL());
+		ogsh.pushProjectionIdentity(dc.getGL().getGL2());
         double distanceFromOrigin = dc.getView().getEyePoint().getLength3();
         double near = distanceFromOrigin;
         double far = this.radius + distanceFromOrigin;
@@ -44,7 +44,7 @@ public class ProjectionStarsLayer extends StarsLayer
 			return;
 		}
 
-        GL2 gl = dc.getGL();
+        GL2 gl = dc.getGL().getGL2();
         OGLStackHandler ogsh = new OGLStackHandler();
 
         try

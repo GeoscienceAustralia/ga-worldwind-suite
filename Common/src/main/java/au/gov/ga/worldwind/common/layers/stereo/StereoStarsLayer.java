@@ -46,7 +46,7 @@ public class StereoStarsLayer extends ProjectionStarsLayer
 			if (projection != null)
 			{
 				double[] matrixArray = new double[16];
-				GL2 gl = dc.getGL();
+				GL2 gl = dc.getGL().getGL2();
 				gl.glMatrixMode(GL2.GL_PROJECTION);
 				gl.glPushMatrix();
 
@@ -71,7 +71,7 @@ public class StereoStarsLayer extends ProjectionStarsLayer
 		{
 			pointSize *= 2f;
 		}
-		dc.getGL().glPointSize(pointSize);
+		dc.getGL().getGL2().glPointSize(pointSize);
 
 		super.doRender(dc);
 	}

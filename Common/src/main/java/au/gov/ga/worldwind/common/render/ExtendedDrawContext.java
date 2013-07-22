@@ -87,7 +87,7 @@ public class ExtendedDrawContext extends DrawContextImpl
 	 */
 	public static void applyWireframePolygonMode(DrawContext dc)
 	{
-		dc.getGL().glPolygonMode(GL2.GL_FRONT_AND_BACK, isWireframe(dc) ? GL2.GL_LINE : GL2.GL_FILL);
+		dc.getGL().getGL2().glPolygonMode(GL2.GL_FRONT_AND_BACK, isWireframe(dc) ? GL2.GL_LINE : GL2.GL_FILL);
 	}
 
 	@Override

@@ -115,7 +115,7 @@ public class FogLayer extends RenderableLayer
 		// End based on distance to horizon
 		float end = (float) (dc.getView().getHorizonDistance() * this.farFactor);
 		// Set GL fog
-		GL2 gl = dc.getGL();
+		GL2 gl = dc.getGL().getGL2();
 		gl.glFogfv(GL2.GL_FOG_COLOR, fogColor, 0); // Set fog color
 		gl.glFogi(GL2.GL_FOG_MODE, GL2.GL_LINEAR); // Set fog mode
 		gl.glFogf(GL2.GL_FOG_START, start); // Set fog start distance

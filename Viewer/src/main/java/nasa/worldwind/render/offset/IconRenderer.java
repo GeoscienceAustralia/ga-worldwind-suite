@@ -509,7 +509,7 @@ public class IconRenderer
 
     protected void beginDrawIcons(DrawContext dc)
     {
-        GL2 gl = dc.getGL();
+        GL2 gl = dc.getGL().getGL2();
 
         this.oglStackHandler.clear();
 
@@ -562,7 +562,7 @@ public class IconRenderer
         if (dc.isPickingMode())
             this.pickSupport.endPicking(dc);
 
-        this.oglStackHandler.pop(dc.getGL());
+        this.oglStackHandler.pop(dc.getGL().getGL2());
     }
 
     protected void drawIconsInBatch(DrawContext dc, OrderedIcon uIcon)
@@ -652,7 +652,7 @@ public class IconRenderer
             pedestalSpacing = 0d;
         }
 
-        GL2 gl = dc.getGL();
+        GL2 gl = dc.getGL().getGL2();
 
         this.setDepthFunc(dc, uIcon, screenPoint);
 
@@ -727,7 +727,7 @@ public class IconRenderer
     protected void applyBackground(DrawContext dc, WWIcon icon, Vec4 screenPoint, double width, double height,
         double pedestalSpacing, double pedestalScale)
     {
-        GL2 gl = dc.getGL();
+        GL2 gl = dc.getGL().getGL2();
 
         double backgroundScale;
         backgroundScale = icon.getBackgroundScale();
@@ -760,7 +760,7 @@ public class IconRenderer
 
     protected void setDepthFunc(DrawContext dc, OrderedIcon uIcon, Vec4 screenPoint)
     {
-        GL2 gl = dc.getGL();
+        GL2 gl = dc.getGL().getGL2();
 
         if (uIcon.icon.isAlwaysOnTop())
         {

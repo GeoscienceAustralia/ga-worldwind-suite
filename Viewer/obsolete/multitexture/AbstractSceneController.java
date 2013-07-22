@@ -286,7 +286,7 @@ public abstract class AbstractSceneController extends WWObjectImpl implements Sc
             throw new IllegalStateException(message);
         }
 
-        javax.media.opengl.GL gl = dc.getGL();
+        javax.media.opengl.GL gl = dc.getGL().getGL2();
 
         gl.glPushAttrib(GL.GL_VIEWPORT_BIT | GL.GL_ENABLE_BIT | GL.GL_TRANSFORM_BIT);
 
@@ -304,13 +304,13 @@ public abstract class AbstractSceneController extends WWObjectImpl implements Sc
     protected void clearFrame(DrawContext dc)
     {
         Color cc = dc.getClearColor();
-        dc.getGL().glClearColor(cc.getRed(), cc.getGreen(), cc.getBlue(), cc.getAlpha());
-        dc.getGL().glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
+        dc.getGL().getGL2().glClearColor(cc.getRed(), cc.getGreen(), cc.getBlue(), cc.getAlpha());
+        dc.getGL().getGL2().glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
     }
 
     protected void finalizeFrame(DrawContext dc)
     {
-        GL gl = dc.getGL();
+        GL gl = dc.getGL().getGL2();
 
         gl.glMatrixMode(GL.GL_MODELVIEW);
         gl.glPopMatrix();
@@ -422,7 +422,7 @@ public abstract class AbstractSceneController extends WWObjectImpl implements Sc
         {
             int[] viewport = new int[4];
             java.nio.ByteBuffer pixel = com.sun.opengl.util.BufferUtil.newByteBuffer(3);
-            GL gl = dc.getGL();
+            GL gl = dc.getGL().getGL2();
             gl.glGetIntegerv(GL.GL_VIEWPORT, viewport, 0);
             gl.glReadPixels(dc.getPickPoint().x, viewport[3] - dc.getPickPoint().y, 1, 1, GL.GL_RGB,
                 GL.GL_UNSIGNED_BYTE, pixel);
@@ -513,7 +513,7 @@ public abstract class AbstractSceneController extends WWObjectImpl implements Sc
                 Model model = dc.getModel();
 
                 float[] previousColor = new float[4];
-                dc.getGL().glGetFloatv(GL.GL_CURRENT_COLOR, previousColor, 0);
+                dc.getGL().getGL2().glGetFloatv(GL.GL_CURRENT_COLOR, previousColor, 0);
 
                 for (SectorGeometry sg : dc.getSurfaceGeometry())
                 {
@@ -522,12 +522,12 @@ public abstract class AbstractSceneController extends WWObjectImpl implements Sc
 
                     if (model.isShowTessellationBoundingVolumes())
                     {
-                        dc.getGL().glColor3d(1, 0, 0);
+                        dc.getGL().getGL2().glColor3d(1, 0, 0);
                         sg.renderBoundingVolume(dc);
                     }
                 }
 
-                dc.getGL().glColor4fv(previousColor, 0);
+                dc.getGL().getGL2().glColor4fv(previousColor, 0);
             }
         }
         catch (Throwable e)
@@ -545,7 +545,7 @@ public abstract class AbstractSceneController extends WWObjectImpl implements Sc
      */
     protected void checkGLErrors(DrawContext dc)
     {
-        GL gl = dc.getGL();
+        GL gl = dc.getGL().getGL2();
         int err = gl.glGetError();
         if (err != GL.GL_NO_ERROR)
         {

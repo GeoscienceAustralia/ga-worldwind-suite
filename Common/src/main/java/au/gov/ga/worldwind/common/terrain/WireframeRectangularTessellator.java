@@ -133,7 +133,7 @@ public class WireframeRectangularTessellator extends RectangularTessellatorAcces
 
 		dc.getView().pushReferenceCenter(dc, ri.getReferenceCenter());
 
-		GL2 gl = dc.getGL();
+		GL2 gl = dc.getGL().getGL2();
 		gl.glPushAttrib(GL2.GL_DEPTH_BUFFER_BIT | GL2.GL_POLYGON_BIT | GL2.GL_TEXTURE_BIT | GL2.GL_ENABLE_BIT
 				| GL2.GL_CURRENT_BIT);
 		//gl.glEnable(GL.GL_BLEND);
@@ -191,7 +191,7 @@ public class WireframeRectangularTessellator extends RectangularTessellatorAcces
 	{
 		if (!backfaceCulling)
 		{
-			dc.getGL().glDisable(GL2.GL_CULL_FACE);
+			dc.getGL().getGL2().glDisable(GL2.GL_CULL_FACE);
 		}
 		return super.render(dc, tile, numTextureUnits);
 	}
@@ -365,7 +365,7 @@ public class WireframeRectangularTessellator extends RectangularTessellatorAcces
 
 		if (dc.getGLRuntimeCapabilities().isUseVertexBufferObject())
 		{
-			GL2 gl = dc.getGL();
+			GL2 gl = dc.getGL().getGL2();
 			OGLStackHandler ogsh = new OGLStackHandler();
 
 			try

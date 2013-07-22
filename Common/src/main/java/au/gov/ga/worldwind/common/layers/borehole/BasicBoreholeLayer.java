@@ -242,7 +242,7 @@ public class BasicBoreholeLayer extends AbstractLayer implements BoreholeLayer, 
 			markerRenderer.render(dc, markers);
 			annotationRenderer.render(dc, tooltipAnnotation, tooltipAnnotation.getAnnotationDrawPoint(dc), this);
 
-			GL2 gl = dc.getGL();
+			GL2 gl = dc.getGL().getGL2();
 			try
 			{
 				gl.glPushAttrib(GL2.GL_LINE_BIT);

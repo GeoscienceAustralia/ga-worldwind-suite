@@ -447,7 +447,7 @@ public class RSSEarthquakesLayer extends RenderableLayer implements Setupable, L
 		{
 			double finalScale = scale * this.computeScale(dc);
 
-			GL2 gl = dc.getGL();
+			GL2 gl = dc.getGL().getGL2();
 			gl.glTranslated(x, y, 0);
 			gl.glScaled(finalScale, finalScale, 1);
 		}
@@ -511,7 +511,7 @@ public class RSSEarthquakesLayer extends RenderableLayer implements Setupable, L
 				this.shapeBuffer = FrameFactory.createShapeBuffer(AVKey.SHAPE_ELLIPSE, size, size, 0, null);
 			}
 
-			dc.getGL().glTranslated(-size / 2, -size / 2, 0);
+			dc.getGL().getGL2().glTranslated(-size / 2, -size / 2, 0);
 			FrameFactory.drawBuffer(dc, GL2.GL_TRIANGLE_FAN, this.shapeBuffer);
 		}
 	}
@@ -542,7 +542,7 @@ public class RSSEarthquakesLayer extends RenderableLayer implements Setupable, L
 				this.shapeBuffer = FrameFactory.createShapeBuffer(AVKey.SHAPE_RECTANGLE, size, 4, 0, null);
 			}
 
-			dc.getGL().glTranslated(-size / 2, -2, 0);
+			dc.getGL().getGL2().glTranslated(-size / 2, -2, 0);
 			FrameFactory.drawBuffer(dc, GL2.GL_TRIANGLE_FAN, this.shapeBuffer);
 
 
@@ -554,7 +554,7 @@ public class RSSEarthquakesLayer extends RenderableLayer implements Setupable, L
 
 				if (drawPoint != null && surfacePoint != null)
 				{
-					GL2 gl = dc.getGL();
+					GL2 gl = dc.getGL().getGL2();
 					OGLStackHandler stack = new OGLStackHandler();
 
 					try

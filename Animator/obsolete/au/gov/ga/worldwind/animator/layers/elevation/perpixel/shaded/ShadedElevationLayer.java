@@ -84,7 +84,7 @@ public class ShadedElevationLayer extends ElevationLayer
 			initShader(dc);
 		}
 
-		GL gl = dc.getGL();
+		GL gl = dc.getGL().getGL2();
 		gl.glUseProgram(shaderProgram);
 
 		//double minElevation = ((ElevationTesselator) dc.getGlobe().getTessellator()).getMinElevation();
@@ -117,7 +117,7 @@ public class ShadedElevationLayer extends ElevationLayer
 
 	protected void initShader(DrawContext dc)
 	{
-		GL gl = dc.getGL();
+		GL gl = dc.getGL().getGL2();
 		int v = gl.glCreateShader(GL.GL_VERTEX_SHADER);
 		int f = gl.glCreateShader(GL.GL_FRAGMENT_SHADER);
 		String vsrc = "", fsrc = "", line;
@@ -174,7 +174,7 @@ public class ShadedElevationLayer extends ElevationLayer
 	@Override
 	protected void packupShader(DrawContext dc)
 	{
-		dc.getGL().glUseProgram(0);
+		dc.getGL().getGL2().glUseProgram(0);
 	}
 
 	public double getExaggeration()
@@ -651,7 +651,7 @@ public class ShadedElevationLayer extends ElevationLayer
 			throw new IllegalStateException(message);
 		}
 
-		GL gl = dc.getGL();
+		GL gl = dc.getGL().getGL2();
 		gl.glUniform1f(minTexElevationUniform, (float) ((ElevationTexture) texture)
 				.getMinElevation());
 		gl.glUniform1f(maxTexElevationUniform, (float) ((ElevationTexture) texture)

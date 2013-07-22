@@ -291,7 +291,7 @@ public class CurtainTextureTile extends CurtainTile
 		}
 
 		this.setTexture(dc.getTextureCache(), t);
-		t.bind(dc.getGL());
+		t.bind(dc.getGL().getGL2());
 
 		this.setTextureParameters(dc, t);
 
@@ -307,7 +307,7 @@ public class CurtainTextureTile extends CurtainTile
 			throw new IllegalStateException(message);
 		}
 
-		GL2 gl = dc.getGL();
+		GL2 gl = dc.getGL().getGL2();
 
 		// Use a mipmap minification filter when either of the following is true:
 		// a. The texture has mipmap data. This is typically true for formats with embedded mipmaps, such as DDS.
@@ -381,7 +381,7 @@ public class CurtainTextureTile extends CurtainTile
 		}
 
 		if (t != null)
-			t.bind(dc.getGL());
+			t.bind(dc.getGL().getGL2());
 
 		return t != null;
 	}
@@ -468,8 +468,8 @@ public class CurtainTextureTile extends CurtainTile
 		double xShift = (segment.getStart() - fallbackSegment.getStart()) / fhd;
 		double yShift = (segment.getBottom() - fallbackSegment.getBottom()) / fvd;
 
-		dc.getGL().glTranslated(xShift, yShift, 0);
-		dc.getGL().glScaled(xScale, yScale, 1);
+		dc.getGL().getGL2().glTranslated(xShift, yShift, 0);
+		dc.getGL().getGL2().glScaled(xScale, yScale, 1);
 	}
 
 	@Override

@@ -56,7 +56,7 @@ public class MultiTextureSurfaceTileRenderer extends GeographicSurfaceTileRender
 			throw new IllegalStateException(message);
 		}
 
-		GL2 gl = dc.getGL();
+		GL2 gl = dc.getGL().getGL2();
 		int totalNumTexUnits = dc.getGLRuntimeCapabilities().getNumTextureUnits();
 		boolean showOutlines = this.isShowImageTileOutlines() && totalNumTexUnits > 2;
 
@@ -72,12 +72,12 @@ public class MultiTextureSurfaceTileRenderer extends GeographicSurfaceTileRender
 			this.alphaTexture = dc.getTextureCache().getTexture(this);
 			if (this.alphaTexture == null)
 			{
-				this.initAlphaTexture(DEFAULT_ALPHA_TEXTURE_SIZE); // TODO: choose size to match incoming tile sizes?
+				this.initAlphaTexture(dc, DEFAULT_ALPHA_TEXTURE_SIZE); // TODO: choose size to match incoming tile sizes?
 				dc.getTextureCache().put(this, this.alphaTexture);
 			}
 
 			if (showOutlines && this.outlineTexture == null)
-				this.initOutlineTexture(128);
+				this.initOutlineTexture(dc, 128);
 
 			gl.glEnable(GL2.GL_DEPTH_TEST);
 			gl.glDepthFunc(GL2.GL_LEQUAL);

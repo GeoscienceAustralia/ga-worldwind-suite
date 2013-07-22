@@ -678,7 +678,7 @@ public abstract class TiledCurtainLayer extends AbstractLayer implements Bounded
 			sortedTiles = this.currentTiles.toArray(sortedTiles);
 			Arrays.sort(sortedTiles, levelComparer);
 
-			GL2 gl = dc.getGL();
+			GL2 gl = dc.getGL().getGL2();
 
 			if (this.isUseTransparentTextures() || this.getOpacity() < 1)
 			{
@@ -736,7 +736,7 @@ public abstract class TiledCurtainLayer extends AbstractLayer implements Bounded
 		// color as a premultiplied color, so that any incoming premultiplied color will be properly combined with the
 		// base color.
 
-		GL2 gl = dc.getGL();
+		GL2 gl = dc.getGL().getGL2();
 
 		double alpha = this.getOpacity();
 		gl.glColor4d(alpha, alpha, alpha, alpha);
@@ -825,9 +825,9 @@ public abstract class TiledCurtainLayer extends AbstractLayer implements Bounded
 				OGLTextRenderer.getOrCreateTextRenderer(dc.getTextRendererCache(),
 						java.awt.Font.decode("Arial-Plain-13"));
 
-		dc.getGL().glDisable(GL2.GL_DEPTH_TEST);
-		dc.getGL().glDisable(GL2.GL_BLEND);
-		dc.getGL().glDisable(GL2.GL_TEXTURE_2D);
+		dc.getGL().getGL2().glDisable(GL2.GL_DEPTH_TEST);
+		dc.getGL().getGL2().glDisable(GL2.GL_BLEND);
+		dc.getGL().getGL2().glDisable(GL2.GL_TEXTURE_2D);
 
 		textRenderer.beginRendering(viewport.width, viewport.height);
 		textRenderer.setColor(java.awt.Color.YELLOW);
@@ -849,8 +849,8 @@ public abstract class TiledCurtainLayer extends AbstractLayer implements Bounded
 	protected void drawBoundingVolumes(DrawContext dc, List<CurtainTextureTile> tiles)
 	{
 		float[] previousColor = new float[4];
-		dc.getGL().glGetFloatv(GL2.GL_CURRENT_COLOR, previousColor, 0);
-		dc.getGL().glColor3d(0, 1, 0);
+		dc.getGL().getGL2().glGetFloatv(GL2.GL_CURRENT_COLOR, previousColor, 0);
+		dc.getGL().getGL2().glColor3d(0, 1, 0);
 
 		for (CurtainTextureTile tile : tiles)
 		{
@@ -859,16 +859,16 @@ public abstract class TiledCurtainLayer extends AbstractLayer implements Bounded
 			if (extent instanceof Renderable)
 				((Renderable) extent).render(dc);
 
-			/*dc.getGL().glBegin(GL.GL_POINTS);
+			/*dc.getGL().getGL2().glBegin(GL.GL_POINTS);
 			Vec4[] points = path.getPointsInSegment(dc, tile.getSegment(), top, bottom);
 			for (Vec4 point : points)
 			{
-				dc.getGL().glVertex3d(point.x, point.y, point.z);
+				dc.getGL().getGL2().glVertex3d(point.x, point.y, point.z);
 			}
-			dc.getGL().glEnd();*/
+			dc.getGL().getGL2().glEnd();*/
 		}
 
-		dc.getGL().glColor4fv(previousColor, 0);
+		dc.getGL().getGL2().glColor4fv(previousColor, 0);
 	}
 
 	//**************************************************************//

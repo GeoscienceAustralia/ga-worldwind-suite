@@ -342,7 +342,7 @@ class KeyFrameMarkers implements Renderable, SelectListener
 			return;
 		}
 
-		GL2 gl = dc.getGL();
+		GL2 gl = dc.getGL().getGL2();
 		OGLStackHandler stack = new OGLStackHandler();
 		stack.pushAttrib(gl, GL2.GL_CURRENT_BIT | GL2.GL_LINE_BIT | GL2.GL_COLOR_BUFFER_BIT | GL2.GL_HINT_BIT);
 		stack.pushClientAttrib(gl, GL2.GL_CLIENT_VERTEX_ARRAY_BIT);
@@ -377,7 +377,7 @@ class KeyFrameMarkers implements Renderable, SelectListener
 	 */
 	private void drawMarkerElevationRay(DrawContext dc)
 	{
-		GL2 gl = dc.getGL();
+		GL2 gl = dc.getGL().getGL2();
 		OGLStackHandler stack = new OGLStackHandler();
 		stack.pushAttrib(gl, GL2.GL_CURRENT_BIT | GL2.GL_LINE_BIT | GL2.GL_COLOR_BUFFER_BIT | GL2.GL_HINT_BIT);
 		stack.pushClientAttrib(gl, GL2.GL_CLIENT_VERTEX_ARRAY_BIT);

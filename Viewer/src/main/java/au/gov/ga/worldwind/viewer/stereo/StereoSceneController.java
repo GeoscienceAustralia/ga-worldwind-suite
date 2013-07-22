@@ -79,7 +79,7 @@ public class StereoSceneController extends ExtendedSceneController
 			lastFieldOfView = fieldOfView;
 		}
 
-		GL2 gl = dc.getGL();
+		GL2 gl = dc.getGL().getGL2();
 		if (!stereoTested)
 		{
 			ByteBuffer buffer16 = Buffers.newDirectByteBuffer(16);

@@ -65,7 +65,7 @@ public class SegmentGeometry implements Renderable
 	{
 		dc.getView().pushReferenceCenter(dc, referenceCenter);
 
-		GL2 gl = dc.getGL();
+		GL2 gl = dc.getGL().getGL2();
 		OGLStackHandler ogsh = new OGLStackHandler();
 
 		try
@@ -156,7 +156,7 @@ public class SegmentGeometry implements Renderable
 
 	protected int[] fillVerticesVBO(DrawContext dc)
 	{
-		GL2 gl = dc.getGL();
+		GL2 gl = dc.getGL().getGL2();
 
 		int[] vboIds = (int[]) dc.getGpuResourceCache().get(this.vboCacheKey);
 		if (vboIds == null)

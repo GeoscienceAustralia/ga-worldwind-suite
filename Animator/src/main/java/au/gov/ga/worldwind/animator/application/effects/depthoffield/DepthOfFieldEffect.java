@@ -106,7 +106,7 @@ public class DepthOfFieldEffect extends EffectBase
 	@Override
 	protected void resizeExtraFrameBuffers(DrawContext dc, Dimension dimensions)
 	{
-		blurFrameBuffer.resize(dc.getGL(), new Dimension(dimensions.width / 4, dimensions.height / 4)); //1/16 of the size
+		blurFrameBuffer.resize(dc.getGL().getGL2(), new Dimension(dimensions.width / 4, dimensions.height / 4)); //1/16 of the size
 	}
 
 	/**
@@ -205,7 +205,7 @@ public class DepthOfFieldEffect extends EffectBase
 	@Override
 	protected void drawFrameBufferWithEffect(DrawContext dc, Dimension dimensions, FrameBuffer frameBuffer)
 	{
-		GL2 gl = dc.getGL();
+		GL2 gl = dc.getGL().getGL2();
 
 		depthOfFieldShader.createIfRequired(gl);
 		gaussianBlurShader.createIfRequired(gl);
@@ -256,7 +256,7 @@ public class DepthOfFieldEffect extends EffectBase
 	@Override
 	protected void releaseEffect(DrawContext dc)
 	{
-		GL2 gl = dc.getGL();
+		GL2 gl = dc.getGL().getGL2();
 		depthOfFieldShader.deleteIfCreated(gl);
 		gaussianBlurShader.deleteIfCreated(gl);
 		blurFrameBuffer.deleteIfCreated(gl);

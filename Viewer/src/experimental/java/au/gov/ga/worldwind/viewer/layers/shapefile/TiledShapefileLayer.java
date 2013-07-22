@@ -579,7 +579,7 @@ public abstract class TiledShapefileLayer extends AbstractLayer
 		// color as a premultiplied color, so that any incoming premultiplied color will be properly combined with the
 		// base color.
 
-		GL2 gl = dc.getGL();
+		GL2 gl = dc.getGL().getGL2();
 
 		double alpha = this.getOpacity();
 		gl.glColor4d(alpha, alpha, alpha, alpha);
@@ -670,9 +670,9 @@ public abstract class TiledShapefileLayer extends AbstractLayer
 				OGLTextRenderer.getOrCreateTextRenderer(dc.getTextRendererCache(), java.awt.Font
 						.decode("Arial-Plain-13"));
 
-		dc.getGL().glDisable(GL2.GL_DEPTH_TEST);
-		dc.getGL().glDisable(GL2.GL_BLEND);
-		dc.getGL().glDisable(GL2.GL_TEXTURE_2D);
+		dc.getGL().getGL2().glDisable(GL2.GL_DEPTH_TEST);
+		dc.getGL().getGL2().glDisable(GL2.GL_BLEND);
+		dc.getGL().getGL2().glDisable(GL2.GL_TEXTURE_2D);
 
 		textRenderer.beginRendering(viewport.width, viewport.height);
 		textRenderer.setColor(java.awt.Color.YELLOW);

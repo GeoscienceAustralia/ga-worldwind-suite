@@ -45,7 +45,7 @@ public class ShapefileRenderer
 	{
 		beginRendering(dc);
 
-		GL gl = dc.getGL();
+		GL gl = dc.getGL().getGL2();
 
 		gl.glClear(GL2.GL_DEPTH_BUFFER_BIT);
 		
@@ -112,14 +112,14 @@ public class ShapefileRenderer
 			Logging.logger().severe(message);
 			throw new IllegalArgumentException(message);
 		}
-		if (dc.getGL() == null)
+		if (dc.getGL().getGL2() == null)
 		{
 			String message = Logging.getMessage("nullValue.DrawingContextGLIsNull");
 			Logging.logger().severe(message);
 			throw new IllegalStateException(message);
 		}
 
-		GL2 gl = dc.getGL();
+		GL2 gl = dc.getGL().getGL2();
 
 		gl.glPushClientAttrib(GL2.GL_CLIENT_VERTEX_ARRAY_BIT);
 		gl.glEnableClientState(GL2.GL_VERTEX_ARRAY);
@@ -181,14 +181,14 @@ public class ShapefileRenderer
 			Logging.logger().severe(message);
 			throw new IllegalArgumentException(message);
 		}
-		if (dc.getGL() == null)
+		if (dc.getGL().getGL2() == null)
 		{
 			String message = Logging.getMessage("nullValue.DrawingContextGLIsNull");
 			Logging.logger().severe(message);
 			throw new IllegalStateException(message);
 		}
 
-		GL2 gl = dc.getGL();
+		GL2 gl = dc.getGL().getGL2();
 
 		gl.glPopAttrib();
 		gl.glPopClientAttrib();
@@ -202,14 +202,14 @@ public class ShapefileRenderer
 			Logging.logger().severe(message);
 			throw new IllegalStateException(message);
 		}
-		if (dc.getGL() == null)
+		if (dc.getGL().getGL2() == null)
 		{
 			String message = Logging.getMessage("nullValue.DrawingContextGLIsNull");
 			Logging.logger().severe(message);
 			throw new IllegalStateException(message);
 		}
 
-		GL2 gl = dc.getGL();
+		GL2 gl = dc.getGL().getGL2();
 
 		if (this.isUseEXTBlendFuncSeparate())
 		{
@@ -247,14 +247,14 @@ public class ShapefileRenderer
 			Logging.logger().severe(message);
 			throw new IllegalStateException(message);
 		}
-		if (dc.getGL() == null)
+		if (dc.getGL().getGL2() == null)
 		{
 			String message = Logging.getMessage("nullValue.DrawingContextGLIsNull");
 			Logging.logger().severe(message);
 			throw new IllegalStateException(message);
 		}
 
-		GL2 gl = dc.getGL();
+		GL2 gl = dc.getGL().getGL2();
 
 		gl.glEnable(GL2.GL_LIGHTING);
 		setLightModel(gl);

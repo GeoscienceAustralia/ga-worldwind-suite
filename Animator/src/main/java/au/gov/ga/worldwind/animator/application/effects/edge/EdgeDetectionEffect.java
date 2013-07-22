@@ -83,7 +83,7 @@ public class EdgeDetectionEffect extends EffectBase
 	@Override
 	protected void drawFrameBufferWithEffect(DrawContext dc, Dimension dimensions, FrameBuffer frameBuffer)
 	{
-		GL2 gl = dc.getGL();
+		GL2 gl = dc.getGL().getGL2();
 
 		edgeShader.createIfRequired(gl);
 		try
@@ -100,6 +100,6 @@ public class EdgeDetectionEffect extends EffectBase
 	@Override
 	protected void releaseEffect(DrawContext dc)
 	{
-		edgeShader.deleteIfCreated(dc.getGL());
+		edgeShader.deleteIfCreated(dc.getGL().getGL2());
 	}
 }

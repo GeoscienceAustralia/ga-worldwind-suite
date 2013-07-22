@@ -54,7 +54,7 @@ public class AnimatorSceneController extends ExtendedSceneController
 	@Override
 	public void doRepaint(DrawContext dc)
 	{
-		GL2 gl = dc.getGL();
+		GL2 gl = dc.getGL().getGL2();
 		gl.glHint(GL2.GL_FOG_HINT, GL2.GL_NICEST);
 		gl.glHint(GL2.GL_LINE_SMOOTH_HINT, GL2.GL_NICEST);
 		gl.glHint(GL2.GL_PERSPECTIVE_CORRECTION_HINT, GL2.GL_NICEST);

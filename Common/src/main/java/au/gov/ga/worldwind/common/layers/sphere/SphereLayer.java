@@ -70,7 +70,7 @@ public class SphereLayer extends AbstractLayer
 	@Override
 	protected void doRender(DrawContext dc)
 	{
-		GL2 gl = dc.getGL();
+		GL2 gl = dc.getGL().getGL2();
 		GLU glu = dc.getGLU();
 		
 		OGLStackHandler ogsh = new OGLStackHandler();

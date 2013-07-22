@@ -45,7 +45,7 @@ public class DepthLayer extends AbstractLayer
 	@Override
 	protected void doRender(DrawContext dc)
 	{
-		GL2 gl = dc.getGL();
+		GL2 gl = dc.getGL().getGL2();
 		gl.glPushAttrib(GL2.GL_POLYGON_BIT);
 
 		try

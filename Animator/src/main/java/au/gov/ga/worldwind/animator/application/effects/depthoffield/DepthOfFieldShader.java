@@ -57,7 +57,7 @@ public class DepthOfFieldShader extends Shader
 	 */
 	public void use(DrawContext dc, Dimension dimensions, float focus, float near, float far, float blurTextureScale)
 	{
-		GL2 gl = dc.getGL();
+		GL2 gl = dc.getGL().getGL2();
 		super.use(gl);
 
 		gl.glUniform1f(cameraNearUniform, near);

@@ -78,7 +78,7 @@ public class Skybox extends RenderableLayer
 					}
 
 					skybox[i] = TextureIO.newTexture(stream, true, null);
-					skybox[i].bind(dc.getGL());
+					skybox[i].bind(dc.getGL().getGL2());
 					//dc.getTextureCache().put(keys[i], skybox[i]);
 				}
 				catch (IOException e)
@@ -88,7 +88,7 @@ public class Skybox extends RenderableLayer
 					throw new WWRuntimeException(msg, e);
 				}
 
-				GL2 gl = dc.getGL();
+				GL2 gl = dc.getGL().getGL2();
 				gl.glTexEnvf(GL2.GL_TEXTURE_ENV, GL2.GL_TEXTURE_ENV_MODE, GL2.GL_MODULATE);
 				gl.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_MIN_FILTER, GL2.GL_LINEAR_MIPMAP_LINEAR);
 				gl.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_MAG_FILTER, GL2.GL_LINEAR);
@@ -108,7 +108,7 @@ public class Skybox extends RenderableLayer
 	@Override
 	protected void doRender(DrawContext dc)
 	{
-		GL2 gl = dc.getGL();
+		GL2 gl = dc.getGL().getGL2();
 
 		if (!inited)
 		{

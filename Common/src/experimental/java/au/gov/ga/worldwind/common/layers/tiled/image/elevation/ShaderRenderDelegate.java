@@ -125,7 +125,7 @@ public class ShaderRenderDelegate implements IRenderDelegate
 			initShader(dc);
 		}
 
-		GL2 gl = dc.getGL();
+		GL2 gl = dc.getGL().getGL2();
 		gl.glUseProgram(shaderProgram);
 
 		gl.glUniform1f(exaggerationUniform, (float) exaggeration);
@@ -152,7 +152,7 @@ public class ShaderRenderDelegate implements IRenderDelegate
 
 	protected void initShader(DrawContext dc)
 	{
-		GL2 gl = dc.getGL();
+		GL2 gl = dc.getGL().getGL2();
 		int v = gl.glCreateShader(GL2.GL_VERTEX_SHADER);
 		int f = gl.glCreateShader(GL2.GL_FRAGMENT_SHADER);
 		String vsrc = "", fsrc = "", line;
@@ -204,7 +204,7 @@ public class ShaderRenderDelegate implements IRenderDelegate
 
 	protected void packupShader(DrawContext dc)
 	{
-		dc.getGL().glUseProgram(0);
+		dc.getGL().getGL2().glUseProgram(0);
 	}
 
 	@Override

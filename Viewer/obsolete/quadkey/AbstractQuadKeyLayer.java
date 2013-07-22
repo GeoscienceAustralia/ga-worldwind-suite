@@ -348,7 +348,7 @@ public abstract class AbstractQuadKeyLayer extends AbstractLayer
 	{
 		Sphere s = (Sphere) Sector.computeBoundingSphere(dc.getGlobe(), dc
 				.getVerticalExaggeration(), sector);
-		dc.getGL().glColor3d(1, 1, 0);
+		dc.getGL().getGL2().glColor3d(1, 1, 0);
 		s.render(dc);
 
 	}

@@ -816,7 +816,7 @@ public class MaskTiledImageLayer extends TiledImageLayer
 
 	protected void setBlendingFunction(DrawContext dc)
 	{
-		GL2 gl = dc.getGL();
+		GL2 gl = dc.getGL().getGL2();
 		double alpha = this.getOpacity();
 		gl.glColor4d(1.0, 1.0, 1.0, alpha);
 		gl.glEnable(GL2.GL_BLEND);

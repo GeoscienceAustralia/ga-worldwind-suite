@@ -293,7 +293,7 @@ public class CrustLayer extends AbstractLayer implements Loader
 			recalculateColors();
 		}
 
-		GL2 gl = dc.getGL();
+		GL2 gl = dc.getGL().getGL2();
 
 		int push = GL2.GL_CLIENT_VERTEX_ARRAY_BIT;
 		if (colors != null)
@@ -404,7 +404,7 @@ public class CrustLayer extends AbstractLayer implements Loader
 
 	protected void setBlendingFunction(DrawContext dc)
 	{
-		GL2 gl = dc.getGL();
+		GL2 gl = dc.getGL().getGL2();
 		double alpha = this.getOpacity();
 		gl.glColor4d(alpha, alpha, alpha, alpha);
 		gl.glEnable(GL2.GL_BLEND);

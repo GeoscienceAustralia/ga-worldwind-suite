@@ -57,7 +57,7 @@ public class ScreenshotPaintTask implements PaintTask
 		try
 		{
 			int[] viewportArray = new int[4];
-			dc.getGL().glGetIntegerv(GL2.GL_VIEWPORT, viewportArray, 0);
+			dc.getGL().getGL2().glGetIntegerv(GL2.GL_VIEWPORT, viewportArray, 0);
 			int width = viewportArray[2];
 			int height = viewportArray[3];
 

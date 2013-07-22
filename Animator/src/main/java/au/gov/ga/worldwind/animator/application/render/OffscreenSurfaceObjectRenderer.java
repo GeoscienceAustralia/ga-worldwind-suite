@@ -51,7 +51,7 @@ public class OffscreenSurfaceObjectRenderer extends SurfaceObjectTileBuilder
 		{
 			int[] framebuffers = new int[1];
 
-			GL2 gl = dc.getGL();
+			GL2 gl = dc.getGL().getGL2();
 			gl.glGenFramebuffers(1, framebuffers, 0);
 			FrameBufferStack.push(gl, framebuffers[0]);
 
@@ -67,7 +67,7 @@ public class OffscreenSurfaceObjectRenderer extends SurfaceObjectTileBuilder
 		{
 			int[] framebuffers = new int[] { this.framebufferObject };
 
-			GL2 gl = dc.getGL();
+			GL2 gl = dc.getGL().getGL2();
 			FrameBufferStack.pop(gl);
 			gl.glDeleteFramebuffers(1, framebuffers, 0);
 

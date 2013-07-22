@@ -80,7 +80,7 @@ public class LogoLayer extends RenderableLayer
 		if (this.iconFilePath == null)
 			return;
 
-		GL gl = dc.getGL();
+		GL gl = dc.getGL().getGL2();
 
 		boolean attribsPushed = false;
 		boolean modelviewPushed = false;
@@ -213,7 +213,7 @@ public class LogoLayer extends RenderableLayer
 			throw new WWRuntimeException(msg, e);
 		}
 
-		GL gl = dc.getGL();
+		GL gl = dc.getGL().getGL2();
 		gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_MODE, GL.GL_MODULATE);
 		gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER,
 				GL.GL_LINEAR_MIPMAP_LINEAR);

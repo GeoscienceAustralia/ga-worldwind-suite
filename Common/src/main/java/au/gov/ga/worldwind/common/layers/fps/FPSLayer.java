@@ -372,7 +372,7 @@ public class FPSLayer extends AbstractLayer
 		}
 
 
-		GL2 gl = dc.getGL();
+		GL2 gl = dc.getGL().getGL2();
 
 		OGLStackHandler ogsh = new OGLStackHandler();
 

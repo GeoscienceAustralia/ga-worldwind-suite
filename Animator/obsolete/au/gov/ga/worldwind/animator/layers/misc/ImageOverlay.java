@@ -218,7 +218,7 @@ public class ImageOverlay extends AbstractLayer
 			return;
 		}
 
-		GL gl = dc.getGL();
+		GL gl = dc.getGL().getGL2();
 
 		boolean attribsPushed = false;
 		boolean modelviewPushed = false;
@@ -386,7 +386,7 @@ public class ImageOverlay extends AbstractLayer
 			throw new WWRuntimeException(msg, e);
 		}
 
-		GL gl = dc.getGL();
+		GL gl = dc.getGL().getGL2();
 		gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_MODE, GL.GL_MODULATE);
 		gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_LINEAR);//_MIPMAP_LINEAR);
 		gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER, GL.GL_LINEAR);

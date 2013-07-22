@@ -30,6 +30,7 @@ import gov.nasa.worldwind.render.TextRendererCache;
 import gov.nasa.worldwind.terrain.SectorGeometryList;
 import gov.nasa.worldwind.terrain.Terrain;
 import gov.nasa.worldwind.terrain.ZeroElevationModel;
+import gov.nasa.worldwind.util.ClutterFilter;
 import gov.nasa.worldwind.util.PerformanceStatistic;
 import gov.nasa.worldwind.util.PickPointFrustumList;
 
@@ -877,7 +878,18 @@ public class FakeDrawContext implements DrawContext
 	}
 
 	@Override
-	public void applyDeclutterFilter()
+	public void applyClutterFilter()
+	{
+	}
+
+	@Override
+	public ClutterFilter getClutterFilter()
+	{
+		return null;
+	}
+
+	@Override
+	public void setClutterFilter(ClutterFilter arg0)
 	{
 	}
 }

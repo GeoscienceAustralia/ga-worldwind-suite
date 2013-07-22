@@ -25,6 +25,6 @@
 	</classpathentry>
 	<classpathentry exported="true" kind="lib" path="lib/debug/worldwindx-debug.jar" sourcepath="lib/src/worldwind-src.zip"/>
 	<classpathentry exported="true" kind="lib" path="lib/package/gluegen-rt.jar" sourcepath="lib/src/gluegen-java-src.zip"/>
-	<classpathentry exported="true" kind="lib" path="lib/package/jogl.all.jar" sourcepath="lib/src/jogl-java-src.zip"/>
+	<classpathentry exported="true" kind="lib" path="lib/package/jogl-all.jar" sourcepath="lib/src/jogl-java-src.zip"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

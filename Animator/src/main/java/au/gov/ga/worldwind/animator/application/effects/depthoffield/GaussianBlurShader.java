@@ -49,7 +49,7 @@ public class GaussianBlurShader extends Shader
 	 */
 	public void use(DrawContext dc, Dimension dimensions, boolean horizontal)
 	{
-		GL2 gl = dc.getGL();
+		GL2 gl = dc.getGL().getGL2();
 		super.use(gl);
 
 		gl.glUniform1f(sigmaUniform, 4.0f);

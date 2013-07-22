@@ -138,7 +138,7 @@ public class ScreenOverlayLayer extends AbstractLayer
 			return;
 		}
 		
-		GL2 gl = dc.getGL();
+		GL2 gl = dc.getGL().getGL2();
 
         boolean attribsPushed = false;
         boolean modelviewPushed = false;
@@ -213,7 +213,7 @@ public class ScreenOverlayLayer extends AbstractLayer
 									  			(overlay.width + attributes.getBorderWidth() * 2), 
 									  			(overlay.height + attributes.getBorderWidth() * 2), 
 									  			0, buffer);
-		GL2 gl = dc.getGL();
+		GL2 gl = dc.getGL().getGL2();
 		
 		gl.glEnable(GL2.GL_LINE_SMOOTH);
 		gl.glHint(GL2.GL_LINE_SMOOTH_HINT, GL2.GL_NICEST);
@@ -239,7 +239,7 @@ public class ScreenOverlayLayer extends AbstractLayer
 		Texture overlayTexture = getTexture(dc, overlay);
 		if (overlayTexture != null)
 		{
-			GL2 gl = dc.getGL();
+			GL2 gl = dc.getGL().getGL2();
 		    gl.glEnable(GL2.GL_TEXTURE_2D);
 		    overlayTexture.bind(gl);
 
@@ -282,7 +282,7 @@ public class ScreenOverlayLayer extends AbstractLayer
 			texture = AWTTextureIO.newTexture(GLProfile.get(GLProfile.GL2), image, false);
 			dc.getTextureCache().put(attributes.getSourceId(), texture);
 			
-			GL2 gl = dc.getGL();
+			GL2 gl = dc.getGL().getGL2();
 	        gl.glTexEnvf(GL2.GL_TEXTURE_ENV, GL2.GL_TEXTURE_ENV_MODE, GL2.GL_MODULATE);
 	        gl.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_MIN_FILTER, GL2.GL_LINEAR);
 	        gl.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_MAG_FILTER, GL2.GL_LINEAR);

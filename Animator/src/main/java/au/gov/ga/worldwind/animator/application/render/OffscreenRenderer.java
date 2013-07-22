@@ -83,7 +83,7 @@ public class OffscreenRenderer extends AnimationRendererBase
 			@Override
 			public void run(DrawContext dc)
 			{
-				frameBuffer.create(dc.getGL(), renderDimensions);
+				frameBuffer.create(dc.getGL().getGL2(), renderDimensions);
 			}
 		});
 
@@ -93,7 +93,7 @@ public class OffscreenRenderer extends AnimationRendererBase
 			@Override
 			public void run(DrawContext dc)
 			{
-				GL2 gl = dc.getGL();
+				GL2 gl = dc.getGL().getGL2();
 				frameBuffer.bind(gl);
 				gl.glViewport(0, 0, renderDimensions.width, renderDimensions.height);
 			}
@@ -104,7 +104,7 @@ public class OffscreenRenderer extends AnimationRendererBase
 			@Override
 			public void run(DrawContext dc)
 			{
-				GL2 gl = dc.getGL();
+				GL2 gl = dc.getGL().getGL2();
 				gl.glViewport(0, 0, renderDimensions.width, renderDimensions.height);
 			}
 		};
@@ -116,7 +116,7 @@ public class OffscreenRenderer extends AnimationRendererBase
 			@Override
 			public void run(DrawContext dc)
 			{
-				GL2 gl = dc.getGL();
+				GL2 gl = dc.getGL().getGL2();
 				frameBuffer.unbind(gl);
 				gl.glViewport(0, 0, dc.getDrawableWidth(), dc.getDrawableHeight());
 				FrameBuffer.renderTexturedQuad(gl, frameBuffer.getTexture().getId());
@@ -165,7 +165,7 @@ public class OffscreenRenderer extends AnimationRendererBase
 			@Override
 			public void run(DrawContext dc)
 			{
-				frameBuffer.delete(dc.getGL());
+				frameBuffer.delete(dc.getGL().getGL2());
 			}
 		});
 
