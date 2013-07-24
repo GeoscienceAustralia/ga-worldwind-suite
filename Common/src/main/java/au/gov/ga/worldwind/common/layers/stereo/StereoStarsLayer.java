@@ -25,7 +25,8 @@ import javax.media.opengl.GL2;
 import au.gov.ga.worldwind.common.view.stereo.StereoView;
 
 /**
- * An extension of the {@link ProjectionStarsLayer} that supports stereo rendering of stars
+ * An extension of the {@link ProjectionStarsLayer} that supports stereo
+ * rendering of stars
  * 
  * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
@@ -47,8 +48,7 @@ public class StereoStarsLayer extends ProjectionStarsLayer
 			{
 				double[] matrixArray = new double[16];
 				GL2 gl = dc.getGL().getGL2();
-				gl.glMatrixMode(GL2.GL_PROJECTION);
-				gl.glPushMatrix();
+				ogsh.pushProjection(gl);
 
 				projection.toArray(matrixArray, 0, false);
 				gl.glLoadMatrixd(matrixArray, 0);
