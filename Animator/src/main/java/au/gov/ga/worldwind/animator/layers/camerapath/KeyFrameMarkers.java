@@ -38,14 +38,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.locks.ReadWriteLock;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 import au.gov.ga.worldwind.animator.animation.Animation;
 import au.gov.ga.worldwind.animator.animation.KeyFrame;
 import au.gov.ga.worldwind.common.util.GeometryUtil;
 import au.gov.ga.worldwind.common.util.LenientReadWriteLock;
 
-import com.sun.opengl.util.BufferUtil;
+import com.jogamp.common.nio.Buffers;
 
 /**
  * A {@link Renderable} that draws a {@link Marker} for each camera key frame
@@ -342,25 +342,25 @@ class KeyFrameMarkers implements Renderable, SelectListener
 			return;
 		}
 
-		GL gl = dc.getGL();
+		GL2 gl = dc.getGL().getGL2();
 		OGLStackHandler stack = new OGLStackHandler();
-		stack.pushAttrib(gl, GL.GL_CURRENT_BIT | GL.GL_LINE_BIT | GL.GL_COLOR_BUFFER_BIT | GL.GL_HINT_BIT);
-		stack.pushClientAttrib(gl, GL.GL_CLIENT_VERTEX_ARRAY_BIT);
+		stack.pushAttrib(gl, GL2.GL_CURRENT_BIT | GL2.GL_LINE_BIT | GL2.GL_COLOR_BUFFER_BIT | GL2.GL_HINT_BIT);
+		stack.pushClientAttrib(gl, GL2.GL_CLIENT_VERTEX_ARRAY_BIT);
 		try
 		{
-			gl.glEnableClientState(GL.GL_VERTEX_ARRAY);
-			gl.glEnable(GL.GL_LINE_SMOOTH);
-			gl.glEnable(GL.GL_BLEND);
-			gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
-			gl.glHint(GL.GL_LINE_SMOOTH_HINT, GL.GL_NICEST);
-			gl.glEnable(GL.GL_LINE_STIPPLE);
+			gl.glEnableClientState(GL2.GL_VERTEX_ARRAY);
+			gl.glEnable(GL2.GL_LINE_SMOOTH);
+			gl.glEnable(GL2.GL_BLEND);
+			gl.glBlendFunc(GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA);
+			gl.glHint(GL2.GL_LINE_SMOOTH_HINT, GL2.GL_NICEST);
+			gl.glEnable(GL2.GL_LINE_STIPPLE);
 			gl.glLineWidth(2.0f);
 			gl.glLineStipple(3, (short) 0xAAAA);
 
 			gl.glColor3fv(Color.WHITE.getColorComponents(null), 0);
-			gl.glVertexPointer(3, GL.GL_DOUBLE, 0, joinersFrontBuffer);
+			gl.glVertexPointer(3, GL2.GL_DOUBLE, 0, joinersFrontBuffer);
 
-			gl.glDrawArrays(GL.GL_LINES, 0, animation.getKeyFrameCount() * 2);
+			gl.glDrawArrays(GL2.GL_LINES, 0, animation.getKeyFrameCount() * 2);
 		}
 		finally
 		{
@@ -377,17 +377,17 @@ class KeyFrameMarkers implements Renderable, SelectListener
 	 */
 	private void drawMarkerElevationRay(DrawContext dc)
 	{
-		GL gl = dc.getGL();
+		GL2 gl = dc.getGL().getGL2();
 		OGLStackHandler stack = new OGLStackHandler();
-		stack.pushAttrib(gl, GL.GL_CURRENT_BIT | GL.GL_LINE_BIT | GL.GL_COLOR_BUFFER_BIT | GL.GL_HINT_BIT);
-		stack.pushClientAttrib(gl, GL.GL_CLIENT_VERTEX_ARRAY_BIT);
+		stack.pushAttrib(gl, GL2.GL_CURRENT_BIT | GL2.GL_LINE_BIT | GL2.GL_COLOR_BUFFER_BIT | GL2.GL_HINT_BIT);
+		stack.pushClientAttrib(gl, GL2.GL_CLIENT_VERTEX_ARRAY_BIT);
 		try
 		{
-			gl.glEnableClientState(GL.GL_VERTEX_ARRAY);
-			gl.glEnable(GL.GL_LINE_SMOOTH);
-			gl.glEnable(GL.GL_BLEND);
-			gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
-			gl.glHint(GL.GL_LINE_SMOOTH_HINT, GL.GL_NICEST);
+			gl.glEnableClientState(GL2.GL_VERTEX_ARRAY);
+			gl.glEnable(GL2.GL_LINE_SMOOTH);
+			gl.glEnable(GL2.GL_BLEND);
+			gl.glBlendFunc(GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA);
+			gl.glHint(GL2.GL_LINE_SMOOTH_HINT, GL2.GL_NICEST);
 			gl.glLineWidth(2.0f);
 
 			gl.glColor3fv(Color.GREEN.getColorComponents(null), 0);
@@ -395,7 +395,7 @@ class KeyFrameMarkers implements Renderable, SelectListener
 			Line markerEarhCentreRay =
 					Line.fromSegment(worldWindow.getModel().getGlobe().getCenter(), worldWindow.getModel().getGlobe()
 							.computePointFromPosition(lastPickedMarker.getPosition()));
-			gl.glBegin(GL.GL_LINE_STRIP);
+			gl.glBegin(GL2.GL_LINE_STRIP);
 
 			Vec4 linePoint = markerEarhCentreRay.getPointAt(0);
 			gl.glVertex3d(linePoint.x, linePoint.y, linePoint.z);
@@ -425,7 +425,7 @@ class KeyFrameMarkers implements Renderable, SelectListener
 	{
 		eyeMarkersBackBuffer.clear();
 		lookatMarkersBackBuffer.clear();
-		joinersBackBuffer = BufferUtil.newDoubleBuffer(animation.getKeyFrameCount() * 3 * 2);
+		joinersBackBuffer = Buffers.newDirectDoubleBuffer(animation.getKeyFrameCount() * 3 * 2);
 
 		Vec4 markerCoords;
 		for (KeyFrame keyFrame : animation.getKeyFrames())

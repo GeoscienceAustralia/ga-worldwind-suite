@@ -23,7 +23,7 @@ import gov.nasa.worldwind.render.DrawContext;
 
 import java.nio.ByteBuffer;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 import au.gov.ga.worldwind.common.render.ExtendedDrawContext;
 import au.gov.ga.worldwind.common.render.ExtendedSceneController;
@@ -33,7 +33,7 @@ import au.gov.ga.worldwind.common.view.stereo.StereoView.Eye;
 import au.gov.ga.worldwind.viewer.settings.Settings;
 import au.gov.ga.worldwind.viewer.settings.Settings.StereoMode;
 
-import com.sun.opengl.util.BufferUtil;
+import com.jogamp.common.nio.Buffers;
 
 /**
  * {@link SceneController} implementation that supports stereo rendering. When
@@ -79,11 +79,11 @@ public class StereoSceneController extends ExtendedSceneController
 			lastFieldOfView = fieldOfView;
 		}
 
-		GL gl = dc.getGL();
+		GL2 gl = dc.getGL().getGL2();
 		if (!stereoTested)
 		{
-			ByteBuffer buffer16 = BufferUtil.newByteBuffer(16);
-			gl.glGetBooleanv(GL.GL_STEREO, buffer16);
+			ByteBuffer buffer16 = Buffers.newDirectByteBuffer(16);
+			gl.glGetBooleanv(GL2.GL_STEREO, buffer16);
 			Settings.setStereoSupported(buffer16.get() == 1);
 			stereoTested = true;
 		}
@@ -126,7 +126,7 @@ public class StereoSceneController extends ExtendedSceneController
 					this.applyView(dc);
 					this.draw(dc);
 
-					gl.glClear(GL.GL_DEPTH_BUFFER_BIT);
+					gl.glClear(GL2.GL_DEPTH_BUFFER_BIT);
 
 					stereo.setup(true, swap ? Eye.LEFT : Eye.RIGHT);
 					setupBuffer(gl, mode, Eye.RIGHT);
@@ -149,7 +149,7 @@ public class StereoSceneController extends ExtendedSceneController
 		}
 	}
 
-	private void setupBuffer(GL gl, StereoMode mode, Eye eye)
+	private void setupBuffer(GL2 gl, StereoMode mode, Eye eye)
 	{
 		boolean left = eye == Eye.LEFT;
 		switch (mode)
@@ -164,12 +164,12 @@ public class StereoSceneController extends ExtendedSceneController
 			gl.glColorMask(!left, !left, left, true);
 			break;
 		case STEREO_BUFFER:
-			gl.glDrawBuffer(left ? GL.GL_BACK_LEFT : GL.GL_BACK_RIGHT);
+			gl.glDrawBuffer(left ? GL2.GL_BACK_LEFT : GL2.GL_BACK_RIGHT);
 			break;
 		}
 	}
 
-	private void restoreBuffer(GL gl, StereoMode mode)
+	private void restoreBuffer(GL2 gl, StereoMode mode)
 	{
 		switch (mode)
 		{
@@ -179,7 +179,7 @@ public class StereoSceneController extends ExtendedSceneController
 			gl.glColorMask(true, true, true, true);
 			break;
 		case STEREO_BUFFER:
-			gl.glDrawBuffer(GL.GL_BACK);
+			gl.glDrawBuffer(GL2.GL_BACK);
 			break;
 		}
 	}

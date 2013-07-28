@@ -75,7 +75,7 @@ public class BasicRollOrbitView extends BasicOrbitView implements RollOrbitView
 			Logging.logger().severe(message);
 			throw new IllegalArgumentException(message);
 		}
-		if (dc.getGL() == null)
+		if (dc.getGL().getGL2() == null)
 		{
 			String message = Logging.getMessage("nullValue.DrawingContextGLIsNull");
 			Logging.logger().severe(message);
@@ -108,7 +108,7 @@ public class BasicRollOrbitView extends BasicOrbitView implements RollOrbitView
 		//========== projection matrix state ==========//
 		// Get the current OpenGL viewport state.
 		int[] viewportArray = new int[4];
-		this.dc.getGL().glGetIntegerv(GL.GL_VIEWPORT, viewportArray, 0);
+		this.dc.getGL().getGL2().glGetIntegerv(GL.GL_VIEWPORT, viewportArray, 0);
 		this.viewport = new java.awt.Rectangle(viewportArray[0], viewportArray[1], viewportArray[2], viewportArray[3]);
 		// Compute the current clip plane distances.
 

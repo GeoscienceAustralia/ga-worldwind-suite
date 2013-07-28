@@ -7,7 +7,7 @@ import gov.nasa.worldwind.util.Logging;
 
 import java.awt.Color;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 /**
  * Sets fog range/density according to view altitude.
@@ -115,13 +115,13 @@ public class FogLayer extends RenderableLayer
 		// End based on distance to horizon
 		float end = (float) (dc.getView().getHorizonDistance() * this.farFactor);
 		// Set GL fog
-		GL gl = dc.getGL();
-		gl.glFogfv(GL.GL_FOG_COLOR, fogColor, 0); // Set fog color
-		gl.glFogi(GL.GL_FOG_MODE, GL.GL_LINEAR); // Set fog mode
-		gl.glFogf(GL.GL_FOG_START, start); // Set fog start distance
-		gl.glFogf(GL.GL_FOG_END, end); // Set fog end distance
-		gl.glHint(GL.GL_FOG_HINT, GL.GL_DONT_CARE);// Set fog hint
-		gl.glEnable(GL.GL_FOG); // Enable fog
+		GL2 gl = dc.getGL().getGL2();
+		gl.glFogfv(GL2.GL_FOG_COLOR, fogColor, 0); // Set fog color
+		gl.glFogi(GL2.GL_FOG_MODE, GL2.GL_LINEAR); // Set fog mode
+		gl.glFogf(GL2.GL_FOG_START, start); // Set fog start distance
+		gl.glFogf(GL2.GL_FOG_END, end); // Set fog end distance
+		gl.glHint(GL2.GL_FOG_HINT, GL2.GL_DONT_CARE);// Set fog hint
+		gl.glEnable(GL2.GL_FOG); // Enable fog
 	}
 
 	@Override

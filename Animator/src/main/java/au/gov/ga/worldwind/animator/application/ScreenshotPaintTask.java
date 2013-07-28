@@ -19,9 +19,10 @@ import gov.nasa.worldwind.render.DrawContext;
 
 import java.io.File;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 import au.gov.ga.worldwind.animator.util.TGAScreenshot;
+import com.jogamp.opengl.util.awt.Screenshot;
 
 /**
  * A {@link PaintTask} which saves the current frame buffer to a file. Should be
@@ -56,7 +57,7 @@ public class ScreenshotPaintTask implements PaintTask
 		try
 		{
 			int[] viewportArray = new int[4];
-			dc.getGL().glGetIntegerv(GL.GL_VIEWPORT, viewportArray, 0);
+			dc.getGL().getGL2().glGetIntegerv(GL2.GL_VIEWPORT, viewportArray, 0);
 			int width = viewportArray[2];
 			int height = viewportArray[3];
 
@@ -66,7 +67,7 @@ public class ScreenshotPaintTask implements PaintTask
 			}
 			else
 			{
-				com.sun.opengl.util.Screenshot.writeToFile(screenshotFile, width, height, alpha);
+				Screenshot.writeToFile(screenshotFile, width, height, alpha);
 			}
 		}
 		catch (Exception e)

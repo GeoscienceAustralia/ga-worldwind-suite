@@ -17,7 +17,7 @@ package au.gov.ga.worldwind.common.render;
 
 import java.util.Stack;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 /**
  * Stack that the {@link FrameBuffer}s call when binding/unbinding. This ensures
@@ -31,21 +31,21 @@ public class FrameBufferStack
 	private static Stack<Integer> stack = new Stack<Integer>();
 	private static int currentFrameBufferId = 0;
 
-	public static synchronized void push(GL gl, int frameBufferId)
+	public static synchronized void push(GL2 gl, int frameBufferId)
 	{
 		stack.push(currentFrameBufferId);
-		gl.glBindFramebufferEXT(GL.GL_FRAMEBUFFER_EXT, frameBufferId);
+		gl.glBindFramebuffer(GL2.GL_FRAMEBUFFER, frameBufferId);
 		currentFrameBufferId = frameBufferId;
 	}
 
-	public static synchronized void pop(GL gl)
+	public static synchronized void pop(GL2 gl)
 	{
 		int frameBufferId = 0;
 		if (!stack.isEmpty())
 		{
 			frameBufferId = stack.pop();
 		}
-		gl.glBindFramebufferEXT(GL.GL_FRAMEBUFFER_EXT, frameBufferId);
+		gl.glBindFramebuffer(GL2.GL_FRAMEBUFFER, frameBufferId);
 		currentFrameBufferId = frameBufferId;
 	}
 }

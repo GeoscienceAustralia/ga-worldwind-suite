@@ -15,6 +15,37 @@
  ******************************************************************************/
 package au.gov.ga.worldwind.common.render;
 
+import gov.nasa.worldwind.Model;
+import gov.nasa.worldwind.View;
+import gov.nasa.worldwind.avlist.AVList;
+import gov.nasa.worldwind.cache.GpuResourceCache;
+import gov.nasa.worldwind.event.Message;
+import gov.nasa.worldwind.geom.Angle;
+import gov.nasa.worldwind.geom.Extent;
+import gov.nasa.worldwind.geom.Position;
+import gov.nasa.worldwind.geom.Sector;
+import gov.nasa.worldwind.geom.Vec4;
+import gov.nasa.worldwind.globes.Globe;
+import gov.nasa.worldwind.layers.Layer;
+import gov.nasa.worldwind.layers.LayerList;
+import gov.nasa.worldwind.pick.PickedObject;
+import gov.nasa.worldwind.pick.PickedObjectList;
+import gov.nasa.worldwind.render.AnnotationRenderer;
+import gov.nasa.worldwind.render.DeclutteringTextRenderer;
+import gov.nasa.worldwind.render.DrawContext;
+import gov.nasa.worldwind.render.GLRuntimeCapabilities;
+import gov.nasa.worldwind.render.LightingModel;
+import gov.nasa.worldwind.render.OrderedRenderable;
+import gov.nasa.worldwind.render.OutlinedShape;
+import gov.nasa.worldwind.render.ScreenCredit;
+import gov.nasa.worldwind.render.SurfaceTileRenderer;
+import gov.nasa.worldwind.render.TextRendererCache;
+import gov.nasa.worldwind.terrain.SectorGeometryList;
+import gov.nasa.worldwind.terrain.Terrain;
+import gov.nasa.worldwind.util.ClutterFilter;
+import gov.nasa.worldwind.util.PerformanceStatistic;
+import gov.nasa.worldwind.util.PickPointFrustumList;
+
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Point;
@@ -34,36 +65,7 @@ import javax.media.opengl.GLContext;
 import javax.media.opengl.GLDrawable;
 import javax.media.opengl.glu.GLU;
 
-import com.sun.opengl.util.texture.TextureCoords;
-
-import gov.nasa.worldwind.Model;
-import gov.nasa.worldwind.View;
-import gov.nasa.worldwind.avlist.AVList;
-import gov.nasa.worldwind.cache.GpuResourceCache;
-import gov.nasa.worldwind.event.Message;
-import gov.nasa.worldwind.geom.Angle;
-import gov.nasa.worldwind.geom.Extent;
-import gov.nasa.worldwind.geom.Position;
-import gov.nasa.worldwind.geom.Sector;
-import gov.nasa.worldwind.geom.Vec4;
-import gov.nasa.worldwind.globes.Globe;
-import gov.nasa.worldwind.layers.Layer;
-import gov.nasa.worldwind.layers.LayerList;
-import gov.nasa.worldwind.pick.PickedObject;
-import gov.nasa.worldwind.pick.PickedObjectList;
-import gov.nasa.worldwind.render.AnnotationRenderer;
-import gov.nasa.worldwind.render.DrawContext;
-import gov.nasa.worldwind.render.GLRuntimeCapabilities;
-import gov.nasa.worldwind.render.LightingModel;
-import gov.nasa.worldwind.render.OrderedRenderable;
-import gov.nasa.worldwind.render.OutlinedShape;
-import gov.nasa.worldwind.render.ScreenCredit;
-import gov.nasa.worldwind.render.SurfaceTileRenderer;
-import gov.nasa.worldwind.render.TextRendererCache;
-import gov.nasa.worldwind.terrain.SectorGeometryList;
-import gov.nasa.worldwind.terrain.Terrain;
-import gov.nasa.worldwind.util.PerformanceStatistic;
-import gov.nasa.worldwind.util.PickPointFrustumList;
+import com.jogamp.opengl.util.texture.TextureCoords;
 
 /**
  * {@link DrawContext} implementation that simply delegates all of it's
@@ -806,5 +808,33 @@ public class DrawContextDelegate implements DrawContext
 		delegate.setPreRenderMode(preRenderMode);
 	}
 
+	@Override
+	public Vec4 computePointFromPosition(Position position, int altitudeMode)
+	{
+		return delegate.computePointFromPosition(position, altitudeMode);
+	}
 
+	@Override
+	public DeclutteringTextRenderer getDeclutteringTextRenderer()
+	{
+		return delegate.getDeclutteringTextRenderer();
+	}
+
+	@Override
+	public void applyClutterFilter()
+	{
+		delegate.applyClutterFilter();
+	}
+
+	@Override
+	public ClutterFilter getClutterFilter()
+	{
+		return delegate.getClutterFilter();
+	}
+
+	@Override
+	public void setClutterFilter(ClutterFilter clutterFilter)
+	{
+		delegate.setClutterFilter(clutterFilter);
+	}
 }

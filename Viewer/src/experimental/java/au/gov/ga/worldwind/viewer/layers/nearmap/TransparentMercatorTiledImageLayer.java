@@ -40,9 +40,10 @@ import java.net.URL;
 import java.nio.ByteBuffer;
 
 import javax.imageio.ImageIO;
+import javax.media.opengl.GLProfile;
 
-import com.sun.opengl.util.texture.TextureData;
-import com.sun.opengl.util.texture.TextureIO;
+import com.jogamp.opengl.util.texture.TextureData;
+import com.jogamp.opengl.util.texture.TextureIO;
 
 /**
  * BasicTiledImageLayer modified 2009-02-03 to add support for Mercator
@@ -247,7 +248,7 @@ public class TransparentMercatorTiledImageLayer extends MercatorTiledImageLayer
 	{
 		try
 		{
-			return TextureIO.newTextureData(url, useMipMaps, null);
+			return TextureIO.newTextureData(GLProfile.get(GLProfile.GL2), url, useMipMaps, null);
 		}
 		catch (Exception e)
 		{

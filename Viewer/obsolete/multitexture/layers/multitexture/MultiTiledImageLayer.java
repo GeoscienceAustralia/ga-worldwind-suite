@@ -571,7 +571,7 @@ public abstract class MultiTiledImageLayer extends AbstractLayer
 			sortedTiles = this.currentTiles.toArray(sortedTiles);
 			Arrays.sort(sortedTiles, levelComparer);
 
-			GL gl = dc.getGL();
+			GL gl = dc.getGL().getGL2();
 
 			if (this.isUseTransparentTextures() || this.getOpacity() < 1)
 			{
@@ -693,9 +693,9 @@ public abstract class MultiTiledImageLayer extends AbstractLayer
 			this.textRenderer.setUseVertexArrays(false);
 		}
 
-		dc.getGL().glDisable(GL.GL_DEPTH_TEST);
-		dc.getGL().glDisable(GL.GL_BLEND);
-		dc.getGL().glDisable(GL.GL_TEXTURE_2D);
+		dc.getGL().getGL2().glDisable(GL.GL_DEPTH_TEST);
+		dc.getGL().getGL2().glDisable(GL.GL_BLEND);
+		dc.getGL().getGL2().glDisable(GL.GL_TEXTURE_2D);
 
 		this.textRenderer.setColor(java.awt.Color.YELLOW);
 		this.textRenderer.beginRendering(viewport.width, viewport.height);
@@ -722,8 +722,8 @@ public abstract class MultiTiledImageLayer extends AbstractLayer
 			ArrayList<MultiTextureTile> tiles)
 	{
 		float[] previousColor = new float[4];
-		dc.getGL().glGetFloatv(GL.GL_CURRENT_COLOR, previousColor, 0);
-		dc.getGL().glColor3d(0, 1, 0);
+		dc.getGL().getGL2().glGetFloatv(GL.GL_CURRENT_COLOR, previousColor, 0);
+		dc.getGL().getGL2().glColor3d(0, 1, 0);
 
 		for (MultiTextureTile tile : tiles)
 		{
@@ -732,10 +732,10 @@ public abstract class MultiTiledImageLayer extends AbstractLayer
 
 		Cylinder c = dc.getGlobe().computeBoundingCylinder(
 				dc.getVerticalExaggeration(), this.levels.getSector());
-		dc.getGL().glColor3d(1, 1, 0);
+		dc.getGL().getGL2().glColor3d(1, 1, 0);
 		c.render(dc);
 
-		dc.getGL().glColor4fv(previousColor, 0);
+		dc.getGL().getGL2().glColor4fv(previousColor, 0);
 	}
 
 	// ============== Image Composition ======================= //

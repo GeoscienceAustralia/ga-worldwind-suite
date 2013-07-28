@@ -44,7 +44,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 import au.gov.ga.worldwind.common.layers.point.types.MarkerPointLayer;
 import au.gov.ga.worldwind.common.layers.styled.Attribute;
@@ -242,10 +242,10 @@ public class BasicBoreholeLayer extends AbstractLayer implements BoreholeLayer, 
 			markerRenderer.render(dc, markers);
 			annotationRenderer.render(dc, tooltipAnnotation, tooltipAnnotation.getAnnotationDrawPoint(dc), this);
 
-			GL gl = dc.getGL();
+			GL2 gl = dc.getGL().getGL2();
 			try
 			{
-				gl.glPushAttrib(GL.GL_LINE_BIT);
+				gl.glPushAttrib(GL2.GL_LINE_BIT);
 				gl.glLineWidth((float) lineWidth);
 
 				for (BoreholeImpl borehole : boreholes)

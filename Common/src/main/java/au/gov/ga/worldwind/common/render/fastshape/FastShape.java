@@ -47,13 +47,13 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import javax.imageio.ImageIO;
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 import au.gov.ga.worldwind.common.layers.Bounded;
 import au.gov.ga.worldwind.common.layers.Wireframeable;
 import au.gov.ga.worldwind.common.util.exaggeration.VerticalExaggerationAccessor;
 
-import com.sun.opengl.util.texture.Texture;
+import com.jogamp.opengl.util.texture.Texture;
 
 /**
  * The FastShape class is a representation of a piece of geometry. It is useful
@@ -289,7 +289,7 @@ public class FastShape implements OrderedRenderable, Cacheable, Bounded, Wirefra
 			alpha = 1;
 		}
 
-		GL gl = dc.getGL();
+		GL2 gl = dc.getGL().getGL2();
 		OGLStackHandler stack = new OGLStackHandler();
 
 		try
@@ -300,7 +300,7 @@ public class FastShape implements OrderedRenderable, Cacheable, Bounded, Wirefra
 			boolean willUseSortedIndices =
 					(forceSortedPrimitives || (sortTransparentPrimitives && alpha < 1.0))
 							&& sortedIndexVBO.getBuffer() != null;
-			boolean willUsePointSprite = mode == GL.GL_POINTS && pointSprite && pointTextureUrl != null;
+			boolean willUsePointSprite = mode == GL2.GL_POINTS && pointSprite && pointTextureUrl != null;
 			boolean willUseTextureBlending = (alpha < 1.0 || color != null) && colorBufferContainsAlpha;
 
 			if (willUsePointSprite && pointTexture == null)
@@ -322,34 +322,34 @@ public class FastShape implements OrderedRenderable, Cacheable, Bounded, Wirefra
 				blankTexture = new BasicWWTexture(image, true);
 			}
 
-			int attributesToPush = GL.GL_CURRENT_BIT | GL.GL_POINT_BIT;
+			int attributesToPush = GL2.GL_CURRENT_BIT | GL2.GL_POINT_BIT;
 			if (!fogEnabled)
 			{
-				attributesToPush |= GL.GL_FOG_BIT;
+				attributesToPush |= GL2.GL_FOG_BIT;
 			}
 			if (wireframe || backfaceCulling)
 			{
-				attributesToPush |= GL.GL_POLYGON_BIT;
+				attributesToPush |= GL2.GL_POLYGON_BIT;
 			}
 			if (lighted)
 			{
-				attributesToPush |= GL.GL_LIGHTING_BIT;
+				attributesToPush |= GL2.GL_LIGHTING_BIT;
 			}
 			if (willUseSortedIndices)
 			{
-				attributesToPush |= GL.GL_DEPTH_BUFFER_BIT;
+				attributesToPush |= GL2.GL_DEPTH_BUFFER_BIT;
 			}
 			if (lineWidth != null)
 			{
-				attributesToPush |= GL.GL_LINE_BIT;
+				attributesToPush |= GL2.GL_LINE_BIT;
 			}
 			if (willUsePointSprite || willUseTextureBlending || (textured && texture != null))
 			{
-				attributesToPush |= GL.GL_TEXTURE_BIT;
+				attributesToPush |= GL2.GL_TEXTURE_BIT;
 			}
 
 			stack.pushAttrib(gl, attributesToPush);
-			stack.pushClientAttrib(gl, GL.GL_CLIENT_VERTEX_ARRAY_BIT);
+			stack.pushClientAttrib(gl, GL2.GL_CLIENT_VERTEX_ARRAY_BIT);
 			Vec4 referenceCenter = boundingSphere.getCenter();
 			dc.getView().pushReferenceCenter(dc, referenceCenter);
 
@@ -363,31 +363,31 @@ public class FastShape implements OrderedRenderable, Cacheable, Bounded, Wirefra
 			}
 			if (pointMinSize != null)
 			{
-				gl.glPointParameterf(GL.GL_POINT_SIZE_MIN, pointMinSize.floatValue());
+				gl.glPointParameterf(GL2.GL_POINT_SIZE_MIN, pointMinSize.floatValue());
 			}
 			if (pointMaxSize != null)
 			{
-				gl.glPointParameterf(GL.GL_POINT_SIZE_MAX, pointMaxSize.floatValue());
+				gl.glPointParameterf(GL2.GL_POINT_SIZE_MAX, pointMaxSize.floatValue());
 			}
 			if (pointConstantAttenuation != null || pointLinearAttenuation != null || pointQuadraticAttenuation != null)
 			{
 				float ca = pointConstantAttenuation != null ? pointConstantAttenuation.floatValue() : 1f;
 				float la = pointLinearAttenuation != null ? pointLinearAttenuation.floatValue() : 0f;
 				float qa = pointQuadraticAttenuation != null ? pointQuadraticAttenuation.floatValue() : 0f;
-				gl.glPointParameterfv(GL.GL_POINT_DISTANCE_ATTENUATION, new float[] { ca, la, qa }, 0);
+				gl.glPointParameterfv(GL2.GL_POINT_DISTANCE_ATTENUATION, new float[] { ca, la, qa }, 0);
 			}
 			if (!fogEnabled)
 			{
-				gl.glDisable(GL.GL_FOG);
+				gl.glDisable(GL2.GL_FOG);
 			}
 			if (wireframe)
 			{
-				gl.glPolygonMode(GL.GL_FRONT_AND_BACK, GL.GL_LINE);
+				gl.glPolygonMode(GL2.GL_FRONT_AND_BACK, GL2.GL_LINE);
 			}
 			if (backfaceCulling)
 			{
-				gl.glEnable(GL.GL_CULL_FACE);
-				gl.glCullFace(GL.GL_BACK);
+				gl.glEnable(GL2.GL_CULL_FACE);
+				gl.glCullFace(GL2.GL_BACK);
 			}
 			if (lighted)
 			{
@@ -398,41 +398,41 @@ public class FastShape implements OrderedRenderable, Cacheable, Bounded, Wirefra
 				float[] lightDiffuse = { 1.0f, 1.0f, 1.0f, 1.0f };
 				float[] lightSpecular = { 1.0f, 1.0f, 1.0f, 1.0f };
 				float[] modelAmbient = { 0.3f, 0.3f, 0.3f, 1.0f };
-				gl.glLightModelfv(GL.GL_LIGHT_MODEL_AMBIENT, modelAmbient, 0);
-				gl.glLightfv(GL.GL_LIGHT1, GL.GL_POSITION, lightPosition, 0);
-				gl.glLightfv(GL.GL_LIGHT1, GL.GL_DIFFUSE, lightDiffuse, 0);
-				gl.glLightfv(GL.GL_LIGHT1, GL.GL_AMBIENT, lightAmbient, 0);
-				gl.glLightfv(GL.GL_LIGHT1, GL.GL_SPECULAR, lightSpecular, 0);
-				gl.glDisable(GL.GL_LIGHT0);
-				gl.glEnable(GL.GL_LIGHT1);
-				gl.glEnable(GL.GL_LIGHTING);
-				gl.glEnable(GL.GL_COLOR_MATERIAL);
-				gl.glLightModeli(GL.GL_LIGHT_MODEL_TWO_SIDE, twoSidedLighting ? GL.GL_TRUE : GL.GL_FALSE);
+				gl.glLightModelfv(GL2.GL_LIGHT_MODEL_AMBIENT, modelAmbient, 0);
+				gl.glLightfv(GL2.GL_LIGHT1, GL2.GL_POSITION, lightPosition, 0);
+				gl.glLightfv(GL2.GL_LIGHT1, GL2.GL_DIFFUSE, lightDiffuse, 0);
+				gl.glLightfv(GL2.GL_LIGHT1, GL2.GL_AMBIENT, lightAmbient, 0);
+				gl.glLightfv(GL2.GL_LIGHT1, GL2.GL_SPECULAR, lightSpecular, 0);
+				gl.glDisable(GL2.GL_LIGHT0);
+				gl.glEnable(GL2.GL_LIGHT1);
+				gl.glEnable(GL2.GL_LIGHTING);
+				gl.glEnable(GL2.GL_COLOR_MATERIAL);
+				gl.glLightModeli(GL2.GL_LIGHT_MODEL_TWO_SIDE, twoSidedLighting ? GL2.GL_TRUE : GL2.GL_FALSE);
 			}
 
 			if (willUsePointSprite)
 			{
-				gl.glEnable(GL.GL_POINT_SMOOTH);
-				gl.glEnable(GL.GL_POINT_SPRITE);
+				gl.glEnable(GL2.GL_POINT_SMOOTH);
+				gl.glEnable(GL2.GL_POINT_SPRITE);
 
 				//stage 0: previous (color) * texture
 
-				gl.glActiveTexture(GL.GL_TEXTURE0);
-				gl.glEnable(GL.GL_TEXTURE_2D);
-				gl.glTexEnvi(GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_MODE, GL.GL_COMBINE);
-				gl.glTexEnvi(GL.GL_POINT_SPRITE, GL.GL_COORD_REPLACE, GL.GL_TRUE);
+				gl.glActiveTexture(GL2.GL_TEXTURE0);
+				gl.glEnable(GL2.GL_TEXTURE_2D);
+				gl.glTexEnvi(GL2.GL_TEXTURE_ENV, GL2.GL_TEXTURE_ENV_MODE, GL2.GL_COMBINE);
+				gl.glTexEnvi(GL2.GL_POINT_SPRITE, GL2.GL_COORD_REPLACE, GL2.GL_TRUE);
 
-				gl.glTexEnvi(GL.GL_TEXTURE_ENV, GL.GL_SRC0_RGB, GL.GL_PREVIOUS);
-				gl.glTexEnvi(GL.GL_TEXTURE_ENV, GL.GL_COMBINE_RGB, GL.GL_REPLACE);
+				gl.glTexEnvi(GL2.GL_TEXTURE_ENV, GL2.GL_SRC0_RGB, GL2.GL_PREVIOUS);
+				gl.glTexEnvi(GL2.GL_TEXTURE_ENV, GL2.GL_COMBINE_RGB, GL2.GL_REPLACE);
 
 				//TODO consider (instead of 2 calls above):
 				//gl.glTexEnvi(GL.GL_TEXTURE_ENV, GL.GL_SRC0_RGB, GL.GL_PREVIOUS);
 				//gl.glTexEnvi(GL.GL_TEXTURE_ENV, GL.GL_SRC1_RGB, GL.GL_TEXTURE);
 				//gl.glTexEnvi(GL.GL_TEXTURE_ENV, GL.GL_COMBINE_RGB, GL.GL_MODULATE);
 
-				gl.glTexEnvi(GL.GL_TEXTURE_ENV, GL.GL_SRC0_ALPHA, GL.GL_PREVIOUS);
-				gl.glTexEnvi(GL.GL_TEXTURE_ENV, GL.GL_SRC1_ALPHA, GL.GL_TEXTURE);
-				gl.glTexEnvi(GL.GL_TEXTURE_ENV, GL.GL_COMBINE_ALPHA, GL.GL_MODULATE);
+				gl.glTexEnvi(GL2.GL_TEXTURE_ENV, GL2.GL_SRC0_ALPHA, GL2.GL_PREVIOUS);
+				gl.glTexEnvi(GL2.GL_TEXTURE_ENV, GL2.GL_SRC1_ALPHA, GL2.GL_TEXTURE);
+				gl.glTexEnvi(GL2.GL_TEXTURE_ENV, GL2.GL_COMBINE_ALPHA, GL2.GL_MODULATE);
 
 				pointTexture.bind(dc);
 			}
@@ -449,27 +449,27 @@ public class FastShape implements OrderedRenderable, Cacheable, Bounded, Wirefra
 
 				//stage 1: previous (color) * texture envionment color
 
-				gl.glActiveTexture(willUsePointSprite ? GL.GL_TEXTURE1 : GL.GL_TEXTURE0);
-				gl.glEnable(GL.GL_TEXTURE_2D);
-				gl.glTexEnvi(GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_MODE, GL.GL_COMBINE);
+				gl.glActiveTexture(willUsePointSprite ? GL2.GL_TEXTURE1 : GL2.GL_TEXTURE0);
+				gl.glEnable(GL2.GL_TEXTURE_2D);
+				gl.glTexEnvi(GL2.GL_TEXTURE_ENV, GL2.GL_TEXTURE_ENV_MODE, GL2.GL_COMBINE);
 
-				gl.glTexEnvi(GL.GL_TEXTURE_ENV, GL.GL_SRC0_RGB, GL.GL_PREVIOUS);
-				gl.glTexEnvi(GL.GL_TEXTURE_ENV, GL.GL_SRC1_RGB, GL.GL_CONSTANT);
-				gl.glTexEnvi(GL.GL_TEXTURE_ENV, GL.GL_COMBINE_RGB, GL.GL_MODULATE);
+				gl.glTexEnvi(GL2.GL_TEXTURE_ENV, GL2.GL_SRC0_RGB, GL2.GL_PREVIOUS);
+				gl.glTexEnvi(GL2.GL_TEXTURE_ENV, GL2.GL_SRC1_RGB, GL2.GL_CONSTANT);
+				gl.glTexEnvi(GL2.GL_TEXTURE_ENV, GL2.GL_COMBINE_RGB, GL2.GL_MODULATE);
 
-				gl.glTexEnvi(GL.GL_TEXTURE_ENV, GL.GL_SRC0_ALPHA, GL.GL_PREVIOUS);
-				gl.glTexEnvi(GL.GL_TEXTURE_ENV, GL.GL_SRC1_ALPHA, GL.GL_CONSTANT);
-				gl.glTexEnvi(GL.GL_TEXTURE_ENV, GL.GL_COMBINE_ALPHA, GL.GL_MODULATE);
+				gl.glTexEnvi(GL2.GL_TEXTURE_ENV, GL2.GL_SRC0_ALPHA, GL2.GL_PREVIOUS);
+				gl.glTexEnvi(GL2.GL_TEXTURE_ENV, GL2.GL_SRC1_ALPHA, GL2.GL_CONSTANT);
+				gl.glTexEnvi(GL2.GL_TEXTURE_ENV, GL2.GL_COMBINE_ALPHA, GL2.GL_MODULATE);
 
-				gl.glTexEnvfv(GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_COLOR, new float[] { r, g, b, (float) alpha }, 0);
+				gl.glTexEnvfv(GL2.GL_TEXTURE_ENV, GL2.GL_TEXTURE_ENV_COLOR, new float[] { r, g, b, (float) alpha }, 0);
 				blankTexture.bind(dc);
 			}
 
 			if (textured && texture != null)
 			{
-				gl.glActiveTexture(GL.GL_TEXTURE0);
-				gl.glEnable(GL.GL_TEXTURE_2D);
-				texture.bind();
+				gl.glActiveTexture(GL2.GL_TEXTURE0);
+				gl.glEnable(GL2.GL_TEXTURE_2D);
+				texture.bind(gl);
 			}
 
 			if (textureMatrix != null && textureMatrix.length >= 16)
@@ -483,9 +483,9 @@ public class FastShape implements OrderedRenderable, Cacheable, Bounded, Wirefra
 				FloatVBO vbo = dc.isPickingMode() && pickingColorVBO.getBuffer() != null ? pickingColorVBO : colorVBO;
 				if (vbo.getBuffer() != null)
 				{
-					gl.glEnableClientState(GL.GL_COLOR_ARRAY);
+					gl.glEnableClientState(GL2.GL_COLOR_ARRAY);
 					vbo.bind(gl);
-					gl.glColorPointer(vbo.getElementStride(), GL.GL_FLOAT, 0, 0);
+					gl.glColorPointer(vbo.getElementStride(), GL2.GL_FLOAT, 0, 0);
 				}
 			}
 
@@ -497,38 +497,38 @@ public class FastShape implements OrderedRenderable, Cacheable, Bounded, Wirefra
 
 			if (textureCoordinateVBO.getBuffer() != null)
 			{
-				gl.glEnableClientState(GL.GL_TEXTURE_COORD_ARRAY);
+				gl.glEnableClientState(GL2.GL_TEXTURE_COORD_ARRAY);
 				textureCoordinateVBO.bind(gl);
-				gl.glTexCoordPointer(textureCoordinateVBO.getElementStride(), GL.GL_FLOAT, 0, 0);
+				gl.glTexCoordPointer(textureCoordinateVBO.getElementStride(), GL2.GL_FLOAT, 0, 0);
 			}
 
 			if (alpha < 1.0 || colorBufferContainsAlpha || willUseSortedIndices)
 			{
-				gl.glEnable(GL.GL_BLEND);
-				gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
+				gl.glEnable(GL2.GL_BLEND);
+				gl.glBlendFunc(GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA);
 			}
 
-			gl.glEnableClientState(GL.GL_VERTEX_ARRAY);
+			gl.glEnableClientState(GL2.GL_VERTEX_ARRAY);
 			vertexVBO.bind(gl);
-			gl.glVertexPointer(vertexVBO.getElementStride(), GL.GL_FLOAT, 0, 0);
+			gl.glVertexPointer(vertexVBO.getElementStride(), GL2.GL_FLOAT, 0, 0);
 
 			if (willCalculateNormals)
 			{
-				gl.glEnableClientState(GL.GL_NORMAL_ARRAY);
+				gl.glEnableClientState(GL2.GL_NORMAL_ARRAY);
 				normalVBO.bind(gl);
-				gl.glNormalPointer(GL.GL_FLOAT, 0, 0);
+				gl.glNormalPointer(GL2.GL_FLOAT, 0, 0);
 			}
 
 			if (willUseSortedIndices)
 			{
 				gl.glDepthMask(false);
 				sortedIndexVBO.bind(gl);
-				gl.glDrawElements(mode, sortedIndexVBO.getBuffer().length, GL.GL_UNSIGNED_INT, 0);
+				gl.glDrawElements(mode, sortedIndexVBO.getBuffer().length, GL2.GL_UNSIGNED_INT, 0);
 			}
 			else if (indexVBO.getBuffer() != null)
 			{
 				indexVBO.bind(gl);
-				gl.glDrawElements(mode, indexVBO.getBuffer().length, GL.GL_UNSIGNED_INT, 0);
+				gl.glDrawElements(mode, indexVBO.getBuffer().length, GL2.GL_UNSIGNED_INT, 0);
 			}
 			else
 			{
@@ -536,8 +536,8 @@ public class FastShape implements OrderedRenderable, Cacheable, Bounded, Wirefra
 			}
 
 			//unbind the buffers
-			gl.glBindBuffer(GL.GL_ARRAY_BUFFER, 0);
-			gl.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER, 0);
+			gl.glBindBuffer(GL2.GL_ARRAY_BUFFER, 0);
+			gl.glBindBuffer(GL2.GL_ELEMENT_ARRAY_BUFFER, 0);
 		}
 		finally
 		{
@@ -579,7 +579,7 @@ public class FastShape implements OrderedRenderable, Cacheable, Bounded, Wirefra
 		Vec4 eyePoint = dc.getView().getEyePoint();
 		boolean recalculateIndices =
 				(forceSortedPrimitives || (sortTransparentPrimitives && alpha < 1.0))
-						&& (mode == GL.GL_TRIANGLES || mode == GL.GL_POINTS) && !eyePoint.equals(lastEyePoint);
+						&& (mode == GL2.GL_TRIANGLES || mode == GL2.GL_POINTS) && !eyePoint.equals(lastEyePoint);
 		if (recalculateIndices)
 		{
 			lastEyePoint = eyePoint;
@@ -752,7 +752,7 @@ public class FastShape implements OrderedRenderable, Cacheable, Bounded, Wirefra
 		boolean hasIndices = indices != null;
 		int loopLimit = hasIndices ? indices.length : size;
 		int loopIncrement = 3;
-		if (mode == GL.GL_TRIANGLE_STRIP)
+		if (mode == GL2.GL_TRIANGLE_STRIP)
 		{
 			loopLimit -= 2;
 			loopIncrement = 1;
@@ -769,7 +769,7 @@ public class FastShape implements OrderedRenderable, Cacheable, Bounded, Wirefra
 			Vec4 v2 = verts[index2];
 
 			Vec4 e1 = v1.subtract3(v0);
-			Vec4 e2 = mode == GL.GL_TRIANGLE_STRIP && i % 2 == 0 ? v0.subtract3(v2) : v2.subtract3(v0);
+			Vec4 e2 = mode == GL2.GL_TRIANGLE_STRIP && i % 2 == 0 ? v0.subtract3(v2) : v2.subtract3(v0);
 			Vec4 N = reverseNormals ? e2.cross3(e1).normalize3() : e1.cross3(e2).normalize3();
 
 			// if N is 0, the triangle is degenerate
@@ -845,7 +845,7 @@ public class FastShape implements OrderedRenderable, Cacheable, Bounded, Wirefra
 			eyePoint = eyePoint.subtract3(boundingSphere.getCenter());
 		}
 
-		if (mode == GL.GL_TRIANGLES)
+		if (mode == GL2.GL_TRIANGLES)
 		{
 			boolean hasIndices = indices != null;
 			int triangleCountBy3 = hasIndices ? indices.length : size;
@@ -878,7 +878,7 @@ public class FastShape implements OrderedRenderable, Cacheable, Bounded, Wirefra
 				sortedIndices[i + 2] = hasIndices ? indices[distance.index + 2] : distance.index + 2;
 			}
 		}
-		else if (mode == GL.GL_POINTS)
+		else if (mode == GL2.GL_POINTS)
 		{
 			IndexAndDistance[] distances = new IndexAndDistance[size];
 			for (int i = 0; i < size; i++)
@@ -1096,7 +1096,7 @@ public class FastShape implements OrderedRenderable, Cacheable, Bounded, Wirefra
 
 	protected boolean willCalculateNormals()
 	{
-		return isCalculateNormals() && (getMode() == GL.GL_TRIANGLES || getMode() == GL.GL_TRIANGLE_STRIP);
+		return isCalculateNormals() && (getMode() == GL2.GL_TRIANGLES || getMode() == GL2.GL_TRIANGLE_STRIP);
 	}
 
 	public boolean isFogEnabled()

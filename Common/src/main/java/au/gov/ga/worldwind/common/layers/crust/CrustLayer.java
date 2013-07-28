@@ -35,7 +35,7 @@ import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 import javax.xml.xpath.XPath;
 
 import org.w3c.dom.Document;
@@ -47,7 +47,7 @@ import au.gov.ga.worldwind.common.downloader.RetrievalResult;
 import au.gov.ga.worldwind.common.util.AVKeyMore;
 import au.gov.ga.worldwind.common.util.Loader;
 
-import com.sun.opengl.util.BufferUtil;
+import com.jogamp.common.nio.Buffers;
 
 /**
  * A specialised sub-surface layer that displays crustal elevation data
@@ -128,8 +128,8 @@ public class CrustLayer extends AbstractLayer implements Loader
 		}
 		
 		indices = generateTriStripIndices(width, height, wrap);
-		vertices = BufferUtil.newDoubleBuffer(width * height * 3);
-		colors = BufferUtil.newDoubleBuffer(width * height * 4);
+		vertices = Buffers.newDirectDoubleBuffer(width * height * 3);
+		colors = Buffers.newDirectDoubleBuffer(width * height * 4);
 	}
 
 	public CrustLayer(Document dom, AVList params)
@@ -224,7 +224,7 @@ public class CrustLayer extends AbstractLayer implements Loader
 		}
 		height--;
 		int indexCount = 2 * width * height + 4 * width - 2;
-		IntBuffer buffer = BufferUtil.newIntBuffer(indexCount);
+		IntBuffer buffer = Buffers.newDirectIntBuffer(indexCount);
 		int k = 0;
 		for (int i = 0; i < width; i++)
 		{
@@ -293,34 +293,34 @@ public class CrustLayer extends AbstractLayer implements Loader
 			recalculateColors();
 		}
 
-		GL gl = dc.getGL();
+		GL2 gl = dc.getGL().getGL2();
 
-		int push = GL.GL_CLIENT_VERTEX_ARRAY_BIT;
+		int push = GL2.GL_CLIENT_VERTEX_ARRAY_BIT;
 		if (colors != null)
 		{
-			push |= GL.GL_COLOR_BUFFER_BIT;
+			push |= GL2.GL_COLOR_BUFFER_BIT;
 		}
 		if (getOpacity() < 1.0)
 		{
-			push |= GL.GL_CURRENT_BIT;
+			push |= GL2.GL_CURRENT_BIT;
 		}
 		gl.glPushClientAttrib(push);
 
 		if (colors != null)
 		{
-			gl.glEnableClientState(GL.GL_COLOR_ARRAY);
-			gl.glColorPointer(4, GL.GL_DOUBLE, 0, colors.rewind());
+			gl.glEnableClientState(GL2.GL_COLOR_ARRAY);
+			gl.glColorPointer(4, GL2.GL_DOUBLE, 0, colors.rewind());
 		}
 		if (getOpacity() < 1.0)
 		{
 			setBlendingFunction(dc);
 		}
 
-		gl.glEnableClientState(GL.GL_VERTEX_ARRAY);
-		gl.glVertexPointer(3, GL.GL_DOUBLE, 0, vertices.rewind());
+		gl.glEnableClientState(GL2.GL_VERTEX_ARRAY);
+		gl.glVertexPointer(3, GL2.GL_DOUBLE, 0, vertices.rewind());
 
-		gl.glDrawElements(javax.media.opengl.GL.GL_TRIANGLE_STRIP, indices.limit(),
-				javax.media.opengl.GL.GL_UNSIGNED_INT, indices.rewind());
+		gl.glDrawElements(GL2.GL_TRIANGLE_STRIP, indices.limit(),
+				GL2.GL_UNSIGNED_INT, indices.rewind());
 
 		gl.glColor4d(1, 1, 1, 1);
 		gl.glPopClientAttrib();
@@ -368,7 +368,7 @@ public class CrustLayer extends AbstractLayer implements Loader
 			if (doubles.length != width * height)
 				throw new IOException("File doesn't contain width x height (" + (width * height) + ") values");
 
-			DoubleBuffer buffer = BufferUtil.newDoubleBuffer(width * height);
+			DoubleBuffer buffer = Buffers.newDirectDoubleBuffer(width * height);
 			buffer.put(doubles);
 			buffer.rewind();
 			
@@ -404,11 +404,11 @@ public class CrustLayer extends AbstractLayer implements Loader
 
 	protected void setBlendingFunction(DrawContext dc)
 	{
-		GL gl = dc.getGL();
+		GL2 gl = dc.getGL().getGL2();
 		double alpha = this.getOpacity();
 		gl.glColor4d(alpha, alpha, alpha, alpha);
-		gl.glEnable(GL.GL_BLEND);
-		gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
+		gl.glEnable(GL2.GL_BLEND);
+		gl.glBlendFunc(GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA);
 	}
 
 	private static double[] chroma(double depth, double opacity)

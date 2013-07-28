@@ -1,0 +1,98 @@
+<?xml version="1.0" ?>
+
+<project name="AndroidRemoteServer" basedir="." default="run">
+
+	<property name="perform_unit_tests" value="false" />
+	<property name="javac_debug" value="false" />
+
+	<property name="application_dir" value="${basedir}/../.." />
+	<property name="viewer_dir" value="${application_dir}/Viewer" />
+	<property name="viewer_package_dir" value="${viewer_dir}/target/executable" />
+
+	<property name="shared_dir" value="${basedir}/../AndroidRemoteShared" />
+	<property name="shared_package_dir" value="${shared_dir}/target/package" />
+
+	<property name="src_dir" value="${basedir}/src" />
+	<property name="lib_dir" value="${basedir}/lib" />
+
+	<property name="target_dir" value="${basedir}/target" />
+	<property name="build_dir" value="${target_dir}/classes" />
+	<property name="package_dir" value="${target_dir}/package" />
+	<property name="jar_name" value="server-uberjar.jar" />
+	<property name="batch_name" value="run.bat" />
+
+	<path id="classpath">
+		<fileset dir="${lib_dir}">
+			<include name="**/*.jar" />
+		</fileset>
+		<fileset dir="${shared_package_dir}">
+			<include name="**/*.jar" />
+		</fileset>
+		<fileset dir="${viewer_package_dir}">
+			<include name="**/*.jar" />
+		</fileset>
+	</path>
+
+	<patternset id="manifest_exclude">
+		<exclude name="META-INF/**" />
+	</patternset>
+
+	<target name="clean" description="Remove all generated files">
+		<delete dir="${target_dir}" />
+	</target>
+
+	<target name="dependencies">
+		<ant antfile="${viewer_dir}/build.xml" target="executable" dir="${viewer_dir}" inheritall="false">
+			<property name="javac_debug" value="${javac_debug}" />
+			<property name="perform_unit_tests" value="${perform_unit_tests}" />
+			<property name="user.dir" value="${viewer_dir}" />
+		</ant>
+		<ant antfile="${shared_dir}/build.xml" target="run" dir="${shared_dir}" inheritall="false">
+			<property name="javac_debug" value="${javac_debug}" />
+			<property name="perform_unit_tests" value="${perform_unit_tests}" />
+			<property name="user.dir" value="${shared_dir}" />
+		</ant>
+	</target>
+
+	<target name="build" depends="dependencies">
+		<mkdir dir="${build_dir}" />
+		<copy todir="${build_dir}">
+			<fileset dir="${src_dir}">
+				<exclude name="**/*.java" />
+			</fileset>
+		</copy>
+		<javac source="1.6" target="1.6" destdir="${build_dir}" classpathref="classpath" listfiles="no" fork="true" debug="${javac_debug}" includeantruntime="no">
+			<src path="${src_dir}" />
+		</javac>
+	</target>
+
+	<target name="package" depends="build">
+		<mkdir dir="${package_dir}" />
+		<jar destfile="${package_dir}/${jar_name}">
+
+			<zipgroupfileset dir="${lib_dir}">
+				<include name="**/*.jar" />
+				<patternset refid="manifest_exclude" />
+			</zipgroupfileset>
+			<zipgroupfileset dir="${shared_package_dir}">
+				<include name="**/*.jar" />
+				<patternset refid="manifest_exclude" />
+			</zipgroupfileset>
+			<zipgroupfileset dir="${viewer_package_dir}">
+				<include name="**/*.jar" />
+				<patternset refid="manifest_exclude" />
+			</zipgroupfileset>
+
+			<fileset dir="${build_dir}" />
+
+			<manifest>
+				<attribute name="Main-Class" value="au.gov.ga.worldwind.androidremote.server.Executable" />
+			</manifest>
+		</jar>
+
+		<echo file="${package_dir}/${batch_name}">java -Dsun.java2d.noddraw=true -Xmx1024m -jar ./${jar_name}</echo>
+	</target>
+
+	<target name="run" depends="package" />
+
+</project>

@@ -25,7 +25,7 @@ import gov.nasa.worldwind.util.OGLUtil;
 import java.util.Iterator;
 import java.util.logging.Level;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 /**
  * {@link GeographicSurfaceTileRenderer} extension that supports multitexturing
@@ -56,13 +56,13 @@ public class MultiTextureSurfaceTileRenderer extends GeographicSurfaceTileRender
 			throw new IllegalStateException(message);
 		}
 
-		GL gl = dc.getGL();
+		GL2 gl = dc.getGL().getGL2();
 		int totalNumTexUnits = dc.getGLRuntimeCapabilities().getNumTextureUnits();
 		boolean showOutlines = this.isShowImageTileOutlines() && totalNumTexUnits > 2;
 
-		gl.glPushAttrib(GL.GL_COLOR_BUFFER_BIT // for alpha func
-				| GL.GL_ENABLE_BIT | GL.GL_CURRENT_BIT | GL.GL_DEPTH_BUFFER_BIT // for depth func
-				| GL.GL_TRANSFORM_BIT);
+		gl.glPushAttrib(GL2.GL_COLOR_BUFFER_BIT // for alpha func
+				| GL2.GL_ENABLE_BIT | GL2.GL_CURRENT_BIT | GL2.GL_DEPTH_BUFFER_BIT // for depth func
+				| GL2.GL_TRANSFORM_BIT);
 
 		boolean texturesEnabled = false;
 		int numTexUnitsUsed = showOutlines ? 3 : 2;
@@ -72,18 +72,18 @@ public class MultiTextureSurfaceTileRenderer extends GeographicSurfaceTileRender
 			this.alphaTexture = dc.getTextureCache().getTexture(this);
 			if (this.alphaTexture == null)
 			{
-				this.initAlphaTexture(DEFAULT_ALPHA_TEXTURE_SIZE); // TODO: choose size to match incoming tile sizes?
+				this.initAlphaTexture(dc, DEFAULT_ALPHA_TEXTURE_SIZE); // TODO: choose size to match incoming tile sizes?
 				dc.getTextureCache().put(this, this.alphaTexture);
 			}
 
 			if (showOutlines && this.outlineTexture == null)
-				this.initOutlineTexture(128);
+				this.initOutlineTexture(dc, 128);
 
-			gl.glEnable(GL.GL_DEPTH_TEST);
-			gl.glDepthFunc(GL.GL_LEQUAL);
+			gl.glEnable(GL2.GL_DEPTH_TEST);
+			gl.glDepthFunc(GL2.GL_LEQUAL);
 
-			gl.glEnable(GL.GL_ALPHA_TEST);
-			gl.glAlphaFunc(GL.GL_GREATER, 0.01f);
+			gl.glEnable(GL2.GL_ALPHA_TEST);
+			gl.glAlphaFunc(GL2.GL_GREATER, 0.01f);
 
 			dc.getSurfaceGeometry().beginRendering(dc);
 
@@ -110,26 +110,26 @@ public class MultiTextureSurfaceTileRenderer extends GeographicSurfaceTileRender
 
 					for (int i = 0; i < numTexUnitsUsed; i++)
 					{
-						gl.glActiveTexture(GL.GL_TEXTURE0 + i);
-						gl.glEnable(GL.GL_TEXTURE_2D);
-						gl.glMatrixMode(GL.GL_TEXTURE);
+						gl.glActiveTexture(GL2.GL_TEXTURE0 + i);
+						gl.glEnable(GL2.GL_TEXTURE_2D);
+						gl.glMatrixMode(GL2.GL_TEXTURE);
 						gl.glPushMatrix();
 						if (showOutlines && i == numTexUnitsUsed - 2)
 						{
 							//outline texture
-							gl.glTexEnvi(GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_MODE, GL.GL_ADD);
+							gl.glTexEnvi(GL2.GL_TEXTURE_ENV, GL2.GL_TEXTURE_ENV_MODE, GL2.GL_ADD);
 						}
 						else if (i == numTexUnitsUsed - 1 || !dc.isPickingMode())
 						{
 							//alpha texture or not picking mode
-							gl.glTexEnvi(GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_MODE, GL.GL_MODULATE);
+							gl.glTexEnvi(GL2.GL_TEXTURE_ENV, GL2.GL_TEXTURE_ENV_MODE, GL2.GL_MODULATE);
 						}
 						else
 						{
 							//picking mode (but not the alpha texture)
-							gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_MODE, GL.GL_COMBINE);
-							gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_SRC0_RGB, GL.GL_PREVIOUS);
-							gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_COMBINE_RGB, GL.GL_REPLACE);
+							gl.glTexEnvf(GL2.GL_TEXTURE_ENV, GL2.GL_TEXTURE_ENV_MODE, GL2.GL_COMBINE);
+							gl.glTexEnvf(GL2.GL_TEXTURE_ENV, GL2.GL_SRC0_RGB, GL2.GL_PREVIOUS);
+							gl.glTexEnvf(GL2.GL_TEXTURE_ENV, GL2.GL_COMBINE_RGB, GL2.GL_REPLACE);
 						}
 					}
 
@@ -150,11 +150,11 @@ public class MultiTextureSurfaceTileRenderer extends GeographicSurfaceTileRender
 					// TODO: Figure out how to apply multi-texture to more than one tile at a time. Use fragment shader?
 					for (SurfaceTile tile : tilesToRender)
 					{
-						gl.glActiveTexture(GL.GL_TEXTURE0);
+						gl.glActiveTexture(GL2.GL_TEXTURE0);
 
 						boolean bound;
 						if (tile instanceof MultiTextureTile)
-							bound = ((MultiTextureTile) tile).bind(dc, GL.GL_TEXTURE1, remainingTexUnits);
+							bound = ((MultiTextureTile) tile).bind(dc, GL2.GL_TEXTURE1, remainingTexUnits);
 						else
 							bound = tile.bind(dc);
 
@@ -165,17 +165,17 @@ public class MultiTextureSurfaceTileRenderer extends GeographicSurfaceTileRender
 
 							for (int i = 0; i < numTexUnitsUsed; i++)
 							{
-								gl.glActiveTexture(GL.GL_TEXTURE0 + i);
-								gl.glMatrixMode(GL.GL_TEXTURE);
+								gl.glActiveTexture(GL2.GL_TEXTURE0 + i);
+								gl.glMatrixMode(GL2.GL_TEXTURE);
 								gl.glLoadIdentity();
 
 								if (showOutlines && i == numTexUnitsUsed - 2)
 								{
-									this.outlineTexture.bind();
+									this.outlineTexture.bind(gl);
 								}
 								else if (i == numTexUnitsUsed - 1)
 								{
-									this.alphaTexture.bind();
+									this.alphaTexture.bind(gl);
 								}
 								else if(tile instanceof MultiTextureTile)
 								{
@@ -212,17 +212,17 @@ public class MultiTextureSurfaceTileRenderer extends GeographicSurfaceTileRender
 
 			for (int i = numTexUnitsUsed - 1; i >= 0; i--)
 			{
-				gl.glActiveTexture(GL.GL_TEXTURE0 + i);
-				gl.glMatrixMode(GL.GL_TEXTURE);
+				gl.glActiveTexture(GL2.GL_TEXTURE0 + i);
+				gl.glMatrixMode(GL2.GL_TEXTURE);
 				gl.glPopMatrix();
-				gl.glDisable(GL.GL_TEXTURE_2D);
+				gl.glDisable(GL2.GL_TEXTURE_2D);
 			}
 
-			gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_MODE, OGLUtil.DEFAULT_TEX_ENV_MODE);
+			gl.glTexEnvf(GL2.GL_TEXTURE_ENV, GL2.GL_TEXTURE_ENV_MODE, OGLUtil.DEFAULT_TEX_ENV_MODE);
 			if (dc.isPickingMode())
 			{
-				gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_SRC0_RGB, OGLUtil.DEFAULT_SRC0_RGB);
-				gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_COMBINE_RGB, OGLUtil.DEFAULT_COMBINE_RGB);
+				gl.glTexEnvf(GL2.GL_TEXTURE_ENV, GL2.GL_SRC0_RGB, OGLUtil.DEFAULT_SRC0_RGB);
+				gl.glTexEnvf(GL2.GL_TEXTURE_ENV, GL2.GL_COMBINE_RGB, OGLUtil.DEFAULT_COMBINE_RGB);
 			}
 
 			gl.glPopAttrib();

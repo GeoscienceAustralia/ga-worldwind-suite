@@ -17,7 +17,7 @@ package au.gov.ga.worldwind.animator.application.effects.edge;
 
 import java.io.InputStream;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 import au.gov.ga.worldwind.common.render.Shader;
 
@@ -31,7 +31,7 @@ public class EdgeShader extends Shader
 	private int textureWidthUniform;
 	private int textureHeightUniform;
 
-	public void use(GL gl, int textureWidth, int textureHeight)
+	public void use(GL2 gl, int textureWidth, int textureHeight)
 	{
 		super.use(gl);
 		gl.glUniform1f(textureWidthUniform, (float) textureWidth);
@@ -51,7 +51,7 @@ public class EdgeShader extends Shader
 	}
 
 	@Override
-	protected void getUniformLocations(GL gl)
+	protected void getUniformLocations(GL2 gl)
 	{
 		gl.glUniform1i(gl.glGetUniformLocation(shaderProgram, "colorTexture"), 0);
 		gl.glUniform1i(gl.glGetUniformLocation(shaderProgram, "depthTexture"), 1);

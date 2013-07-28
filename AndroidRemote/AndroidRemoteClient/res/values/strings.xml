@@ -1,0 +1,51 @@
+<resources>
+
+    <string name="app_name">AndroidRemoteClient</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="menu_settings">Settings</string>
+    <string name="title_activity_remote">Remote</string>
+    <string name="connect_menu">Connect…</string>
+    <string name="lock_landscape_menu">Lock landscape</string>
+    <string name="remote_view_menu">Remote view</string>
+    <string name="discoverable">Make discoverable</string>
+    <string name="bluetooth_unavailable">Bluetooth is not available</string>
+    <string name="bluetooth_disabled">Bluetooth was not enabled</string>
+    <string name="title_connected_to">Connected: </string>
+    <string name="title_connecting">Connecting…</string>
+    <string name="title_not_connected">Not connected</string>
+    <string name="connection_failed">Unable to connect</string>
+    <string name="connection_lost">Device connection lost</string>
+    <string name="paired_devices">Paired Devices</string>
+    <string name="other_devices">Other Available Devices</string>
+    <string name="scan_devices">Scan for devices</string>
+    <string name="none_paired">No devices have been paired</string>
+    <string name="scanning">scanning for devices…</string>
+    <string name="none_found">No devices found</string>
+    <string name="select_device">select a device to connect</string>
+    <string name="controls_tab">Control</string>
+    <string name="datasets_tab">Datasets</string>
+    <string name="layers_tab">Layers</string>
+    <string name="flat_layers_tab">Layers (flat)</string>
+    <string name="places_tab">Places</string>
+    <string name="icon_content_description">Icon</string>
+    <string name="layer_enabled">Layer Enabled</string>
+    <string name="layer_enabled_label">Layer enabled: </string>
+    <string name="opacity_label">Opacity: </string>
+    <string name="close">Close</string>
+    <string name="enabled">Enabled</string>
+    <string name="disabled">Disabled</string>
+    <string name="play">Play</string>
+    <string name="stop">Stop</string>
+    <string name="exit">Exit</string>
+    <string name="vertical_exaggeration">Vertical exaggeration</string>
+    <string name="vertical_exaggeration_menu">Vertical exaggeration…</string>
+    <string name="ve1x">1x</string>
+    <string name="ve2x">2x</string>
+    <string name="ve5x">5x</string>
+    <string name="ve10x">10x</string>
+    <string name="delete_layer">Delete layer: </string>
+    <string name="delete">Delete</string>
+    <string name="fly_home">Fly home</string>
+    <string name="help">Help</string>
+
+</resources>

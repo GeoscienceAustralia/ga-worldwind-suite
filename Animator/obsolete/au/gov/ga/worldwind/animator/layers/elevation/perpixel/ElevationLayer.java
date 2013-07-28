@@ -461,7 +461,7 @@ public abstract class ElevationLayer extends TiledImageLayer
 	@Override
 	protected void setBlendingFunction(DrawContext dc)
 	{
-		GL gl = dc.getGL();
+		GL gl = dc.getGL().getGL2();
 		double alpha = this.getOpacity();
 		gl.glColor4d(alpha, alpha, alpha, alpha);
 		gl.glEnable(GL.GL_BLEND);

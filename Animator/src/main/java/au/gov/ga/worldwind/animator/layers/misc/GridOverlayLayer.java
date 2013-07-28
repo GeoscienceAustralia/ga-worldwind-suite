@@ -27,12 +27,12 @@ import java.nio.DoubleBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 import javax.media.opengl.glu.GLU;
 
 import au.gov.ga.worldwind.common.util.Validate;
 
-import com.sun.opengl.util.BufferUtil;
+import com.jogamp.common.nio.Buffers;
 
 /**
  * A layer that renders a grid overlay on top of the viewport window
@@ -132,7 +132,7 @@ public class GridOverlayLayer extends AbstractLayer
 	 */
 	private void drawGrid(DrawContext dc)
 	{
-		GL gl = dc.getGL();
+		GL2 gl = dc.getGL().getGL2();
 		GLU glu = dc.getGLU();
 
 		OGLStackHandler stack = new OGLStackHandler();
@@ -142,8 +142,8 @@ public class GridOverlayLayer extends AbstractLayer
 		{
 			recalculateGrid(viewport);
 
-			stack.pushAttrib(gl, GL.GL_CURRENT_BIT | GL.GL_DEPTH_BUFFER_BIT | GL.GL_COLOR_BUFFER_BIT | GL.GL_LINE_BIT);
-			stack.pushClientAttrib(gl, GL.GL_CLIENT_VERTEX_ARRAY_BIT);
+			stack.pushAttrib(gl, GL2.GL_CURRENT_BIT | GL2.GL_DEPTH_BUFFER_BIT | GL2.GL_COLOR_BUFFER_BIT | GL2.GL_LINE_BIT);
+			stack.pushClientAttrib(gl, GL2.GL_CLIENT_VERTEX_ARRAY_BIT);
 
 			stack.pushProjection(gl);
 			gl.glLoadIdentity();
@@ -153,14 +153,14 @@ public class GridOverlayLayer extends AbstractLayer
 			gl.glLoadIdentity();
 
 			gl.glColor4d(gridColor[0], gridColor[1], gridColor[2], getOpacity());
-			gl.glEnable(GL.GL_BLEND);
-			gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
-			gl.glDisable(GL.GL_DEPTH_TEST);
-			gl.glEnableClientState(GL.GL_VERTEX_ARRAY);
+			gl.glEnable(GL2.GL_BLEND);
+			gl.glBlendFunc(GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA);
+			gl.glDisable(GL2.GL_DEPTH_TEST);
+			gl.glEnableClientState(GL2.GL_VERTEX_ARRAY);
 
 			gl.glLineWidth(LINE_THICKNESS);
-			gl.glVertexPointer(2, GL.GL_DOUBLE, 0, gridBuffer.rewind());
-			gl.glDrawArrays(GL.GL_LINES, 0, numberOfBufferEntries);
+			gl.glVertexPointer(2, GL2.GL_DOUBLE, 0, gridBuffer.rewind());
+			gl.glDrawArrays(GL2.GL_LINES, 0, numberOfBufferEntries);
 		}
 		finally
 		{
@@ -187,7 +187,7 @@ public class GridOverlayLayer extends AbstractLayer
 		calculateHorizontalGridLines(viewport, tempGridBuffer);
 
 		numberOfBufferEntries = tempGridBuffer.size() * 2;
-		gridBuffer = BufferUtil.newDoubleBuffer(numberOfBufferEntries);
+		gridBuffer = Buffers.newDirectDoubleBuffer(numberOfBufferEntries);
 		for (Point gridPoint : tempGridBuffer)
 		{
 			gridBuffer.put(gridPoint.x);

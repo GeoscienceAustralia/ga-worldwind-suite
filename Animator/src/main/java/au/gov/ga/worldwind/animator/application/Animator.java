@@ -165,7 +165,6 @@ import au.gov.ga.worldwind.common.ui.SplashScreen;
 import au.gov.ga.worldwind.common.util.DefaultLauncher;
 import au.gov.ga.worldwind.common.util.GDALDataHelper;
 import au.gov.ga.worldwind.common.util.exaggeration.VerticalExaggerationAccessor;
-import au.gov.ga.worldwind.wmsbrowser.WmsBrowser;
 
 /**
  * The primary application class for the Animator application.
@@ -209,7 +208,7 @@ public class Animator
 	private ParameterEditor parameterEditor;
 
 	/** A tool used to browse for and add WMS layers to the current animation */
-	private WmsBrowser wmsBrowser;
+	//private WmsBrowser wmsBrowser;
 
 	/** The primary world wind canvas */
 	private WorldWindowGLCanvas wwd;
@@ -330,7 +329,7 @@ public class Animator
 		initialiseStatusBar();
 		initialiseMenuBar();
 		initialiseParameterEditor();
-		initialiseWmsBrowser();
+		//initialiseWmsBrowser();
 		initialiseAutoSaver();
 		initialiseAnimationListeners();
 
@@ -872,7 +871,7 @@ public class Animator
 		menu.setMnemonic(KeyEvent.VK_W);
 		menuBar.add(menu);
 		actionFactory.getShowParameterEditorAction().addToMenu(menu);
-		actionFactory.getShowWmsBrowserAction().addToMenu(menu);
+		//actionFactory.getShowWmsBrowserAction().addToMenu(menu);
 
 		// Help menu
 		menu = new JMenu(getMessage(getHelpMenuLabelKey()));
@@ -899,7 +898,7 @@ public class Animator
 		changeOfAnimationListeners.add(parameterEditor);
 	}
 
-	private void initialiseWmsBrowser()
+	/*private void initialiseWmsBrowser()
 	{
 		this.wmsBrowser = new WmsBrowser(getMessage(getAnimatorApplicationTitleKey()));
 		this.wmsBrowser.addWindowListener(new WindowAdapter()
@@ -910,7 +909,7 @@ public class Animator
 				actionFactory.getShowWmsBrowserAction().setSelected(false);
 			}
 		});
-	}
+	}*/
 
 	private void initialiseAutoSaver()
 	{
@@ -1170,7 +1169,7 @@ public class Animator
 					resizeWindowToRenderDimensions();
 					frame.pack();
 					frame.setVisible(true);
-					wwd.createBufferStrategy(2);
+					//wwd.createBufferStrategy(2);
 				}
 
 			});
@@ -1956,7 +1955,7 @@ public class Animator
 		actionFactory.getShowParameterEditorAction().setSelected(visible);
 	}
 
-	public void setWmsBrowserVisible(boolean visible)
+	/*public void setWmsBrowserVisible(boolean visible)
 	{
 		if (visible)
 		{
@@ -1966,7 +1965,7 @@ public class Animator
 		{
 			wmsBrowser.hide();
 		}
-	}
+	}*/
 
 	void scaleAnimation()
 	{

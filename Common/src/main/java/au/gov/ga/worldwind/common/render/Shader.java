@@ -18,7 +18,7 @@ package au.gov.ga.worldwind.common.render;
 import java.io.IOException;
 import java.io.InputStream;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 import au.gov.ga.worldwind.common.util.IOUtil;
 
@@ -48,14 +48,14 @@ public abstract class Shader
 	 * 
 	 * @param gl
 	 */
-	protected abstract void getUniformLocations(GL gl);
+	protected abstract void getUniformLocations(GL2 gl);
 
 	/**
 	 * Setup this GLSL shader in OpenGL
 	 * 
 	 * @param gl
 	 */
-	public final void create(GL gl)
+	public final void create(GL2 gl)
 	{
 		if (isCreated())
 			return;
@@ -74,13 +74,13 @@ public abstract class Shader
 			e.printStackTrace();
 		}
 
-		vertexShader = gl.glCreateShader(GL.GL_VERTEX_SHADER);
+		vertexShader = gl.glCreateShader(GL2.GL_VERTEX_SHADER);
 		if (vertexShader <= 0)
 		{
 			delete(gl);
 			throw new IllegalStateException("Error creating vertex shader");
 		}
-		fragmentShader = gl.glCreateShader(GL.GL_FRAGMENT_SHADER);
+		fragmentShader = gl.glCreateShader(GL2.GL_FRAGMENT_SHADER);
 		if (fragmentShader <= 0)
 		{
 			delete(gl);
@@ -105,8 +105,8 @@ public abstract class Shader
 		gl.glValidateProgram(shaderProgram);
 
 		int[] status = new int[1];
-		gl.glGetProgramiv(shaderProgram, GL.GL_VALIDATE_STATUS, status, 0);
-		if (status[0] != GL.GL_TRUE)
+		gl.glGetProgramiv(shaderProgram, GL2.GL_VALIDATE_STATUS, status, 0);
+		if (status[0] != GL2.GL_TRUE)
 		{
 			int maxLength = 10240;
 			int[] length = new int[1];
@@ -138,7 +138,7 @@ public abstract class Shader
 	 * 
 	 * @param gl
 	 */
-	protected void use(GL gl)
+	protected void use(GL2 gl)
 	{
 		gl.glUseProgram(shaderProgram); //if !isCreated(), then shaderProgram == 0
 	}
@@ -148,7 +148,7 @@ public abstract class Shader
 	 * 
 	 * @param gl
 	 */
-	public void unuse(GL gl)
+	public void unuse(GL2 gl)
 	{
 		gl.glUseProgram(0);
 	}
@@ -158,7 +158,7 @@ public abstract class Shader
 	 * 
 	 * @param gl
 	 */
-	public void delete(GL gl)
+	public void delete(GL2 gl)
 	{
 		if (shaderProgram > 0)
 		{
@@ -183,7 +183,7 @@ public abstract class Shader
 	 * @param gl
 	 * @see Shader#create(GL)
 	 */
-	public void createIfRequired(GL gl)
+	public void createIfRequired(GL2 gl)
 	{
 		if (!isCreated())
 		{
@@ -197,7 +197,7 @@ public abstract class Shader
 	 * @param gl
 	 * @see Shader#delete(GL)
 	 */
-	public void deleteIfCreated(GL gl)
+	public void deleteIfCreated(GL2 gl)
 	{
 		if (isCreated())
 		{

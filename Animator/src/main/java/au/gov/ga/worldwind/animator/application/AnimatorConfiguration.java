@@ -19,6 +19,7 @@ import gov.nasa.worldwind.Configuration;
 import gov.nasa.worldwind.avlist.AVKey;
 
 import javax.media.opengl.GLCapabilities;
+import javax.media.opengl.GLProfile;
 import javax.swing.UIManager;
 
 import au.gov.ga.worldwind.animator.application.input.AnimatorInputHandler;
@@ -39,7 +40,7 @@ import au.gov.ga.worldwind.common.util.message.MessageSourceAccessor;
  */
 public class AnimatorConfiguration
 {
-	private static final GLCapabilities caps = new GLCapabilities();
+	private static final GLCapabilities caps = new GLCapabilities(GLProfile.get(GLProfile.GL2));
 	
 	public static final void initialiseConfiguration()
 	{

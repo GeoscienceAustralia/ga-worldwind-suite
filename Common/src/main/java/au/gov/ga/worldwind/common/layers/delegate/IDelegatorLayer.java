@@ -22,7 +22,7 @@ import gov.nasa.worldwind.util.TileKey;
 
 import java.net.URL;
 
-import com.sun.opengl.util.texture.TextureData;
+import com.jogamp.opengl.util.texture.TextureData;
 
 /**
  * A layer that uses {@link IDelegate} to do it's work.

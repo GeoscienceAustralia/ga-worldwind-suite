@@ -185,7 +185,7 @@ public class ElevationTesselator extends VerticalExaggerationTessellator
 		// Vertex Buffer Objects are supported in versions 1.5 and greater
 		if (dc.getGLRuntimeCapabilities().isUseVertexBufferObject())
 		{
-			GL gl = dc.getGL();
+			GL gl = dc.getGL().getGL2();
 
 			OGLStackHandler ogsh = new OGLStackHandler();
 

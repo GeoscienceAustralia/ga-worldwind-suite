@@ -15,7 +15,51 @@
  ******************************************************************************/
 package au.gov.ga.worldwind.animator.application;
 
-import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.*;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getAddEffectLabelKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getAddElevationModelLabelKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getAddExaggeratorLabelKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getAddKeyMenuLabelKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getAnimateClippingLabelKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getAutoKeyMenuLabelKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getDeleteKeyMenuLabelKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getDynamicStereoMenuLabelKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getExitMenuLabelKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getFirstFrameMenuLabelKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getKeyValuesMenuLabelKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getLastFrameMenuLabelKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getLogEventsLabelKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getNewMenuLabelKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getNext10FrameMenuLabelKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getNextFrameMenuLabelKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getOpenMenuLabelKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getParameterValuesMenuLabelKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getPreviewMenuLabelKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getPreviewX10MenuLabelKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getPreviewX2MenuLabelKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getPrevious10FrameMenuLabelKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getPreviousFrameMenuLabelKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getRenderHighResMenuLabelKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getRenderMenuLabelKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getRenderMenuTooltipKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getRenderStandardResMenuLabelKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getResizeToRenderDimensionsLabelKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getSaveAsMenuLabelKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getSaveMenuLabelKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getScaleAnimationMenuLabelKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getSetFrameCountMenuLabelKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getSetProxyLabelKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getShowAboutMenuLabelKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getShowCameraPathLabelKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getShowCrosshairsLabelKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getShowGridLabelKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getShowParameterEditorMenuLabelKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getShowRuleOfThirdsLabelKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getShowTutorialMenuLabelKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getShowUserGuideMenuLabelKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getShowWireframeMenuLabelKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getSmoothEyeSpeedMenuLabelKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getStereoCameraMenuLabelKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getUseZoomScalingMenuLabelKey;
 import static au.gov.ga.worldwind.common.util.message.MessageSourceAccessor.getMessage;
 
 import java.awt.event.ActionEvent;
@@ -27,9 +71,9 @@ import javax.swing.KeyStroke;
 
 import au.gov.ga.worldwind.animator.application.debug.DebugWriter;
 import au.gov.ga.worldwind.animator.application.settings.Settings;
+import au.gov.ga.worldwind.animator.util.Icons;
 import au.gov.ga.worldwind.common.ui.BasicAction;
 import au.gov.ga.worldwind.common.ui.SelectableAction;
-import au.gov.ga.worldwind.animator.util.Icons;
 import au.gov.ga.worldwind.common.util.Validate;
 
 /**
@@ -82,7 +126,7 @@ public class AnimatorActionFactory
 	private SelectableAction dynamicStereoAction;
 	
 	private SelectableAction showParameterEditorAction;
-	private SelectableAction showWmsBrowserAction;
+	//private SelectableAction showWmsBrowserAction;
 	
 	private BasicAction showUserGuideAction;
 	private BasicAction showTutorialAction;
@@ -114,6 +158,7 @@ public class AnimatorActionFactory
 		newAnimationAction.setIcon(Icons.newfile.getIcon());
 		newAnimationAction.addActionListener(new ActionListener()
 		{
+			@Override
 			public void actionPerformed(ActionEvent e)
 			{
 				targetApplication.newFile();
@@ -126,6 +171,7 @@ public class AnimatorActionFactory
 		openAnimationAction.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_O);
 		openAnimationAction.addActionListener(new ActionListener()
 		{
+			@Override
 			public void actionPerformed(ActionEvent e)
 			{
 				targetApplication.open();
@@ -139,6 +185,7 @@ public class AnimatorActionFactory
 		saveAnimationAction.setIcon(Icons.save.getIcon());
 		saveAnimationAction.addActionListener(new ActionListener()
 		{
+			@Override
 			public void actionPerformed(ActionEvent e)
 			{
 				targetApplication.save();
@@ -151,6 +198,7 @@ public class AnimatorActionFactory
 		saveAnimationAsAction.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_A);
 		saveAnimationAsAction.addActionListener(new ActionListener()
 		{
+			@Override
 			public void actionPerformed(ActionEvent e)
 			{
 				targetApplication.saveAs();
@@ -163,6 +211,7 @@ public class AnimatorActionFactory
 		exitAction.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_X);
 		exitAction.addActionListener(new ActionListener()
 		{
+			@Override
 			public void actionPerformed(ActionEvent e)
 			{
 				targetApplication.quit();
@@ -175,6 +224,7 @@ public class AnimatorActionFactory
 		addKeyAction.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_A);
 		addKeyAction.addActionListener(new ActionListener()
 		{
+			@Override
 			public void actionPerformed(ActionEvent e)
 			{
 				targetApplication.addFrame();
@@ -187,6 +237,7 @@ public class AnimatorActionFactory
 		deleteKeyAction.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_D);
 		deleteKeyAction.addActionListener(new ActionListener()
 		{
+			@Override
 			public void actionPerformed(ActionEvent e)
 			{
 				targetApplication.deleteSelectedKey();
@@ -198,6 +249,7 @@ public class AnimatorActionFactory
 		autoKeyAction.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_K);
 		autoKeyAction.addActionListener(new ActionListener()
 		{
+			@Override
 			public void actionPerformed(ActionEvent e)
 			{
 				targetApplication.setAutokey(autoKeyAction.isSelected());
@@ -209,6 +261,7 @@ public class AnimatorActionFactory
 		setFrameCountAction.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_C);
 		setFrameCountAction.addActionListener(new ActionListener()
 		{
+			@Override
 			public void actionPerformed(ActionEvent e)
 			{
 				targetApplication.promptToSetFrameCount();
@@ -221,6 +274,7 @@ public class AnimatorActionFactory
 		previousFrameAction.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_P);
 		previousFrameAction.addActionListener(new ActionListener()
 		{
+			@Override
 			public void actionPerformed(ActionEvent e)
 			{
 				targetApplication.moveToPreviousFrame();
@@ -233,6 +287,7 @@ public class AnimatorActionFactory
 		nextFrameAction.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_N);
 		nextFrameAction.addActionListener(new ActionListener()
 		{
+			@Override
 			public void actionPerformed(ActionEvent e)
 			{
 				targetApplication.moveToNextFrame();
@@ -244,6 +299,7 @@ public class AnimatorActionFactory
 		previous10FramesAction.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_COMMA, KeyEvent.SHIFT_DOWN_MASK));
 		previous10FramesAction.addActionListener(new ActionListener()
 		{
+			@Override
 			public void actionPerformed(ActionEvent e)
 			{
 				targetApplication.moveToPrevious10Frame();
@@ -255,6 +311,7 @@ public class AnimatorActionFactory
 		next10FramesAction.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_PERIOD, KeyEvent.SHIFT_DOWN_MASK));
 		next10FramesAction.addActionListener(new ActionListener()
 		{
+			@Override
 			public void actionPerformed(ActionEvent e)
 			{
 				targetApplication.moveToNext10Frame();
@@ -267,6 +324,7 @@ public class AnimatorActionFactory
 		firstFrameAction.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_F);
 		firstFrameAction.addActionListener(new ActionListener()
 		{
+			@Override
 			public void actionPerformed(ActionEvent e)
 			{
 				targetApplication.moveToFirstFrame();
@@ -279,6 +337,7 @@ public class AnimatorActionFactory
 		lastFrameAction.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_L);
 		lastFrameAction.addActionListener(new ActionListener()
 		{
+			@Override
 			public void actionPerformed(ActionEvent e)
 			{
 				targetApplication.moveToLastFrame();
@@ -290,6 +349,7 @@ public class AnimatorActionFactory
 		useScaledZoomAction.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_Z);
 		useScaledZoomAction.addActionListener(new ActionListener()
 		{
+			@Override
 			public void actionPerformed(ActionEvent e)
 			{
 				targetApplication.setZoomScalingRequired(useScaledZoomAction.isSelected());
@@ -301,6 +361,7 @@ public class AnimatorActionFactory
 		scaleAnimationAction.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_S);
 		scaleAnimationAction.addActionListener(new ActionListener()
 		{
+			@Override
 			public void actionPerformed(ActionEvent e)
 			{
 				targetApplication.scaleAnimation();
@@ -312,6 +373,7 @@ public class AnimatorActionFactory
 		smoothEyeSpeedAction.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_M);
 		smoothEyeSpeedAction.addActionListener(new ActionListener()
 		{
+			@Override
 			public void actionPerformed(ActionEvent e)
 			{
 				targetApplication.smoothEyeSpeed();
@@ -336,6 +398,7 @@ public class AnimatorActionFactory
 		previewAction.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_P);
 		previewAction.addActionListener(new ActionListener()
 		{
+			@Override
 			public void actionPerformed(ActionEvent e)
 			{
 				targetApplication.preview(1);
@@ -347,6 +410,7 @@ public class AnimatorActionFactory
 		previewX2Action.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, ActionEvent.SHIFT_MASK));
 		previewX2Action.addActionListener(new ActionListener()
 		{
+			@Override
 			public void actionPerformed(ActionEvent e)
 			{
 				targetApplication.preview(2);
@@ -358,6 +422,7 @@ public class AnimatorActionFactory
 		previewX10Action.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, ActionEvent.CTRL_MASK));
 		previewX10Action.addActionListener(new ActionListener()
 		{
+			@Override
 			public void actionPerformed(ActionEvent e)
 			{
 				targetApplication.preview(10);
@@ -370,6 +435,7 @@ public class AnimatorActionFactory
 		renderAction.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_R);
 		renderAction.addActionListener(new ActionListener()
 		{
+			@Override
 			public void actionPerformed(ActionEvent e)
 			{
 				targetApplication.promptForRender();
@@ -381,6 +447,7 @@ public class AnimatorActionFactory
 		renderHiResAction.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_R, ActionEvent.SHIFT_MASK|ActionEvent.CTRL_MASK));
 		renderHiResAction.addActionListener(new ActionListener()
 		{
+			@Override
 			public void actionPerformed(ActionEvent e)
 			{
 				targetApplication.renderAnimation(1);
@@ -391,6 +458,7 @@ public class AnimatorActionFactory
 		renderLowResAction = new BasicAction(getMessage(getRenderStandardResMenuLabelKey()), null);
 		renderLowResAction.addActionListener(new ActionListener()
 		{
+			@Override
 			public void actionPerformed(ActionEvent e)
 			{
 				targetApplication.renderAnimation(0);
@@ -521,7 +589,7 @@ public class AnimatorActionFactory
 		});
 		
 		// Show wms editor
-		showWmsBrowserAction = new SelectableAction(getMessage(getShowWmsBrowserMenuLabelKey()), null, false);
+		/*showWmsBrowserAction = new SelectableAction(getMessage(getShowWmsBrowserMenuLabelKey()), null, false);
 		showWmsBrowserAction.putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_W, ActionEvent.CTRL_MASK));
 		showWmsBrowserAction.addActionListener(new ActionListener()
 		{
@@ -530,7 +598,7 @@ public class AnimatorActionFactory
 			{
 				targetApplication.setWmsBrowserVisible(showWmsBrowserAction.isSelected());
 			}
-		});
+		});*/
 		
 		showUserGuideAction = new BasicAction(getMessage(getShowUserGuideMenuLabelKey()), null);
 		showUserGuideAction.addActionListener(new ActionListener()
@@ -568,6 +636,7 @@ public class AnimatorActionFactory
 		debugKeyFramesAction.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_K);
 		debugKeyFramesAction.addActionListener(new ActionListener()
 		{
+			@Override
 			public void actionPerformed(ActionEvent e)
 			{
 				DebugWriter.dumpKeyFrameValues("keyFrames.txt", targetApplication.getCurrentAnimation());
@@ -580,6 +649,7 @@ public class AnimatorActionFactory
 		debugParameterValuesAction.putValue(Action.MNEMONIC_KEY, KeyEvent.VK_P);
 		debugParameterValuesAction.addActionListener(new ActionListener()
 		{
+			@Override
 			public void actionPerformed(ActionEvent e)
 			{
 				DebugWriter.dumpParameterValues("parameterValues.txt",
@@ -819,10 +889,10 @@ public class AnimatorActionFactory
 		return dynamicStereoAction;
 	}
 	
-	public SelectableAction getShowWmsBrowserAction()
+	/*public SelectableAction getShowWmsBrowserAction()
 	{
 		return showWmsBrowserAction;
-	}
+	}*/
 	
 	public SelectableAction getAnimateClippingAction()
 	{

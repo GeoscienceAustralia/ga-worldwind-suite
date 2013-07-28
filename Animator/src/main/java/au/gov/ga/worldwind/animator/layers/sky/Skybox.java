@@ -30,10 +30,10 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
-import com.sun.opengl.util.texture.Texture;
-import com.sun.opengl.util.texture.TextureIO;
+import com.jogamp.opengl.util.texture.Texture;
+import com.jogamp.opengl.util.texture.TextureIO;
 
 /**
  * Layer that renders a skybox in the background.
@@ -78,7 +78,7 @@ public class Skybox extends RenderableLayer
 					}
 
 					skybox[i] = TextureIO.newTexture(stream, true, null);
-					skybox[i].bind();
+					skybox[i].bind(dc.getGL().getGL2());
 					//dc.getTextureCache().put(keys[i], skybox[i]);
 				}
 				catch (IOException e)
@@ -88,12 +88,12 @@ public class Skybox extends RenderableLayer
 					throw new WWRuntimeException(msg, e);
 				}
 
-				GL gl = dc.getGL();
-				gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_MODE, GL.GL_MODULATE);
-				gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_LINEAR_MIPMAP_LINEAR);
-				gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER, GL.GL_LINEAR);
-				gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_S, GL.GL_CLAMP_TO_EDGE);
-				gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_T, GL.GL_CLAMP_TO_EDGE);
+				GL2 gl = dc.getGL().getGL2();
+				gl.glTexEnvf(GL2.GL_TEXTURE_ENV, GL2.GL_TEXTURE_ENV_MODE, GL2.GL_MODULATE);
+				gl.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_MIN_FILTER, GL2.GL_LINEAR_MIPMAP_LINEAR);
+				gl.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_MAG_FILTER, GL2.GL_LINEAR);
+				gl.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_S, GL2.GL_CLAMP_TO_EDGE);
+				gl.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_T, GL2.GL_CLAMP_TO_EDGE);
 				// Enable texture anisotropy, improves "tilted" world map quality.
 				/*int[] maxAnisotropy = new int[1];
 				gl
@@ -108,7 +108,7 @@ public class Skybox extends RenderableLayer
 	@Override
 	protected void doRender(DrawContext dc)
 	{
-		GL gl = dc.getGL();
+		GL2 gl = dc.getGL().getGL2();
 
 		if (!inited)
 		{
@@ -117,7 +117,7 @@ public class Skybox extends RenderableLayer
 		}
 
 		//set up projection matrix
-		gl.glMatrixMode(GL.GL_PROJECTION);
+		gl.glMatrixMode(GL2.GL_PROJECTION);
 		gl.glPushMatrix();
 		gl.glLoadIdentity();
 
@@ -125,7 +125,7 @@ public class Skybox extends RenderableLayer
 				dc.getView().getViewport().getWidth() / dc.getView().getViewport().getHeight(), 0.1, 5.0);
 
 		//set up modelview matrix
-		gl.glMatrixMode(GL.GL_MODELVIEW);
+		gl.glMatrixMode(GL2.GL_MODELVIEW);
 		gl.glPushMatrix();
 		gl.glLoadIdentity();
 
@@ -152,11 +152,11 @@ public class Skybox extends RenderableLayer
 		dc.getGLU().gluLookAt(0, 0, 0, forward.x, forward.y, forward.z, up.x, up.y, up.z);
 
 		// Enable/Disable features
-		gl.glPushAttrib(GL.GL_ENABLE_BIT);
-		gl.glEnable(GL.GL_TEXTURE_2D);
-		gl.glDisable(GL.GL_DEPTH_TEST);
-		gl.glDisable(GL.GL_LIGHTING);
-		gl.glDisable(GL.GL_BLEND);
+		gl.glPushAttrib(GL2.GL_ENABLE_BIT);
+		gl.glEnable(GL2.GL_TEXTURE_2D);
+		gl.glDisable(GL2.GL_DEPTH_TEST);
+		gl.glDisable(GL2.GL_LIGHTING);
+		gl.glDisable(GL2.GL_BLEND);
 
 		// Just in case we set all vertices to white.
 		gl.glColor4f(1, 1, 1, 1);
@@ -166,15 +166,15 @@ public class Skybox extends RenderableLayer
 		// Restore enable bits and matrix
 		gl.glPopAttrib();
 		gl.glPopMatrix();
-		gl.glMatrixMode(GL.GL_PROJECTION);
+		gl.glMatrixMode(GL2.GL_PROJECTION);
 		gl.glPopMatrix();
 	}
 
-	private void drawSkybox(GL gl)
+	private void drawSkybox(GL2 gl)
 	{
 		// Render the front quad
-		skybox[0].bind();
-		gl.glBegin(GL.GL_QUADS);
+		skybox[0].bind(gl);
+		gl.glBegin(GL2.GL_QUADS);
 		{
 			gl.glTexCoord2f(1, 1);
 			gl.glVertex3f(0.5f, -0.5f, -0.5f);
@@ -188,8 +188,8 @@ public class Skybox extends RenderableLayer
 		gl.glEnd();
 
 		// Render the left quad
-		skybox[1].bind();
-		gl.glBegin(GL.GL_QUADS);
+		skybox[1].bind(gl);
+		gl.glBegin(GL2.GL_QUADS);
 		{
 			gl.glTexCoord2f(1, 1);
 			gl.glVertex3f(-0.5f, -0.5f, -0.5f);
@@ -203,8 +203,8 @@ public class Skybox extends RenderableLayer
 		gl.glEnd();
 
 		// Render the back quad
-		skybox[2].bind();
-		gl.glBegin(GL.GL_QUADS);
+		skybox[2].bind(gl);
+		gl.glBegin(GL2.GL_QUADS);
 		{
 			gl.glTexCoord2f(1, 1);
 			gl.glVertex3f(-0.5f, -0.5f, 0.5f);
@@ -218,8 +218,8 @@ public class Skybox extends RenderableLayer
 		gl.glEnd();
 
 		// Render the right quad
-		skybox[3].bind();
-		gl.glBegin(GL.GL_QUADS);
+		skybox[3].bind(gl);
+		gl.glBegin(GL2.GL_QUADS);
 		{
 			gl.glTexCoord2f(1, 1);
 			gl.glVertex3f(0.5f, -0.5f, 0.5f);
@@ -233,8 +233,8 @@ public class Skybox extends RenderableLayer
 		gl.glEnd();
 
 		// Render the top quad
-		skybox[4].bind();
-		gl.glBegin(GL.GL_QUADS);
+		skybox[4].bind(gl);
+		gl.glBegin(GL2.GL_QUADS);
 		{
 			gl.glTexCoord2f(0, 1);
 			gl.glVertex3f(-0.5f, 0.5f, -0.5f);
@@ -248,8 +248,8 @@ public class Skybox extends RenderableLayer
 		gl.glEnd();
 
 		// Render the bottom quad
-		skybox[5].bind();
-		gl.glBegin(GL.GL_QUADS);
+		skybox[5].bind(gl);
+		gl.glBegin(GL2.GL_QUADS);
 		{
 			gl.glTexCoord2f(0, 0);
 			gl.glVertex3f(-0.5f, -0.5f, -0.5f);

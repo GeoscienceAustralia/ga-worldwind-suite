@@ -45,7 +45,7 @@ import java.net.URL;
 import java.util.Arrays;
 import java.util.Comparator;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 import org.gdal.osr.CoordinateTransformation;
 
@@ -60,7 +60,7 @@ import au.gov.ga.worldwind.common.util.Util;
 import au.gov.ga.worldwind.common.util.Validate;
 import au.gov.ga.worldwind.common.util.exaggeration.VerticalExaggerationAccessor;
 
-import com.sun.opengl.util.j2d.TextureRenderer;
+import com.jogamp.opengl.util.awt.TextureRenderer;
 
 /**
  * Basic implementation of the {@link VolumeLayer} interface.
@@ -138,7 +138,7 @@ public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wire
 		{
 			coordinateTransformation = CoordinateTransformationUtil.getTransformationToWGS84(s);
 		}
-		
+
 		s = (String) params.getValue(AVKeyMore.PAINTED_VARIABLE);
 		if (s != null)
 		{
@@ -308,14 +308,6 @@ public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wire
 		bottomSurface.setReverseNormals(!reverseNormals);
 		bottomSurface.setElevation(bottomElevation);
 		bottomSurface.setUseOrderedRendering(useOrderedRendering);
-
-		//create the textures
-		topTexture = new TextureRenderer(dataProvider.getXSize(), dataProvider.getYSize(), true, true);
-		bottomTexture = new TextureRenderer(dataProvider.getXSize(), dataProvider.getYSize(), true, true);
-		minLonTexture = new TextureRenderer(dataProvider.getYSize(), dataProvider.getZSize(), true, true);
-		maxLonTexture = new TextureRenderer(dataProvider.getYSize(), dataProvider.getZSize(), true, true);
-		minLatTexture = new TextureRenderer(dataProvider.getXSize(), dataProvider.getZSize(), true, true);
-		maxLatTexture = new TextureRenderer(dataProvider.getXSize(), dataProvider.getZSize(), true, true);
 
 		//update each shape's wireframe property so they match the layer's
 		setWireframe(isWireframe());
@@ -771,7 +763,7 @@ public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wire
 	{
 		return paintedVariable;
 	}
-	
+
 	@Override
 	protected void doPick(DrawContext dc, Point point)
 	{
@@ -793,6 +785,21 @@ public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wire
 
 		synchronized (dataLock)
 		{
+			if (!dataAvailable)
+			{
+				return;
+			}
+
+			if (topTexture == null)
+			{
+				topTexture = new TextureRenderer(dataProvider.getXSize(), dataProvider.getYSize(), true, true);
+				bottomTexture = new TextureRenderer(dataProvider.getXSize(), dataProvider.getYSize(), true, true);
+				minLonTexture = new TextureRenderer(dataProvider.getYSize(), dataProvider.getZSize(), true, true);
+				maxLonTexture = new TextureRenderer(dataProvider.getYSize(), dataProvider.getZSize(), true, true);
+				minLatTexture = new TextureRenderer(dataProvider.getXSize(), dataProvider.getZSize(), true, true);
+				maxLatTexture = new TextureRenderer(dataProvider.getXSize(), dataProvider.getZSize(), true, true);
+			}
+
 			//recalculate surfaces and clipping planes each frame (in case user drags one of the surfaces)
 			recalculateSurfaces();
 			recalculateClippingPlanes(dc);
@@ -860,14 +867,14 @@ public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wire
 	public void shapePreRender(DrawContext dc, FastShape shape)
 	{
 		//push the OpenGL clipping plane state on the attribute stack
-		dc.getGL().glPushAttrib(GL.GL_TRANSFORM_BIT);
+		dc.getGL().getGL2().glPushAttrib(GL2.GL_TRANSFORM_BIT);
 		setupClippingPlanes(dc, shape == topSurface, shape == bottomSurface);
 	}
 
 	@Override
 	public void shapePostRender(DrawContext dc, FastShape shape)
 	{
-		dc.getGL().glPopAttrib();
+		dc.getGL().getGL2().glPopAttrib();
 	}
 
 	protected void setupClippingPlanes(DrawContext dc, boolean top, boolean bottom)
@@ -880,7 +887,7 @@ public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wire
 		boolean[] enabled;
 		double[] array;
 
-		GL gl = dc.getGL();
+		GL2 gl = dc.getGL().getGL2();
 		if (top || bottom)
 		{
 			array = top ? topClippingPlanes : bottomClippingPlanes;
@@ -898,14 +905,14 @@ public class BasicVolumeLayer extends AbstractLayer implements VolumeLayer, Wire
 
 		for (int i = 0; i < 4; i++)
 		{
-			gl.glClipPlane(GL.GL_CLIP_PLANE0 + i, array, i * 4);
+			gl.glClipPlane(GL2.GL_CLIP_PLANE0 + i, array, i * 4);
 			if (enabled[i])
 			{
-				gl.glEnable(GL.GL_CLIP_PLANE0 + i);
+				gl.glEnable(GL2.GL_CLIP_PLANE0 + i);
 			}
 			else
 			{
-				gl.glDisable(GL.GL_CLIP_PLANE0 + i);
+				gl.glDisable(GL2.GL_CLIP_PLANE0 + i);
 			}
 		}
 	}

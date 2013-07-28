@@ -40,7 +40,7 @@ import java.util.TreeMap;
 
 import au.gov.ga.worldwind.common.util.exaggeration.VerticalExaggerationAccessor;
 
-import com.sun.opengl.util.BufferUtil;
+import com.jogamp.common.nio.Buffers;
 
 /**
  * Defines a path consisting of lat/lon coordinates. Contains functionality for
@@ -210,8 +210,8 @@ public class Path
 		}
 		else
 		{
-			verts = BufferUtil.newFloatBuffer(numVertices * 3);
-			texCoords = BufferUtil.newFloatBuffer(numVertices * 2);
+			verts = Buffers.newDirectFloatBuffer(numVertices * 3);
+			texCoords = Buffers.newDirectFloatBuffer(numVertices * 2);
 		}
 		Vec4 refCenter = getSegmentCenterPoint(dc, segment, top, bottom, followTerrain);
 

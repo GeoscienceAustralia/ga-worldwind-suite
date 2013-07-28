@@ -24,7 +24,7 @@ import gov.nasa.worldwind.render.SurfaceTile;
 import gov.nasa.worldwind.render.SurfaceTileRenderer;
 import gov.nasa.worldwind.terrain.SectorGeometry;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 import au.gov.ga.worldwind.common.util.exaggeration.VerticalExaggerationAccessor;
 
@@ -74,8 +74,8 @@ public class ExtendedSurfaceTileRenderer extends MultiTextureSurfaceTileRenderer
 		double exaggeratedOffset = VerticalExaggerationAccessor.applyVerticalExaggeration(dc, elevationOffset );
 		if (exaggeratedOffset != 0)
 		{
-			GL gl = dc.getGL();
-			gl.glMatrixMode(GL.GL_MODELVIEW);
+			GL2 gl = dc.getGL().getGL2();
+			gl.glMatrixMode(GL2.GL_MODELVIEW);
 
 			Globe globe = dc.getGlobe();
 			Sector sector = sg.getSector();

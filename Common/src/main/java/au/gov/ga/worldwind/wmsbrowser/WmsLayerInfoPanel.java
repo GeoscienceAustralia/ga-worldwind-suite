@@ -16,12 +16,20 @@
 package au.gov.ga.worldwind.wmsbrowser;
 
 import static au.gov.ga.worldwind.common.util.message.MessageSourceAccessor.getMessage;
-import static au.gov.ga.worldwind.wmsbrowser.util.message.WmsBrowserMessageConstants.*;
+import static au.gov.ga.worldwind.wmsbrowser.util.message.WmsBrowserMessageConstants.getLayerInfoAbstractKey;
+import static au.gov.ga.worldwind.wmsbrowser.util.message.WmsBrowserMessageConstants.getLayerInfoBoundingBoxKey;
+import static au.gov.ga.worldwind.wmsbrowser.util.message.WmsBrowserMessageConstants.getLayerInfoDataUrlKey;
+import static au.gov.ga.worldwind.wmsbrowser.util.message.WmsBrowserMessageConstants.getLayerInfoDefaultStringValueKey;
+import static au.gov.ga.worldwind.wmsbrowser.util.message.WmsBrowserMessageConstants.getLayerInfoKeywordsKey;
+import static au.gov.ga.worldwind.wmsbrowser.util.message.WmsBrowserMessageConstants.getLayerInfoLastUpdateKey;
+import static au.gov.ga.worldwind.wmsbrowser.util.message.WmsBrowserMessageConstants.getLayerInfoLegendAltKey;
+import static au.gov.ga.worldwind.wmsbrowser.util.message.WmsBrowserMessageConstants.getLayerInfoMetaDataUrlKey;
+import static au.gov.ga.worldwind.wmsbrowser.util.message.WmsBrowserMessageConstants.getLayerInfoNoLegendMsgKey;
+import static au.gov.ga.worldwind.wmsbrowser.util.message.WmsBrowserMessageConstants.getNoLayerSelectedMsgKey;
 import gov.nasa.worldwind.BasicModel;
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.awt.AWTInputHandler;
-import gov.nasa.worldwind.awt.WorldWindowGLCanvas;
 import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.geom.LatLon;
 import gov.nasa.worldwind.geom.Position;
@@ -62,6 +70,7 @@ import javax.swing.event.HyperlinkEvent.EventType;
 import javax.swing.event.HyperlinkListener;
 import javax.swing.text.html.HTMLEditorKit;
 
+import au.gov.ga.worldwind.common.newt.WorldWindowNewtCanvas;
 import au.gov.ga.worldwind.common.util.DefaultLauncher;
 import au.gov.ga.worldwind.common.util.Util;
 import au.gov.ga.worldwind.common.util.Validate;
@@ -92,7 +101,7 @@ public class WmsLayerInfoPanel extends JComponent
 	
 	private JPanel buttonPanel;
 
-	private WorldWindowGLCanvas wwd;
+	private WorldWindowNewtCanvas wwd;
 	private WorldMapLayer worldMapLayer;
 	private MetacartaCountryBoundariesLayer countryBoundariesLayer;
 	private MetacartaCoastlineLayer coastlinesLayer;
@@ -195,7 +204,7 @@ public class WmsLayerInfoPanel extends JComponent
 	
 	private void initialiseWorldWindow()
 	{
-		wwd = new WorldWindowGLCanvas();
+		wwd = new WorldWindowNewtCanvas();
 		wwd.setModel(new BasicModel());
 		((AWTInputHandler) wwd.getInputHandler()).setSmoothViewChanges(false);
 		wwd.setMinimumSize(new Dimension(1, 1));

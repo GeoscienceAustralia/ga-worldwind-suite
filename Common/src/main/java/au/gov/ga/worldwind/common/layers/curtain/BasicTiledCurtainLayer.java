@@ -44,8 +44,9 @@ import org.w3c.dom.Element;
 import au.gov.ga.worldwind.common.layers.tiled.image.delegate.FileLockSharer;
 import au.gov.ga.worldwind.common.util.AVKeyMore;
 
-import com.sun.opengl.util.texture.TextureData;
-import com.sun.opengl.util.texture.TextureIO;
+import com.jogamp.opengl.util.texture.TextureData;
+import com.jogamp.opengl.util.texture.TextureIO;
+import javax.media.opengl.GLProfile;
 
 /**
  * Basic implementation subclass of the abstract {@link TiledCurtainLayer}.
@@ -296,13 +297,13 @@ public class BasicTiledCurtainLayer extends TiledCurtainLayer
 				attributes.setBuildMipmaps(useMipMaps);
 				ByteBuffer buffer = DDSCompressor.compressImageURL(url, attributes);
 
-				return TextureIO.newTextureData(WWIO.getInputStreamFromByteBuffer(buffer), useMipMaps, null);
+				return TextureIO.newTextureData(GLProfile.get(GLProfile.GL2), WWIO.getInputStreamFromByteBuffer(buffer), useMipMaps, null);
 			}
 			// If the caller has disabled texture compression, or if the texture data is already a DDS file, then read
 			// the texture data without converting it.
 			else
 			{
-				return TextureIO.newTextureData(url, useMipMaps, null);
+				return TextureIO.newTextureData(GLProfile.get(GLProfile.GL2), url, useMipMaps, null);
 			}
 		}
 		catch (Exception e)

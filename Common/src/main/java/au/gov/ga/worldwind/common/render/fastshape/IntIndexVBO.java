@@ -18,7 +18,7 @@ package au.gov.ga.worldwind.common.render.fastshape;
 import java.nio.Buffer;
 import java.nio.IntBuffer;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 /**
  * {@link AbstractVBO} implementation for int index VBOs.
@@ -30,7 +30,7 @@ public class IntIndexVBO extends AbstractVBO<int[]>
 	@Override
 	protected int getTarget()
 	{
-		return GL.GL_ELEMENT_ARRAY_BUFFER;
+		return GL2.GL_ELEMENT_ARRAY_BUFFER;
 	}
 
 	@Override

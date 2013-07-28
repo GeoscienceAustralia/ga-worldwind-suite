@@ -28,7 +28,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 import au.gov.ga.worldwind.common.render.fastshape.FastShape;
 
@@ -251,7 +251,7 @@ public class GocadPLineReader implements GocadReader<FastShape>
 			name = "PLine";
 		}
 
-		FastShape shape = new FastShape(positions, indicesBuffer.array(), GL.GL_LINES);
+		FastShape shape = new FastShape(positions, indicesBuffer.array(), GL2.GL_LINES);
 		shape.setName(name);
 		if (parameters.getColorMap() != null)
 		{

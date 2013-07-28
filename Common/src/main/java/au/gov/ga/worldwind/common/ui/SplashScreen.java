@@ -31,17 +31,19 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 
 /**
- * Displays a user-specified splash screen image on startup and hides it when the WorldWindow has finished initialising.
+ * Displays a user-specified splash screen image on startup and hides it when
+ * the WorldWindow has finished initialising.
  * <p/>
- * If the application has specified a {@link java.awt.SplashScreen} using the <code>-splash:path/to/image.png</code> on launch,
- * does not create a new splash dialog. 
+ * If the application has specified a {@link java.awt.SplashScreen} using the
+ * <code>-splash:path/to/image.png</code> on launch, does not create a new
+ * splash dialog.
  * 
  * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
 public class SplashScreen
 {
-	private static final URL DEFAULT_IMAGE_URL= SplashScreen.class.getResource("/images/400x230-splash-nww.png");
-	
+	private static final URL DEFAULT_IMAGE_URL = SplashScreen.class.getResource("/images/400x230-splash-nww.png");
+
 	private BufferedImage image;
 	private JDialog dialog;
 
@@ -54,13 +56,14 @@ public class SplashScreen
 	}
 
 	/**
-	 * Create a new splash screen with the default splash image as a child of the provided frame.
+	 * Create a new splash screen with the default splash image as a child of
+	 * the provided frame.
 	 */
 	public SplashScreen(JFrame owner)
 	{
 		this(owner, DEFAULT_IMAGE_URL);
 	}
-	
+
 	/**
 	 * Create a new splash screen with the provided image url
 	 */
@@ -70,7 +73,7 @@ public class SplashScreen
 		{
 			return;
 		}
-		
+
 		dialog = new JDialog(owner);
 		initialiseSplashImage(splashImageUrl);
 		if (image != null)
@@ -97,7 +100,8 @@ public class SplashScreen
 	}
 
 	/**
-	 * Initialise the splash image with the image referred to by the provided URL
+	 * Initialise the splash image with the image referred to by the provided
+	 * URL
 	 */
 	private void initialiseSplashImage(URL imageUrl)
 	{
@@ -113,7 +117,7 @@ public class SplashScreen
 		{
 		}
 	}
-	
+
 	/**
 	 * Hide the splash screen when WorldWindow raises a rendering event.
 	 * 
@@ -130,10 +134,17 @@ public class SplashScreen
 			{
 				if (event.getStage() == RenderingEvent.BEFORE_BUFFER_SWAP)
 				{
-					if (dialog != null)
+					SwingUtil.invokeLaterTaskOnEDT(new Runnable()
 					{
-						dialog.dispose();
-					}
+						@Override
+						public void run()
+						{
+							if (dialog != null)
+							{
+								dialog.dispose();
+							}
+						}
+					});
 					wwd.removeRenderingListener(this);
 				}
 			}

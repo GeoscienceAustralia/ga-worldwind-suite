@@ -20,7 +20,7 @@ import gov.nasa.worldwind.render.DrawContext;
 import java.awt.Dimension;
 import java.io.InputStream;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 import au.gov.ga.worldwind.common.render.Shader;
 
@@ -57,7 +57,7 @@ public class DepthOfFieldShader extends Shader
 	 */
 	public void use(DrawContext dc, Dimension dimensions, float focus, float near, float far, float blurTextureScale)
 	{
-		GL gl = dc.getGL();
+		GL2 gl = dc.getGL().getGL2();
 		super.use(gl);
 
 		gl.glUniform1f(cameraNearUniform, near);
@@ -80,7 +80,7 @@ public class DepthOfFieldShader extends Shader
 	}
 
 	@Override
-	protected void getUniformLocations(GL gl)
+	protected void getUniformLocations(GL2 gl)
 	{
 		gl.glUniform1i(gl.glGetUniformLocation(shaderProgram, "colorTexture"), 0);
 		gl.glUniform1i(gl.glGetUniformLocation(shaderProgram, "depthTexture"), 1);
