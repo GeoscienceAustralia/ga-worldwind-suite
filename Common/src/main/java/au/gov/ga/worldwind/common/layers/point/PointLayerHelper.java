@@ -23,6 +23,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
 
+import au.gov.ga.worldwind.common.layers.point.providers.XMLPointProvider;
 import au.gov.ga.worldwind.common.layers.styled.Attribute;
 import au.gov.ga.worldwind.common.layers.styled.BasicStyleProvider;
 import au.gov.ga.worldwind.common.layers.styled.Style;
@@ -49,7 +50,8 @@ public class PointLayerHelper
 	public PointLayerHelper(AVList params)
 	{
 		//retrieve the globals from the params
-
+		Validate.notNull(params, "Parameters are required");
+		
 		context = (URL) params.getValue(AVKeyMore.CONTEXT_URL);
 		url = params.getStringValue(AVKey.URL);
 		dataCacheName = params.getStringValue(AVKey.DATA_CACHE_NAME);
@@ -58,8 +60,11 @@ public class PointLayerHelper
 		styleProvider.setStyles((List<Style>) params.getValue(AVKeyMore.DATA_LAYER_STYLES));
 		styleProvider.setAttributes((List<Attribute>) params.getValue(AVKeyMore.DATA_LAYER_ATTRIBUTES));
 		
-		Validate.notBlank(url, "Point data url not set");
-		Validate.notBlank(dataCacheName, "Point data cache name not set");
+		if (!(pointProvider instanceof XMLPointProvider))
+		{
+			Validate.notBlank(url, "Point data url not set");
+			Validate.notBlank(dataCacheName, "Point data cache name not set");
+		}
 
 		Validate.notNull(pointProvider, "Point data provider is null");
 		Validate.notNull(styleProvider.getStyles(), "Point style list is null");

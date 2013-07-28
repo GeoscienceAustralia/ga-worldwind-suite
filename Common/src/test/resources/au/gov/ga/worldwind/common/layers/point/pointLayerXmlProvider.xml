@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Layer version="1" layerType="PointLayer">
+
+	<DisplayName>test points</DisplayName>
+	<PointType>Marker</PointType>
+	<DataFormat>XML</DataFormat>
+	
+	<Points>
+		<Point units="degrees" latitude="-35.3435" longitude="149.1584" name="Geoscience Australia"/>
+		<Point units="degrees" latitude="-6.2115" longitude="106.8452" name="Jakarta Indonesia"/>
+		<Point units="degrees" latitude="-4.1962" longitude="152.173" name="Rabaul PNG"/>
+		<Point units="degrees" latitude="14.583333" longitude="120.966667" name="Manila Philippines"/>
+		<Point units="degrees" latitude="-31.933" longitude="115.833" name="Perth"/>
+		<Point units="degrees" latitude="-23.42" longitude="133.53" name="Alice Springs"/>
+		<Point units="degrees" latitude="-17.82" longitude="178.04" name="Fiji"/>
+	</Points>
+	
+	<Styles>
+		<Style name="DEF" default="true">
+			<Property name="Material" value="255,255,0" />
+		</Style>
+	</Styles>
+	
+  <Attributes>
+		<Attribute name="name">
+			<Text value="%value%" placeholder="%value%" />
+		</Attribute>
+	</Attributes>
+	
+</Layer>
