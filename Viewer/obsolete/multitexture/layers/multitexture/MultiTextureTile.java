@@ -348,7 +348,7 @@ public class MultiTextureTile extends Tile implements SurfaceTile
 		{
 			t[i].bind();
 
-			GL gl = dc.getGL();
+			GL gl = dc.getGL().getGL2();
 			if (usingMipmaps[i]
 					&& this.getSector().getMaxLatitude().degrees < 80d
 					&& this.getSector().getMinLatitude().degrees > -80)
@@ -411,7 +411,7 @@ public class MultiTextureTile extends Tile implements SurfaceTile
 		{
 			if (multi)
 			{
-				GL gl = dc.getGL();
+				GL gl = dc.getGL().getGL2();
 				for (int i = 1; i < t.length; i++)
 				{
 					gl.glActiveTexture(unit + i - 1);
@@ -505,8 +505,8 @@ public class MultiTextureTile extends Tile implements SurfaceTile
 		double sShift = oneOverTwoToTheN * (this.getColumn() % twoToTheN);
 		double tShift = oneOverTwoToTheN * (this.getRow() % twoToTheN);
 
-		dc.getGL().glTranslated(sShift, tShift, 0);
-		dc.getGL().glScaled(oneOverTwoToTheN, oneOverTwoToTheN, 1);
+		dc.getGL().getGL2().glTranslated(sShift, tShift, 0);
+		dc.getGL().getGL2().glScaled(oneOverTwoToTheN, oneOverTwoToTheN, 1);
 	}
 
 	@Override

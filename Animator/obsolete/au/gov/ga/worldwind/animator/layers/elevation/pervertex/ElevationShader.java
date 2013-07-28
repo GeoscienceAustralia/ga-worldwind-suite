@@ -44,7 +44,7 @@ public class ElevationShader extends AbstractLayer
 	@Override
 	protected void doRender(DrawContext dc)
 	{
-		GL gl = dc.getGL();
+		GL gl = dc.getGL().getGL2();
 		View viewBackup = dc.getView();
 		View viewProxy = ViewProxy.newInstance(viewBackup, this);
 		dc.setView(viewProxy);
@@ -108,7 +108,7 @@ public class ElevationShader extends AbstractLayer
 
 	private void setupShader(DrawContext dc)
 	{
-		GL gl = dc.getGL();
+		GL gl = dc.getGL().getGL2();
 		int v = gl.glCreateShader(GL.GL_VERTEX_SHADER);
 		int f = gl.glCreateShader(GL.GL_FRAGMENT_SHADER);
 		String vsrc = "", fsrc = "", line;
@@ -174,7 +174,7 @@ public class ElevationShader extends AbstractLayer
 
 	private void pushReferenceCenter(DrawContext dc, Vec4 referenceCenter)
 	{
-		GL gl = dc.getGL();
+		GL gl = dc.getGL().getGL2();
 		gl.glUniform3f(referenceCenterUniform, (float) referenceCenter.x,
 				(float) referenceCenter.y, (float) referenceCenter.z);
 	}

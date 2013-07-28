@@ -27,7 +27,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 import au.gov.ga.worldwind.common.render.fastshape.FastShape;
 
@@ -152,7 +152,7 @@ public class GocadVSetReader implements GocadReader<FastShape>
 			name = "VSet";
 		}
 
-		FastShape shape = new FastShape(positions, GL.GL_POINTS);
+		FastShape shape = new FastShape(positions, GL2.GL_POINTS);
 		shape.setName(name);
 
 		if (parameters.getPointSize() != null)

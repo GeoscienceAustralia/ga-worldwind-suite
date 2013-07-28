@@ -458,15 +458,19 @@ public class LayersPanel extends AbstractLayersPanel
 			for (TreePath p : paths)
 			{
 				INode node = (INode) p.getLastPathComponent();
-				getModel().removeNodeFromParent(node, true);
-				if (datasetPanel != null)
-				{
-					datasetPanel.getTree().repaint();
-				}
+				deleteNode(node);
 			}
-
-			tree.getUI().relayout();
 		}
+	}
+	
+	public void deleteNode(INode node)
+	{
+		getModel().removeNodeFromParent(node, true);
+		if (datasetPanel != null)
+		{
+			datasetPanel.getTree().repaint();
+		}
+		tree.getUI().relayout();
 	}
 
 	private String createDeleteConfirmationMessage(TreePath[] paths)

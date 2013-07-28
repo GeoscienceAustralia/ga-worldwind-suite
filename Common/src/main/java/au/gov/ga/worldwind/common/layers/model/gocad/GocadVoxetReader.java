@@ -27,7 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 import au.gov.ga.worldwind.common.render.fastshape.FastShape;
 import au.gov.ga.worldwind.common.util.HSLColor;
@@ -337,7 +337,7 @@ public class GocadVoxetReader implements GocadReader<FastShape>
 			name = "Voxet";
 		}
 
-		FastShape shape = new FastShape(positions, GL.GL_POINTS);
+		FastShape shape = new FastShape(positions, GL2.GL_POINTS);
 		shape.setName(name);
 		shape.setColorBuffer(colorBuffer.array());
 		shape.setColorBufferElementSize(4);

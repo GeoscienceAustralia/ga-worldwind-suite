@@ -18,7 +18,7 @@ package au.gov.ga.worldwind.common.render.fastshape;
 import java.nio.Buffer;
 import java.nio.FloatBuffer;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 /**
  * {@link AbstractVBO} implementation for float VBOs.
@@ -35,7 +35,7 @@ public class FloatVBO extends AbstractStrideVBO<float[]>
 	@Override
 	protected int getTarget()
 	{
-		return GL.GL_ARRAY_BUFFER;
+		return GL2.GL_ARRAY_BUFFER;
 	}
 
 	@Override

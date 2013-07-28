@@ -23,12 +23,12 @@ import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.WritableByteChannel;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
+import javax.media.opengl.GLContext;
 import javax.media.opengl.GLException;
-import javax.media.opengl.glu.GLU;
 
-import com.sun.opengl.util.BufferUtil;
-import com.sun.opengl.util.Screenshot;
+import com.jogamp.common.nio.Buffers;
+import com.jogamp.opengl.util.awt.Screenshot;
 
 /**
  * Helper class that saves the current OpenGL context as a TGA screenshot.
@@ -61,16 +61,16 @@ public class TGAScreenshot
 		writer.open(file, width, height, alpha);
 		ByteBuffer buf = writer.getImageData();
 
-		GL gl = GLU.getCurrentGL();
+		GL2 gl = GLContext.getCurrentGL().getGL2();
 
 		// Set up pixel storage modes
 		PixelStorageModes psm = new PixelStorageModes();
 		psm.save(gl);
 
-		int readbackType = (alpha ? GL.GL_BGRA : GL.GL_BGR);
+		int readbackType = (alpha ? GL2.GL_BGRA : GL2.GL_BGR);
 
 		// read the BGR values into the image buffer
-		gl.glReadPixels(x, y, width, height, readbackType, GL.GL_UNSIGNED_BYTE, buf);
+		gl.glReadPixels(x, y, width, height, readbackType, GL2.GL_UNSIGNED_BYTE, buf);
 
 		// Restore pixel storage modes
 		psm.restore(gl);
@@ -107,7 +107,7 @@ public class TGAScreenshot
 			os.write(header);
 
 			//create buffer for jogl to save pixels into
-			buf = BufferUtil.newByteBuffer(width * height * numChannels);
+			buf = Buffers.newDirectByteBuffer(width * height * numChannels);
 		}
 
 		public ByteBuffer getImageData()
@@ -126,7 +126,7 @@ public class TGAScreenshot
 		}
 	}
 
-	private static int glGetInteger(GL gl, int pname, int[] tmp)
+	private static int glGetInteger(GL2 gl, int pname, int[] tmp)
 	{
 		gl.glGetIntegerv(pname, tmp, 0);
 		return tmp[0];
@@ -141,28 +141,28 @@ public class TGAScreenshot
 		int packSwapBytes;
 		int[] tmp = new int[1];
 
-		void save(GL gl)
+		void save(GL2 gl)
 		{
-			packAlignment = glGetInteger(gl, GL.GL_PACK_ALIGNMENT, tmp);
-			packRowLength = glGetInteger(gl, GL.GL_PACK_ROW_LENGTH, tmp);
-			packSkipRows = glGetInteger(gl, GL.GL_PACK_SKIP_ROWS, tmp);
-			packSkipPixels = glGetInteger(gl, GL.GL_PACK_SKIP_PIXELS, tmp);
-			packSwapBytes = glGetInteger(gl, GL.GL_PACK_SWAP_BYTES, tmp);
+			packAlignment = glGetInteger(gl, GL2.GL_PACK_ALIGNMENT, tmp);
+			packRowLength = glGetInteger(gl, GL2.GL_PACK_ROW_LENGTH, tmp);
+			packSkipRows = glGetInteger(gl, GL2.GL_PACK_SKIP_ROWS, tmp);
+			packSkipPixels = glGetInteger(gl, GL2.GL_PACK_SKIP_PIXELS, tmp);
+			packSwapBytes = glGetInteger(gl, GL2.GL_PACK_SWAP_BYTES, tmp);
 
-			gl.glPixelStorei(GL.GL_PACK_ALIGNMENT, 1);
-			gl.glPixelStorei(GL.GL_PACK_ROW_LENGTH, 0);
-			gl.glPixelStorei(GL.GL_PACK_SKIP_ROWS, 0);
-			gl.glPixelStorei(GL.GL_PACK_SKIP_PIXELS, 0);
-			gl.glPixelStorei(GL.GL_PACK_SWAP_BYTES, 0);
+			gl.glPixelStorei(GL2.GL_PACK_ALIGNMENT, 1);
+			gl.glPixelStorei(GL2.GL_PACK_ROW_LENGTH, 0);
+			gl.glPixelStorei(GL2.GL_PACK_SKIP_ROWS, 0);
+			gl.glPixelStorei(GL2.GL_PACK_SKIP_PIXELS, 0);
+			gl.glPixelStorei(GL2.GL_PACK_SWAP_BYTES, 0);
 		}
 
-		void restore(GL gl)
+		void restore(GL2 gl)
 		{
-			gl.glPixelStorei(GL.GL_PACK_ALIGNMENT, packAlignment);
-			gl.glPixelStorei(GL.GL_PACK_ROW_LENGTH, packRowLength);
-			gl.glPixelStorei(GL.GL_PACK_SKIP_ROWS, packSkipRows);
-			gl.glPixelStorei(GL.GL_PACK_SKIP_PIXELS, packSkipPixels);
-			gl.glPixelStorei(GL.GL_PACK_SWAP_BYTES, packSwapBytes);
+			gl.glPixelStorei(GL2.GL_PACK_ALIGNMENT, packAlignment);
+			gl.glPixelStorei(GL2.GL_PACK_ROW_LENGTH, packRowLength);
+			gl.glPixelStorei(GL2.GL_PACK_SKIP_ROWS, packSkipRows);
+			gl.glPixelStorei(GL2.GL_PACK_SKIP_PIXELS, packSkipPixels);
+			gl.glPixelStorei(GL2.GL_PACK_SWAP_BYTES, packSwapBytes);
 		}
 	}
 }

@@ -21,9 +21,9 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.PriorityBlockingQueue;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
-import com.sun.opengl.util.j2d.TextRenderer;
+import com.jogamp.opengl.util.awt.TextRenderer;
 
 public abstract class TiledShapefileLayer extends AbstractLayer
 {
@@ -579,12 +579,12 @@ public abstract class TiledShapefileLayer extends AbstractLayer
 		// color as a premultiplied color, so that any incoming premultiplied color will be properly combined with the
 		// base color.
 
-		GL gl = dc.getGL();
+		GL2 gl = dc.getGL().getGL2();
 
 		double alpha = this.getOpacity();
 		gl.glColor4d(alpha, alpha, alpha, alpha);
-		gl.glEnable(GL.GL_BLEND);
-		gl.glBlendFunc(GL.GL_ONE, GL.GL_ONE_MINUS_SRC_ALPHA);
+		gl.glEnable(GL2.GL_BLEND);
+		gl.glBlendFunc(GL2.GL_ONE, GL2.GL_ONE_MINUS_SRC_ALPHA);
 	}
 
 	private void sendRequests()
@@ -670,9 +670,9 @@ public abstract class TiledShapefileLayer extends AbstractLayer
 				OGLTextRenderer.getOrCreateTextRenderer(dc.getTextRendererCache(), java.awt.Font
 						.decode("Arial-Plain-13"));
 
-		dc.getGL().glDisable(GL.GL_DEPTH_TEST);
-		dc.getGL().glDisable(GL.GL_BLEND);
-		dc.getGL().glDisable(GL.GL_TEXTURE_2D);
+		dc.getGL().getGL2().glDisable(GL2.GL_DEPTH_TEST);
+		dc.getGL().getGL2().glDisable(GL2.GL_BLEND);
+		dc.getGL().getGL2().glDisable(GL2.GL_TEXTURE_2D);
 
 		textRenderer.beginRendering(viewport.width, viewport.height);
 		textRenderer.setColor(java.awt.Color.YELLOW);

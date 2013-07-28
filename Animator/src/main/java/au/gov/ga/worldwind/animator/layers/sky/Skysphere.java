@@ -36,16 +36,16 @@ import java.net.URL;
 import java.nio.DoubleBuffer;
 import java.nio.IntBuffer;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 import org.w3c.dom.Element;
 
 import au.gov.ga.worldwind.animator.util.AVKeyMore;
 import au.gov.ga.worldwind.common.util.Validate;
 
-import com.sun.opengl.util.BufferUtil;
-import com.sun.opengl.util.texture.Texture;
-import com.sun.opengl.util.texture.TextureIO;
+import com.jogamp.common.nio.Buffers;
+import com.jogamp.opengl.util.texture.Texture;
+import com.jogamp.opengl.util.texture.TextureIO;
 
 /**
  * A layer that renders a hemisphere skysphere mapped with the specified image.
@@ -146,7 +146,7 @@ public class Skysphere extends AbstractLayer
 			InputStream stream = textureUrl.openStream();
 
 			texture = TextureIO.newTexture(stream, true, null);
-			texture.bind();
+			texture.bind(dc.getGL().getGL2());
 		}
 		catch (IOException e)
 		{
@@ -155,12 +155,12 @@ public class Skysphere extends AbstractLayer
 			throw new WWRuntimeException(msg, e);
 		}
 
-		GL gl = dc.getGL();
-		gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_MODE, GL.GL_MODULATE);
-		gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_LINEAR_MIPMAP_LINEAR);
-		gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER, GL.GL_LINEAR);
-		gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_S, GL.GL_CLAMP_TO_EDGE);
-		gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_T, GL.GL_CLAMP_TO_EDGE);
+		GL2 gl = dc.getGL().getGL2();
+		gl.glTexEnvf(GL2.GL_TEXTURE_ENV, GL2.GL_TEXTURE_ENV_MODE, GL2.GL_MODULATE);
+		gl.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_MIN_FILTER, GL2.GL_LINEAR_MIPMAP_LINEAR);
+		gl.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_MAG_FILTER, GL2.GL_LINEAR);
+		gl.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_S, GL2.GL_CLAMP_TO_EDGE);
+		gl.glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_WRAP_T, GL2.GL_CLAMP_TO_EDGE);
 		// Enable texture anisotropy, improves "tilted" world map quality.
 		/*int[] maxAnisotropy = new int[1];
 		gl
@@ -173,7 +173,7 @@ public class Skysphere extends AbstractLayer
 	@Override
 	protected void doRender(DrawContext dc)
 	{
-		GL gl = dc.getGL();
+		GL2 gl = dc.getGL().getGL2();
 
 		if (!inited)
 		{
@@ -183,7 +183,7 @@ public class Skysphere extends AbstractLayer
 		}
 
 		//set up projection matrix
-		gl.glMatrixMode(GL.GL_PROJECTION);
+		gl.glMatrixMode(GL2.GL_PROJECTION);
 		gl.glPushMatrix();
 		gl.glLoadIdentity();
 
@@ -191,7 +191,7 @@ public class Skysphere extends AbstractLayer
 				dc.getView().getViewport().getWidth() / dc.getView().getViewport().getHeight(), 0.1, 10.0);
 
 		//set up modelview matrix
-		gl.glMatrixMode(GL.GL_MODELVIEW);
+		gl.glMatrixMode(GL2.GL_MODELVIEW);
 		gl.glPushMatrix();
 		gl.glLoadIdentity();
 
@@ -223,67 +223,67 @@ public class Skysphere extends AbstractLayer
 				up.y, up.z);*/
 
 		// Enable/Disable features
-		gl.glPushAttrib(GL.GL_ENABLE_BIT);
-		gl.glEnable(GL.GL_TEXTURE_2D);
-		gl.glDisable(GL.GL_DEPTH_TEST);
-		gl.glDisable(GL.GL_LIGHTING);
-		gl.glDisable(GL.GL_BLEND);
+		gl.glPushAttrib(GL2.GL_ENABLE_BIT);
+		gl.glEnable(GL2.GL_TEXTURE_2D);
+		gl.glDisable(GL2.GL_DEPTH_TEST);
+		gl.glDisable(GL2.GL_LIGHTING);
+		gl.glDisable(GL2.GL_BLEND);
 
-		gl.glMatrixMode(GL.GL_TEXTURE);
+		gl.glMatrixMode(GL2.GL_TEXTURE);
 		gl.glPushMatrix();
 		gl.glLoadIdentity();
 		gl.glScaled(1.0d, 2.0d, 1.0d);
 
 		gl.glColor3d(1, 1, 1);
-		texture.bind();
+		texture.bind(gl);
 		drawSphere(gl);
 
 		gl.glPopMatrix();
 
 		// Restore enable bits and matrix
 		gl.glPopAttrib();
-		gl.glMatrixMode(GL.GL_MODELVIEW);
+		gl.glMatrixMode(GL2.GL_MODELVIEW);
 		gl.glPopMatrix();
-		gl.glMatrixMode(GL.GL_PROJECTION);
+		gl.glMatrixMode(GL2.GL_PROJECTION);
 		gl.glPopMatrix();
 	}
 
-	private void drawSphere(GL gl)
+	private void drawSphere(GL2 gl)
 	{
-		gl.glEnableClientState(GL.GL_VERTEX_ARRAY);
-		gl.glEnableClientState(GL.GL_NORMAL_ARRAY);
-		gl.glEnableClientState(GL.GL_TEXTURE_COORD_ARRAY);
+		gl.glEnableClientState(GL2.GL_VERTEX_ARRAY);
+		gl.glEnableClientState(GL2.GL_NORMAL_ARRAY);
+		gl.glEnableClientState(GL2.GL_TEXTURE_COORD_ARRAY);
 
 		vb.rewind();
 		nb.rewind();
 		tb.rewind();
 		ib.rewind();
 
-		gl.glVertexPointer(3, GL.GL_DOUBLE, 0, vb);
-		gl.glNormalPointer(GL.GL_DOUBLE, 0, nb);
-		gl.glTexCoordPointer(2, GL.GL_DOUBLE, 0, tb);
-		gl.glDrawElements(GL.GL_TRIANGLES, ib.limit() / 2, GL.GL_UNSIGNED_INT, ib);
+		gl.glVertexPointer(3, GL2.GL_DOUBLE, 0, vb);
+		gl.glNormalPointer(GL2.GL_DOUBLE, 0, nb);
+		gl.glTexCoordPointer(2, GL2.GL_DOUBLE, 0, tb);
+		gl.glDrawElements(GL2.GL_TRIANGLES, ib.limit() / 2, GL2.GL_UNSIGNED_INT, ib);
 
-		gl.glDisableClientState(GL.GL_VERTEX_ARRAY);
-		gl.glDisableClientState(GL.GL_NORMAL_ARRAY);
-		gl.glDisableClientState(GL.GL_TEXTURE_COORD_ARRAY);
+		gl.glDisableClientState(GL2.GL_VERTEX_ARRAY);
+		gl.glDisableClientState(GL2.GL_NORMAL_ARRAY);
+		gl.glDisableClientState(GL2.GL_TEXTURE_COORD_ARRAY);
 	}
 
 	private void setupGeometryBuffers(int slices, int segments, double radius, boolean projected, boolean interior)
 	{
 		// allocate vertices
 		vertexCount = (slices - 2) * (segments + 1) + 2;
-		vb = BufferUtil.newDoubleBuffer(vertexCount * 3);
+		vb = Buffers.newDirectDoubleBuffer(vertexCount * 3);
 
 		// allocate normals if requested
-		nb = BufferUtil.newDoubleBuffer(vertexCount * 3);
+		nb = Buffers.newDirectDoubleBuffer(vertexCount * 3);
 
 		// allocate texture coordinates
-		tb = BufferUtil.newDoubleBuffer(vertexCount * 2);
+		tb = Buffers.newDirectDoubleBuffer(vertexCount * 2);
 
 		// allocate index buffer
 		triCount = 2 * (slices - 2) * segments;
-		ib = BufferUtil.newIntBuffer(triCount * 3);
+		ib = Buffers.newDirectIntBuffer(triCount * 3);
 
 		//sphere center
 		Vec4 center = Vec4.UNIT_W;

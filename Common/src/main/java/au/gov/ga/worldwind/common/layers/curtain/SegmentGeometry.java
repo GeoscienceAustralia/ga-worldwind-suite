@@ -23,7 +23,7 @@ import gov.nasa.worldwind.util.OGLStackHandler;
 
 import java.nio.FloatBuffer;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 /**
  * A {@link Renderable} piece of geometry that draws a segment (or section) of a
@@ -65,13 +65,13 @@ public class SegmentGeometry implements Renderable
 	{
 		dc.getView().pushReferenceCenter(dc, referenceCenter);
 
-		GL gl = dc.getGL();
+		GL2 gl = dc.getGL().getGL2();
 		OGLStackHandler ogsh = new OGLStackHandler();
 
 		try
 		{
-			ogsh.pushClientAttrib(gl, GL.GL_CLIENT_VERTEX_ARRAY_BIT);
-			gl.glEnableClientState(GL.GL_VERTEX_ARRAY);
+			ogsh.pushClientAttrib(gl, GL2.GL_CLIENT_VERTEX_ARRAY_BIT);
+			gl.glEnableClientState(GL2.GL_VERTEX_ARRAY);
 
 			if (dc.getGLRuntimeCapabilities().isUseVertexBufferObject())
 			{
@@ -82,33 +82,33 @@ public class SegmentGeometry implements Renderable
 					vboIds = fillVerticesVBO(dc);
 				}
 				
-				gl.glBindBuffer(GL.GL_ARRAY_BUFFER, vboIds[0]);
-				gl.glVertexPointer(3, GL.GL_FLOAT, 0, 0);
+				gl.glBindBuffer(GL2.GL_ARRAY_BUFFER, vboIds[0]);
+				gl.glVertexPointer(3, GL2.GL_FLOAT, 0, 0);
 
 				for (int i = 0; i < numTextureUnits; i++)
 				{
-					gl.glClientActiveTexture(GL.GL_TEXTURE0 + i);
-					gl.glEnableClientState(GL.GL_TEXTURE_COORD_ARRAY);
+					gl.glClientActiveTexture(GL2.GL_TEXTURE0 + i);
+					gl.glEnableClientState(GL2.GL_TEXTURE_COORD_ARRAY);
 
-					gl.glBindBuffer(GL.GL_ARRAY_BUFFER, vboIds[1]);
-					gl.glTexCoordPointer(2, GL.GL_FLOAT, 0, 0);
+					gl.glBindBuffer(GL2.GL_ARRAY_BUFFER, vboIds[1]);
+					gl.glTexCoordPointer(2, GL2.GL_FLOAT, 0, 0);
 				}
 
-				gl.glDrawArrays(GL.GL_TRIANGLE_STRIP, 0, vertexCount);
+				gl.glDrawArrays(GL2.GL_TRIANGLE_STRIP, 0, vertexCount);
 			}
 			else
 			{
 				//Use Vertex Arrays
-				gl.glVertexPointer(3, GL.GL_FLOAT, 0, vertices.rewind());
+				gl.glVertexPointer(3, GL2.GL_FLOAT, 0, vertices.rewind());
 
 				for (int i = 0; i < numTextureUnits; i++)
 				{
-					gl.glClientActiveTexture(GL.GL_TEXTURE0 + i);
-					gl.glEnableClientState(GL.GL_TEXTURE_COORD_ARRAY);
-					gl.glTexCoordPointer(2, GL.GL_FLOAT, 0, texCoords.rewind());
+					gl.glClientActiveTexture(GL2.GL_TEXTURE0 + i);
+					gl.glEnableClientState(GL2.GL_TEXTURE_COORD_ARRAY);
+					gl.glTexCoordPointer(2, GL2.GL_FLOAT, 0, texCoords.rewind());
 				}
 
-				gl.glDrawArrays(GL.GL_TRIANGLE_STRIP, 0, vertexCount);
+				gl.glDrawArrays(GL2.GL_TRIANGLE_STRIP, 0, vertexCount);
 			}
 		}
 		finally
@@ -156,7 +156,7 @@ public class SegmentGeometry implements Renderable
 
 	protected int[] fillVerticesVBO(DrawContext dc)
 	{
-		GL gl = dc.getGL();
+		GL2 gl = dc.getGL().getGL2();
 
 		int[] vboIds = (int[]) dc.getGpuResourceCache().get(this.vboCacheKey);
 		if (vboIds == null)
@@ -169,14 +169,14 @@ public class SegmentGeometry implements Renderable
 
 		try
 		{
-			gl.glBindBuffer(GL.GL_ARRAY_BUFFER, vboIds[0]);
-			gl.glBufferData(GL.GL_ARRAY_BUFFER, vertices.limit() * 4, vertices.rewind(), GL.GL_STATIC_DRAW);
-			gl.glBindBuffer(GL.GL_ARRAY_BUFFER, vboIds[1]);
-			gl.glBufferData(GL.GL_ARRAY_BUFFER, texCoords.limit() * 4, texCoords.rewind(), GL.GL_STATIC_DRAW);
+			gl.glBindBuffer(GL2.GL_ARRAY_BUFFER, vboIds[0]);
+			gl.glBufferData(GL2.GL_ARRAY_BUFFER, vertices.limit() * 4, vertices.rewind(), GL2.GL_STATIC_DRAW);
+			gl.glBindBuffer(GL2.GL_ARRAY_BUFFER, vboIds[1]);
+			gl.glBufferData(GL2.GL_ARRAY_BUFFER, texCoords.limit() * 4, texCoords.rewind(), GL2.GL_STATIC_DRAW);
 		}
 		finally
 		{
-			gl.glBindBuffer(GL.GL_ARRAY_BUFFER, 0);
+			gl.glBindBuffer(GL2.GL_ARRAY_BUFFER, 0);
 		}
 
 		return vboIds;

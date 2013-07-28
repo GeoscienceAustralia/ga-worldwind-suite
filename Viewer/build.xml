@@ -27,12 +27,6 @@
 	<property name="webstart_selfsigned_dir" value="${webstart_dir}/selfsigned" />
 	<property name="webstart_resources_jar_name" value="resources.jar" />
 
-	<property name="ww_natives_windows_i586_jar" value="worldwind-natives-windows-i586.jar" />
-	<property name="ww_natives_windows_amd64_jar" value="worldwind-natives-windows-amd64.jar" />
-	<property name="ww_natives_macosx_universal_jar" value="worldwind-natives-macosx-universal.jar" />
-	<property name="ww_natives_linux_i586_jar" value="worldwind-natives-linux-i586.jar" />
-	<property name="ww_natives_linux_amd64_jar" value="worldwind-natives-linux-amd64.jar" />
-
 	<!-- Keystore configuration -->
 	<property name="keystore_file" value="${basedir}/keystore" />
 	<property name="keystore_alias" value="selfsigned" />
@@ -40,7 +34,6 @@
 
 	<property name="common_dir" value="${basedir}/../Common" />
 	<property name="common_lib_dir" value="${common_dir}/lib" />
-	<property name="common_build_lib_dir" value="${common_lib_dir}/build" />
 	<property name="common_package_lib_dir" value="${common_lib_dir}/package" />
 	<property name="common_test_lib_dir" value="${common_lib_dir}/test" />
 	<property name="common_test_build_dir" value="${common_dir}/target/test-classes" />
@@ -50,9 +43,6 @@
 	<property name="common_jar_name" value="common.jar" />
 
 	<path id="classpath">
-		<fileset dir="${common_build_lib_dir}">
-			<include name="**/*.jar" />
-		</fileset>
 		<fileset dir="${common_package_lib_dir}">
 			<include name="**/*.jar" />
 		</fileset>
@@ -144,34 +134,59 @@
 		</jar>
 	</target>
 
+	<target name="unzip_package_natives">
+		<unzip dest="${executable_temp_dir}">
+			<fileset dir="${common_package_lib_dir}">
+				<include name="**/*natives*${osarch}*.jar" />
+			</fileset>
+			<patternset refid="manifest_exclude" />
+			<globmapper from="*" to="native/${osarch}/*" />
+		</unzip>
+	</target>
+
 	<target name="executable" depends="package">
 		<mkdir dir="${executable_dir}" />
+
+		<property name="executable_temp_dir" value="${executable_dir}/temp" />
+		<mkdir dir="${executable_temp_dir}" />
+		<antcall target="unzip_package_natives">
+			<param name="osarch" value="linux-amd64" />
+		</antcall>
+		<antcall target="unzip_package_natives">
+			<param name="osarch" value="linux-i586" />
+		</antcall>
+		<antcall target="unzip_package_natives">
+			<param name="osarch" value="macosx-universal" />
+		</antcall>
+		<antcall target="unzip_package_natives">
+			<param name="osarch" value="windows-amd64" />
+		</antcall>
+		<antcall target="unzip_package_natives">
+			<param name="osarch" value="windows-i586" />
+		</antcall>
 
 		<jar destfile="${executable_dir}/${executable_jar_name}">
 			<fileset dir="${build_dir}" />
 
 			<zipgroupfileset dir="${common_package_dir}">
 				<include name="${common_jar_name}" />
-				<patternset refid="manifest_exclude" />
 			</zipgroupfileset>
 
 			<zipgroupfileset dir="${common_package_lib_dir}">
 				<include name="**/*.jar" />
-				<patternset refid="manifest_exclude" />
+				<exclude name="**/*natives*.jar" />
 			</zipgroupfileset>
 			<fileset dir="${common_package_lib_dir}" excludes="**/*.jar" />
 
-			<zipgroupfileset dir="${common_build_lib_dir}">
-				<include name="**/*.jar" />
-				<patternset refid="manifest_exclude" />
-			</zipgroupfileset>
-			<fileset dir="${common_build_lib_dir}" excludes="**/*.jar" />
+			<fileset dir="${executable_temp_dir}" />
 
 			<manifest>
 				<attribute name="Main-Class" value="au.gov.ga.worldwind.viewer.application.Executable" />
 				<attribute name="SplashScreen-Image" value="images/viewer-splash-400x230.png" />
 			</manifest>
 		</jar>
+
+		<delete dir="${executable_temp_dir}" />
 
 		<echo file="${executable_dir}/${executable_batch_name}">java -Dsun.java2d.noddraw=true -Xmx1024m -jar ./${executable_jar_name}</echo>
 	</target>
@@ -198,19 +213,19 @@
 			</fileset>
 		</jar>
 
-		<jar destfile="${webstart_unsigned_dir}/${ww_natives_windows_i586_jar}">
+		<jar destfile="${webstart_unsigned_dir}/worldwind-natives-windows-i586.jar">
 			<fileset dir="${common_package_lib_dir}/native/windows-i586" />
 		</jar>
-		<jar destfile="${webstart_unsigned_dir}/${ww_natives_windows_amd64_jar}">
+		<jar destfile="${webstart_unsigned_dir}/worldwind-natives-windows-amd64.jar">
 			<fileset dir="${common_package_lib_dir}/native/windows-amd64" />
 		</jar>
-		<jar destfile="${webstart_unsigned_dir}/${ww_natives_macosx_universal_jar}">
+		<jar destfile="${webstart_unsigned_dir}/worldwind-natives-macosx-universal.jar">
 			<fileset dir="${common_package_lib_dir}/native/macosx-universal" />
 		</jar>
-		<jar destfile="${webstart_unsigned_dir}/${ww_natives_linux_i586_jar}">
+		<jar destfile="${webstart_unsigned_dir}/worldwind-natives-linux-i586.jar">
 			<fileset dir="${common_package_lib_dir}/native/linux-i586" />
 		</jar>
-		<jar destfile="${webstart_unsigned_dir}/${ww_natives_linux_amd64_jar}">
+		<jar destfile="${webstart_unsigned_dir}/worldwind-natives-linux-amd64.jar">
 			<fileset dir="${common_package_lib_dir}/native/linux-amd64" />
 		</jar>
 	</target>

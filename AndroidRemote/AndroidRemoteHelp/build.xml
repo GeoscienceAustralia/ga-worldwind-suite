@@ -1,0 +1,34 @@
+<?xml version="1.0" ?>
+
+<project name="AndroidRemoteHelp" basedir="." default="run">
+
+	<property name="help_file" value="${basedir}/help.md" />
+	<property name="lib_dir" value="${basedir}/lib" />
+	<property name="output_dir" value="${basedir}/target" />
+	<property name="output_file" value="${output_dir}/help.html" />
+	<property name="android_file" value="${basedir}/../AndroidRemoteClient/res/raw/help.html" />
+	<property name="server_file" value="${basedir}/../AndroidRemoteServer/src/html/android.html" />
+
+	<path id="classpath">
+		<fileset dir="${lib_dir}">
+			<include name="**/*.jar" />
+		</fileset>
+	</path>
+
+	<target name="clean" description="Remove all generated files">
+		<delete dir="${target_dir}" />
+	</target>
+
+	<target name="generate">
+		<mkdir dir="${output_dir}" />
+		<java classpathref="classpath" classname="com.petebevin.markdown.MarkdownProcessor" input="${help_file}" output="${output_file}" />
+	</target>
+
+	<target name="copy" depends="generate">
+		<copy file="${output_file}" tofile="${android_file}" />
+		<copy file="${output_file}" tofile="${server_file}" />
+	</target>
+
+	<target name="run" depends="copy" />
+
+</project>

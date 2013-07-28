@@ -32,6 +32,8 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
+import javax.net.ssl.SSLHandshakeException;
+
 /**
  * {@link RetrievalService} used by the {@link Downloader}.
  * 
@@ -49,6 +51,8 @@ public class DownloaderRetrievalService extends WWObjectImpl implements Retrieva
 
 	private RetrievalExecutor executor; // thread pool for running retrievers
 	private ConcurrentLinkedQueue<RetrievalTask> activeTasks; // tasks currently allocated a thread
+	
+	protected SSLExceptionListener sslExceptionListener;
 
 	/**
 	 * Encapsulates a single threaded retrieval as a
@@ -251,6 +255,13 @@ public class DownloaderRetrievalService extends WWObjectImpl implements Retrieva
 				{
 					Logging.logger().fine(message + " " + e.getCause().getLocalizedMessage());
 				}
+				else if (e.getCause() instanceof SSLHandshakeException)
+                {
+                    if (sslExceptionListener != null)
+                        sslExceptionListener.onException(e.getCause(), task.getRetriever().getName());
+                    else
+                        Logging.logger().fine(message + " " + e.getCause().getLocalizedMessage());
+                }
 				else
 				{
 					Logging.logger().log(Level.FINE, message, e);
@@ -322,7 +333,7 @@ public class DownloaderRetrievalService extends WWObjectImpl implements Retrieva
 		}
 
 		// Add with secondary priority that removes most recently added requests first.
-		return this.runRetriever(retriever, (double) (Long.MAX_VALUE - System.currentTimeMillis()));
+		return this.runRetriever(retriever, Long.MAX_VALUE - System.currentTimeMillis());
 	}
 
 	/**
@@ -502,8 +513,20 @@ public class DownloaderRetrievalService extends WWObjectImpl implements Retrieva
 		if (totalContentLength < 1)
 			progress = 0;
 		else
-			progress = Math.min(100.0, 100.0 * (double) totalBytesRead / (double) totalContentLength);
+			progress = Math.min(100.0, 100.0 * totalBytesRead / totalContentLength);
 
 		return progress;
 	}
+
+    @Override
+	public SSLExceptionListener getSSLExceptionListener()
+    {
+        return sslExceptionListener;
+    }
+
+    @Override
+	public void setSSLExceptionListener(SSLExceptionListener sslExceptionListener)
+    {
+        this.sslExceptionListener = sslExceptionListener;
+    }
 }

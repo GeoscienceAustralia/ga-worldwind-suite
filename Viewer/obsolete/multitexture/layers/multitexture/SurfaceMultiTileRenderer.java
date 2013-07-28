@@ -121,7 +121,7 @@ public abstract class SurfaceMultiTileRenderer extends SurfaceTileRenderer
 			throw new IllegalStateException(message);
 		}
 
-		GL gl = dc.getGL();
+		GL gl = dc.getGL().getGL2();
 
 		gl.glPushAttrib(GL.GL_COLOR_BUFFER_BIT // for alpha func
 				| GL.GL_ENABLE_BIT | GL.GL_CURRENT_BIT | GL.GL_DEPTH_BUFFER_BIT // for depth func

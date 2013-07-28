@@ -20,12 +20,13 @@ import gov.nasa.worldwind.layers.ProjectionStarsLayer;
 import gov.nasa.worldwind.render.DrawContext;
 import gov.nasa.worldwind.util.OGLStackHandler;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 import au.gov.ga.worldwind.common.view.stereo.StereoView;
 
 /**
- * An extension of the {@link ProjectionStarsLayer} that supports stereo rendering of stars
+ * An extension of the {@link ProjectionStarsLayer} that supports stereo
+ * rendering of stars
  * 
  * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
@@ -46,9 +47,8 @@ public class StereoStarsLayer extends ProjectionStarsLayer
 			if (projection != null)
 			{
 				double[] matrixArray = new double[16];
-				GL gl = dc.getGL();
-				gl.glMatrixMode(GL.GL_PROJECTION);
-				gl.glPushMatrix();
+				GL2 gl = dc.getGL().getGL2();
+				ogsh.pushProjection(gl);
 
 				projection.toArray(matrixArray, 0, false);
 				gl.glLoadMatrixd(matrixArray, 0);
@@ -71,7 +71,7 @@ public class StereoStarsLayer extends ProjectionStarsLayer
 		{
 			pointSize *= 2f;
 		}
-		dc.getGL().glPointSize(pointSize);
+		dc.getGL().getGL2().glPointSize(pointSize);
 
 		super.doRender(dc);
 	}

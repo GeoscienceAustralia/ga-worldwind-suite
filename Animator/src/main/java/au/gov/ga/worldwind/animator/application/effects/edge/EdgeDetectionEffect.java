@@ -22,7 +22,7 @@ import gov.nasa.worldwind.render.DrawContext;
 
 import java.awt.Dimension;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 import org.w3c.dom.Element;
 
@@ -83,7 +83,7 @@ public class EdgeDetectionEffect extends EffectBase
 	@Override
 	protected void drawFrameBufferWithEffect(DrawContext dc, Dimension dimensions, FrameBuffer frameBuffer)
 	{
-		GL gl = dc.getGL();
+		GL2 gl = dc.getGL().getGL2();
 
 		edgeShader.createIfRequired(gl);
 		try
@@ -100,6 +100,6 @@ public class EdgeDetectionEffect extends EffectBase
 	@Override
 	protected void releaseEffect(DrawContext dc)
 	{
-		edgeShader.deleteIfCreated(dc.getGL());
+		edgeShader.deleteIfCreated(dc.getGL().getGL2());
 	}
 }

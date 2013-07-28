@@ -28,9 +28,9 @@ import java.awt.Rectangle;
 import java.util.Iterator;
 import java.util.logging.Level;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
-import com.sun.opengl.util.texture.TextureCoords;
+import com.jogamp.opengl.util.texture.TextureCoords;
 
 /**
  * IconRenderer processes collections of {@link gov.nasa.worldwind.render.WWIcon} instances for picking and rendering.
@@ -363,18 +363,21 @@ public class IconRenderer
             this.layer = layer;
         }
 
-        public double getDistanceFromEye()
+        @Override
+		public double getDistanceFromEye()
         {
             return this.eyeDistance;
         }
 
-        public void render(DrawContext dc)
+        @Override
+		public void render(DrawContext dc)
         {
             ToolTipRenderer toolTipRenderer = this.getToolTipRenderer(dc);
             toolTipRenderer.render(dc, this.text, (int) this.point.x, (int) this.point.y);
         }
 
-        public void pick(DrawContext dc, java.awt.Point pickPoint)
+        @Override
+		public void pick(DrawContext dc, java.awt.Point pickPoint)
         {
         }
 
@@ -415,12 +418,14 @@ public class IconRenderer
             this.layer = layer;
         }
 
-        public double getDistanceFromEye()
+        @Override
+		public double getDistanceFromEye()
         {
             return this.eyeDistance;
         }
 
-        public Position getPosition()
+        @Override
+		public Position getPosition()
         {
             return this.icon.getPosition();
         }
@@ -450,7 +455,8 @@ public class IconRenderer
             return layer;
         }
 
-        public void render(DrawContext dc)
+        @Override
+		public void render(DrawContext dc)
         {
             IconRenderer.this.beginDrawIcons(dc);
 
@@ -472,7 +478,8 @@ public class IconRenderer
             }
         }
 
-        public void pick(DrawContext dc, java.awt.Point pickPoint)
+        @Override
+		public void pick(DrawContext dc, java.awt.Point pickPoint)
         {
             IconRenderer.this.pickSupport.clearPickList();
             IconRenderer.this.beginDrawIcons(dc);
@@ -502,28 +509,28 @@ public class IconRenderer
 
     protected void beginDrawIcons(DrawContext dc)
     {
-        GL gl = dc.getGL();
+        GL2 gl = dc.getGL().getGL2();
 
         this.oglStackHandler.clear();
 
         int attributeMask =
-            GL.GL_DEPTH_BUFFER_BIT // for depth test, depth mask and depth func
-                | GL.GL_TRANSFORM_BIT // for modelview and perspective
-                | GL.GL_VIEWPORT_BIT // for depth range
-                | GL.GL_CURRENT_BIT // for current color
-                | GL.GL_COLOR_BUFFER_BIT // for alpha test func and ref, and blend
-                | GL.GL_TEXTURE_BIT // for texture env
-                | GL.GL_DEPTH_BUFFER_BIT // for depth func
-                | GL.GL_ENABLE_BIT; // for enable/disable changes
+            GL2.GL_DEPTH_BUFFER_BIT // for depth test, depth mask and depth func
+                | GL2.GL_TRANSFORM_BIT // for modelview and perspective
+                | GL2.GL_VIEWPORT_BIT // for depth range
+                | GL2.GL_CURRENT_BIT // for current color
+                | GL2.GL_COLOR_BUFFER_BIT // for alpha test func and ref, and blend
+                | GL2.GL_TEXTURE_BIT // for texture env
+                | GL2.GL_DEPTH_BUFFER_BIT // for depth func
+                | GL2.GL_ENABLE_BIT; // for enable/disable changes
         this.oglStackHandler.pushAttrib(gl, attributeMask);
 
         // Apply the depth buffer but don't change it.
-        gl.glEnable(GL.GL_DEPTH_TEST);
+        gl.glEnable(GL2.GL_DEPTH_TEST);
         gl.glDepthMask(false);
 
         // Suppress any fully transparent image pixels
-        gl.glEnable(GL.GL_ALPHA_TEST);
-        gl.glAlphaFunc(GL.GL_GREATER, 0.001f);
+        gl.glEnable(GL2.GL_ALPHA_TEST);
+        gl.glAlphaFunc(GL2.GL_GREATER, 0.001f);
 
         // Load a parallel projection with dimensions (viewportWidth, viewportHeight)
         this.oglStackHandler.pushProjectionIdentity(gl);
@@ -537,16 +544,16 @@ public class IconRenderer
             this.pickSupport.beginPicking(dc);
 
             // Set up to replace the non-transparent texture colors with the single pick color.
-            gl.glEnable(GL.GL_TEXTURE_2D);
-            gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_MODE, GL.GL_COMBINE);
-            gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_SRC0_RGB, GL.GL_PREVIOUS);
-            gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_COMBINE_RGB, GL.GL_REPLACE);
+            gl.glEnable(GL2.GL_TEXTURE_2D);
+            gl.glTexEnvf(GL2.GL_TEXTURE_ENV, GL2.GL_TEXTURE_ENV_MODE, GL2.GL_COMBINE);
+            gl.glTexEnvf(GL2.GL_TEXTURE_ENV, GL2.GL_SRC0_RGB, GL2.GL_PREVIOUS);
+            gl.glTexEnvf(GL2.GL_TEXTURE_ENV, GL2.GL_COMBINE_RGB, GL2.GL_REPLACE);
         }
         else
         {
-            gl.glEnable(GL.GL_TEXTURE_2D);
-            gl.glEnable(GL.GL_BLEND);
-            gl.glBlendFunc(GL.GL_ONE, GL.GL_ONE_MINUS_SRC_ALPHA);
+            gl.glEnable(GL2.GL_TEXTURE_2D);
+            gl.glEnable(GL2.GL_BLEND);
+            gl.glBlendFunc(GL2.GL_ONE, GL2.GL_ONE_MINUS_SRC_ALPHA);
         }
     }
 
@@ -555,7 +562,7 @@ public class IconRenderer
         if (dc.isPickingMode())
             this.pickSupport.endPicking(dc);
 
-        this.oglStackHandler.pop(dc.getGL());
+        this.oglStackHandler.pop(dc.getGL().getGL2());
     }
 
     protected void drawIconsInBatch(DrawContext dc, OrderedIcon uIcon)
@@ -645,11 +652,11 @@ public class IconRenderer
             pedestalSpacing = 0d;
         }
 
-        javax.media.opengl.GL gl = dc.getGL();
+        GL2 gl = dc.getGL().getGL2();
 
         this.setDepthFunc(dc, uIcon, screenPoint);
 
-        gl.glMatrixMode(GL.GL_MODELVIEW);
+        gl.glMatrixMode(GL2.GL_MODELVIEW);
         gl.glLoadIdentity();
 
         Dimension size = icon.getSize();
@@ -720,7 +727,7 @@ public class IconRenderer
     protected void applyBackground(DrawContext dc, WWIcon icon, Vec4 screenPoint, double width, double height,
         double pedestalSpacing, double pedestalScale)
     {
-        javax.media.opengl.GL gl = dc.getGL();
+        GL2 gl = dc.getGL().getGL2();
 
         double backgroundScale;
         backgroundScale = icon.getBackgroundScale();
@@ -753,18 +760,18 @@ public class IconRenderer
 
     protected void setDepthFunc(DrawContext dc, OrderedIcon uIcon, Vec4 screenPoint)
     {
-        GL gl = dc.getGL();
+        GL2 gl = dc.getGL().getGL2();
 
         if (uIcon.icon.isAlwaysOnTop())
         {
-            gl.glDepthFunc(GL.GL_ALWAYS);
+            gl.glDepthFunc(GL2.GL_ALWAYS);
             return;
         }
 
         Position eyePos = dc.getView().getEyePosition();
         if (eyePos == null)
         {
-            gl.glDepthFunc(GL.GL_ALWAYS);
+            gl.glDepthFunc(GL2.GL_ALWAYS);
             return;
         }
 
@@ -773,17 +780,17 @@ public class IconRenderer
         {
             double depth = screenPoint.z - (8d * 0.00048875809d);
             depth = depth < 0d ? 0d : (depth > 1d ? 1d : depth);
-            gl.glDepthFunc(GL.GL_LESS);
+            gl.glDepthFunc(GL2.GL_LESS);
             gl.glDepthRange(depth, depth);
         }
         else if (uIcon.eyeDistance > uIcon.horizonDistance)
         {
-            gl.glDepthFunc(GL.GL_EQUAL);
+            gl.glDepthFunc(GL2.GL_EQUAL);
             gl.glDepthRange(1d, 1d);
         }
         else
         {
-            gl.glDepthFunc(GL.GL_ALWAYS);
+            gl.glDepthFunc(GL2.GL_ALWAYS);
         }
     }
 

@@ -120,6 +120,7 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 		if (layer.isEnabled() != enabled)
 		{
 			layer.setEnabled(enabled);
+			fireEnabledChanged(layer, enabled);
 
 			if (recurse)
 			{
@@ -176,6 +177,7 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 				l.setOpacity(opacity);
 				enabler.redrawWwd();
 			}
+			fireOpacityChanged(layer, opacity);
 		}
 	}
 
@@ -593,6 +595,16 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 		listeners.remove(l);
 	}
 
+	public void addLayerTreeModelListener(LayerTreeModelListener l)
+	{
+		addTreeModelListener(l);
+	}
+
+	public void removeLayerTreeModelListener(LayerTreeModelListener l)
+	{
+		removeTreeModelListener(l);
+	}
+
 	public void insertNodeInto(INode newNode, INode parentNode, int index, boolean rebuildLayersList)
 	{
 		if (newNode instanceof WmsRootNode)
@@ -888,6 +900,30 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 				}
 			}
 		});
+	}
+
+	protected void fireOpacityChanged(ILayerNode node, double opacity)
+	{
+		for (int i = listeners.size() - 1; i >= 0; i--)
+		{
+			TreeModelListener listener = listeners.get(i);
+			if (listener instanceof LayerTreeModelListener)
+			{
+				((LayerTreeModelListener) listener).opacityChanged(node, opacity);
+			}
+		}
+	}
+
+	protected void fireEnabledChanged(ILayerNode node, boolean enabled)
+	{
+		for (int i = listeners.size() - 1; i >= 0; i--)
+		{
+			TreeModelListener listener = listeners.get(i);
+			if (listener instanceof LayerTreeModelListener)
+			{
+				((LayerTreeModelListener) listener).enabledChanged(node, enabled);
+			}
+		}
 	}
 
 	List<ILayerNode> getLayerNodes()

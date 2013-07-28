@@ -17,7 +17,7 @@ package au.gov.ga.worldwind.common.render;
 
 import java.awt.Dimension;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 /**
  * Class used by the {@link FrameBuffer} to generate/store the depth buffer.
@@ -29,8 +29,12 @@ public class FrameBufferDepthBuffer
 	private int id = 0;
 
 	private boolean texture = false;
+	private int textureTarget = GL2.GL_TEXTURE_2D;
+	private int textureMode = GL2.GL_INTENSITY; //or GL_LUMINANCE
+	private int textureType = GL2.GL_UNSIGNED_BYTE; //or GL_FLOAT for float
+	private int internalFormat = GL2.GL_DEPTH_COMPONENT24; //or GL_DEPTH_COMPONENT32F_NV for float
 
-	protected void create(GL gl, Dimension dimensions)
+	protected void create(GL2 gl, Dimension dimensions)
 	{
 		delete(gl);
 
@@ -41,7 +45,7 @@ public class FrameBufferDepthBuffer
 		}
 		else
 		{
-			gl.glGenRenderbuffersEXT(1, renderBuffers, 0);
+			gl.glGenRenderbuffers(1, renderBuffers, 0);
 		}
 		if (renderBuffers[0] <= 0)
 		{
@@ -51,35 +55,34 @@ public class FrameBufferDepthBuffer
 
 		if (texture)
 		{
-			gl.glBindTexture(GL.GL_TEXTURE_2D, id);
+			gl.glBindTexture(textureTarget, id);
 
-			gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER, GL.GL_NEAREST);
-			gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_NEAREST);
-			gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_S, GL.GL_CLAMP);
-			gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_T, GL.GL_CLAMP);
-			gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_DEPTH_TEXTURE_MODE, GL.GL_INTENSITY);
-			gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_COMPARE_MODE, GL.GL_NONE);
+			gl.glTexParameteri(textureTarget, GL2.GL_TEXTURE_MAG_FILTER, GL2.GL_NEAREST);
+			gl.glTexParameteri(textureTarget, GL2.GL_TEXTURE_MIN_FILTER, GL2.GL_NEAREST);
+			gl.glTexParameteri(textureTarget, GL2.GL_TEXTURE_WRAP_S, GL2.GL_CLAMP_TO_EDGE);
+			gl.glTexParameteri(textureTarget, GL2.GL_TEXTURE_WRAP_T, GL2.GL_CLAMP_TO_EDGE);
+			gl.glTexParameteri(textureTarget, GL2.GL_DEPTH_TEXTURE_MODE, textureMode);
+			gl.glTexParameteri(textureTarget, GL2.GL_TEXTURE_COMPARE_MODE, GL2.GL_NONE);
 
-			gl.glTexImage2D(GL.GL_TEXTURE_2D, 0, GL.GL_DEPTH_COMPONENT24, dimensions.width, dimensions.height, 0,
-					GL.GL_DEPTH_COMPONENT, GL.GL_UNSIGNED_BYTE, null);
-			gl.glBindTexture(GL.GL_TEXTURE_2D, 0);
+			gl.glTexImage2D(textureTarget, 0, internalFormat, dimensions.width, dimensions.height, 0,
+					GL2.GL_DEPTH_COMPONENT, textureType, null);
+			gl.glBindTexture(textureTarget, 0);
 		}
 		else
 		{
-			gl.glBindRenderbufferEXT(GL.GL_RENDERBUFFER_EXT, id);
-			gl.glRenderbufferStorageEXT(GL.GL_RENDERBUFFER_EXT, GL.GL_DEPTH_COMPONENT24, dimensions.width,
-					dimensions.height);
-			gl.glBindRenderbufferEXT(GL.GL_RENDERBUFFER_EXT, 0);
+			gl.glBindRenderbuffer(GL2.GL_RENDERBUFFER, id);
+			gl.glRenderbufferStorage(GL2.GL_RENDERBUFFER, internalFormat, dimensions.width, dimensions.height);
+			gl.glBindRenderbuffer(GL2.GL_RENDERBUFFER, 0);
 		}
 	}
 
-	protected void delete(GL gl)
+	protected void delete(GL2 gl)
 	{
 		if (isCreated())
 		{
 			if (texture)
 			{
-				gl.glDeleteRenderbuffersEXT(1, new int[] { id }, 0);
+				gl.glDeleteRenderbuffers(1, new int[] { id }, 0);
 			}
 			else
 			{
@@ -107,5 +110,45 @@ public class FrameBufferDepthBuffer
 	public void setTexture(boolean texture)
 	{
 		this.texture = texture;
+	}
+
+	public int getTextureTarget()
+	{
+		return textureTarget;
+	}
+
+	public void setTextureTarget(int textureTarget)
+	{
+		this.textureTarget = textureTarget;
+	}
+
+	public int getTextureMode()
+	{
+		return textureMode;
+	}
+
+	public void setTextureMode(int textureMode)
+	{
+		this.textureMode = textureMode;
+	}
+
+	public int getTextureType()
+	{
+		return textureType;
+	}
+
+	public void setTextureType(int textureType)
+	{
+		this.textureType = textureType;
+	}
+
+	public int getInternalFormat()
+	{
+		return internalFormat;
+	}
+
+	public void setInternalFormat(int internalFormat)
+	{
+		this.internalFormat = internalFormat;
 	}
 }

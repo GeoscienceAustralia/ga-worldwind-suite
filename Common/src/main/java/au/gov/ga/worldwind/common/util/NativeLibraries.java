@@ -35,8 +35,9 @@ public class NativeLibraries
 {
 	protected final static String BASE_DIR = "/native/";
 	protected final static String TEMP_DIR = "ga-worldwind-natives";
-	protected static final String[] libraries = new String[] { "jogl", "jogl_awt", "jogl_cg", "gluegen-rt",
-			"gdalalljni", "gdalalljni32", "gdalalljni64", "webview", "WebView32", "WebView64" };
+	protected static final String[] libraries = new String[] { "jogl_desktop", "nativewindow_awt",
+			"nativewindow_win32", "nativewindow_macosx", "nativewindow_x11", "newt", "gluegen-rt", "gdalalljni",
+			"gdalalljni32", "gdalalljni64", "webview", "WebView32", "WebView64" };
 	protected static final String JAVA_LIBRARY_PATH = "java.library.path";
 
 	/**
@@ -46,6 +47,9 @@ public class NativeLibraries
 	 */
 	public static void init()
 	{
+		//-Djogamp.gluegen.UseTempJarCache=false
+		System.setProperty("jogamp.gluegen.UseTempJarCache", "false");
+		
 		String osName = System.getProperty("os.name").toLowerCase();
 		String osArch = System.getProperty("os.arch").toLowerCase();
 		String directory, prefix, suffix;

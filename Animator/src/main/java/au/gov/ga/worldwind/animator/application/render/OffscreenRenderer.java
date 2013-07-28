@@ -22,7 +22,7 @@ import gov.nasa.worldwind.view.orbit.OrbitView;
 import java.awt.Dimension;
 import java.io.File;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 import au.gov.ga.worldwind.animator.animation.Animation;
 import au.gov.ga.worldwind.animator.animation.RenderParameters;
@@ -83,7 +83,7 @@ public class OffscreenRenderer extends AnimationRendererBase
 			@Override
 			public void run(DrawContext dc)
 			{
-				frameBuffer.create(dc.getGL(), renderDimensions);
+				frameBuffer.create(dc.getGL().getGL2(), renderDimensions);
 			}
 		});
 
@@ -93,7 +93,7 @@ public class OffscreenRenderer extends AnimationRendererBase
 			@Override
 			public void run(DrawContext dc)
 			{
-				GL gl = dc.getGL();
+				GL2 gl = dc.getGL().getGL2();
 				frameBuffer.bind(gl);
 				gl.glViewport(0, 0, renderDimensions.width, renderDimensions.height);
 			}
@@ -104,7 +104,7 @@ public class OffscreenRenderer extends AnimationRendererBase
 			@Override
 			public void run(DrawContext dc)
 			{
-				GL gl = dc.getGL();
+				GL2 gl = dc.getGL().getGL2();
 				gl.glViewport(0, 0, renderDimensions.width, renderDimensions.height);
 			}
 		};
@@ -116,7 +116,7 @@ public class OffscreenRenderer extends AnimationRendererBase
 			@Override
 			public void run(DrawContext dc)
 			{
-				GL gl = dc.getGL();
+				GL2 gl = dc.getGL().getGL2();
 				frameBuffer.unbind(gl);
 				gl.glViewport(0, 0, dc.getDrawableWidth(), dc.getDrawableHeight());
 				FrameBuffer.renderTexturedQuad(gl, frameBuffer.getTexture().getId());
@@ -165,7 +165,7 @@ public class OffscreenRenderer extends AnimationRendererBase
 			@Override
 			public void run(DrawContext dc)
 			{
-				frameBuffer.delete(dc.getGL());
+				frameBuffer.delete(dc.getGL().getGL2());
 			}
 		});
 

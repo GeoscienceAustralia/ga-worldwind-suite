@@ -332,10 +332,15 @@ public abstract class AbstractLayersPanel extends AbstractThemePanel
 		{
 			if (tree.getLayerModel().isEnabled(node) != enabled)
 			{
-				tree.getLayerModel().setEnabled(node, enabled);
-				relayoutRepaint(node);
+				setEnabled(node, enabled);
 			}
 		}
+	}
+
+	public void setEnabled(ILayerNode node, boolean enabled)
+	{
+		tree.getLayerModel().setEnabled(node, enabled);
+		relayoutRepaint(node);
 	}
 
 	private void setOpacitySlider()
@@ -373,17 +378,20 @@ public abstract class AbstractLayersPanel extends AbstractThemePanel
 		Set<ILayerNode> nodes = getChildLayers(selected, true);
 
 		double opacity = opacitySlider.getValue() / 100d;
-		boolean enabled = opacity > 0;
-
 		for (ILayerNode node : nodes)
 		{
-			tree.getLayerModel().setEnabled(node, enabled);
-			tree.getLayerModel().setOpacity(node, opacity);
-			relayoutRepaint(node);
+			setOpacity(node, opacity);
 		}
 
 		ignoreOpacityChange = false;
 		setOpacitySlider();
+	}
+
+	public void setOpacity(ILayerNode node, double opacity)
+	{
+		tree.getLayerModel().setEnabled(node, opacity > 0);
+		tree.getLayerModel().setOpacity(node, opacity);
+		relayoutRepaint(node);
 	}
 
 	private void relayoutRepaint(INode node)

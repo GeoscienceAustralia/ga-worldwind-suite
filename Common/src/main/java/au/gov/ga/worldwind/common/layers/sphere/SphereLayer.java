@@ -9,7 +9,7 @@ import gov.nasa.worldwind.util.OGLStackHandler;
 
 import java.awt.Color;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 import javax.media.opengl.glu.GLU;
 import javax.media.opengl.glu.GLUquadric;
 
@@ -70,7 +70,7 @@ public class SphereLayer extends AbstractLayer
 	@Override
 	protected void doRender(DrawContext dc)
 	{
-		GL gl = dc.getGL();
+		GL2 gl = dc.getGL().getGL2();
 		GLU glu = dc.getGLU();
 		
 		OGLStackHandler ogsh = new OGLStackHandler();
@@ -79,13 +79,13 @@ public class SphereLayer extends AbstractLayer
 		{
 			ogsh.pushModelview(gl);
 			ogsh.pushProjection(gl);
-			ogsh.pushAttrib(gl, javax.media.opengl.GL.GL_TEXTURE_BIT
-								| javax.media.opengl.GL.GL_ENABLE_BIT
-								| javax.media.opengl.GL.GL_CURRENT_BIT);
+			ogsh.pushAttrib(gl, GL2.GL_TEXTURE_BIT
+								| GL2.GL_ENABLE_BIT
+								| GL2.GL_CURRENT_BIT);
 			
 			setupProjectionMatrix(dc, gl);
 	        
-			gl.glDisable(javax.media.opengl.GL.GL_TEXTURE_2D);
+			gl.glDisable(GL2.GL_TEXTURE_2D);
 			
 			gl.glColor4ub((byte) color.getRed(), 
 						  (byte) color.getGreen(),
@@ -94,13 +94,13 @@ public class SphereLayer extends AbstractLayer
 	
 			if (getOpacity() < 1.0)
 			{
-				gl.glEnable(GL.GL_BLEND);
-				gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
+				gl.glEnable(GL2.GL_BLEND);
+				gl.glBlendFunc(GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA);
 			}
 			
 			gl.glDepthMask(false);
 	
-			gl.glMatrixMode(javax.media.opengl.GL.GL_MODELVIEW);
+			gl.glMatrixMode(GL2.GL_MODELVIEW);
 			
 			gl.glPushMatrix();
 			gl.glTranslated(center.x, center.y, center.z);
@@ -119,7 +119,7 @@ public class SphereLayer extends AbstractLayer
 		}
 	}
 
-	private void setupProjectionMatrix(DrawContext dc, GL gl)
+	private void setupProjectionMatrix(DrawContext dc, GL2 gl)
 	{
 		// Compute a projection matrix with no far clipping
 		Matrix projection = Matrix.fromPerspective(dc.getView().getFieldOfView(),
@@ -128,7 +128,7 @@ public class SphereLayer extends AbstractLayer
 												   1e3,
 												   dc.getGlobe().getDiameter() * 1.5);
 		// Apply the projection matrix to the current OpenGL context.
-		gl.glMatrixMode(GL.GL_PROJECTION);
+		gl.glMatrixMode(GL2.GL_PROJECTION);
 		double[] matrixArray = new double[16];
 		if (projection != null)
 		{

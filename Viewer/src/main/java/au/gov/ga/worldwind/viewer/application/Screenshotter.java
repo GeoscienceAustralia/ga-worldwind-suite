@@ -32,10 +32,9 @@ import java.io.File;
 import java.io.IOException;
 
 import javax.imageio.ImageIO;
-import javax.media.opengl.GLCanvas;
 import javax.swing.JFrame;
 
-import com.sun.opengl.util.Screenshot;
+import com.jogamp.opengl.util.awt.Screenshot;
 
 /**
  * Utility class for taking screenshots of WorldWind.
@@ -43,41 +42,7 @@ import com.sun.opengl.util.Screenshot;
  * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
 public class Screenshotter
-{
-	/**
-	 * Take a simple screenshot of the WorldWindow canvas at the current
-	 * dimensions with alpha enabled.
-	 * 
-	 * @param wwd
-	 *            WorldWindow to take a screenshot of.
-	 * @param canvas
-	 *            GLCanvas associated with the WorldWindow.
-	 * @param file
-	 *            File to save the screenshot to.
-	 */
-	public static void takeScreenshot(WorldWindow wwd, GLCanvas canvas, File file)
-	{
-		takeScreenshot(wwd, canvas, file, true);
-	}
-
-	/**
-	 * Take a simple screenshot of the WorldWindow canvas at the current
-	 * dimensions, optionally enabling transparency.
-	 * 
-	 * @param wwd
-	 *            WorldWindow to take a screenshot of.
-	 * @param canvas
-	 *            GLCanvas associated with the WorldWindow.
-	 * @param file
-	 *            File to save the screenshot to.
-	 * @param enableAlpha
-	 * 			  Whether to enable an alpha channel (if applicable)
-	 */
-	public static void takeScreenshot(WorldWindow wwd, GLCanvas canvas, File file, boolean enableAlpha)
-	{
-		wwd.addRenderingListener(new SimpleScreenshotListener(wwd, file, canvas.getWidth(), canvas.getHeight(), enableAlpha));
-	}
-	
+{	
 	/**
 	 * Take a screenshot at the provided dimensions. Temporarily resizes the
 	 * WorldWind canvas to the dimensions. If the dimensions are larger than the
@@ -94,9 +59,9 @@ public class Screenshotter
 	 * @param file
 	 *            File to save the screenshot to.
 	 */
-	public static void takeScreenshot(final WorldWindow wwd, final int width, final int height, final File file)
+	public static void takeScreenshot(final WorldWindow wwd, final File file)
 	{
-		takeScreenshot(wwd, width, height, file, true);
+		takeScreenshot(wwd, file, true);
 	}
 
 	/**
@@ -117,20 +82,20 @@ public class Screenshotter
 	 * @param enableAlpha
 	 * 			  Whether to enable alpha channel in the saved screenshot
 	 */
-	public static void takeScreenshot(final WorldWindow wwd, final int width, final int height, final File file, final boolean enableAlpha)
+	public static void takeScreenshot(final WorldWindow wwd, final File file, final boolean enableAlpha)
 	{
 		Thread thread = new Thread(new Runnable()
 		{
 			@Override
 			public void run()
 			{
-				takeScreenshotThread(wwd, width, height, file, enableAlpha);
+				takeScreenshotThread(wwd, file, enableAlpha);
 			}
 		});
 		thread.start();
 	}
 	
-	private static void takeScreenshotThread(WorldWindow wwd, int width, int height, File file, boolean enableAlpha)
+	private static void takeScreenshotThread(WorldWindow wwd, File file, boolean enableAlpha)
 	{
 		if (!(wwd instanceof Component))
 		{
@@ -138,6 +103,8 @@ public class Screenshotter
 		}
 
 		Component component = (Component) wwd;
+		int width = component.getWidth();
+		int height = component.getHeight();
 
 		Container parent = component.getParent();
 		JFrame frame = new JFrame();

@@ -27,7 +27,7 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 import au.gov.ga.worldwind.common.layers.point.types.UrlMarker;
 import au.gov.ga.worldwind.common.render.fastshape.FastShape;
@@ -136,11 +136,11 @@ public class BoreholeImpl extends UrlMarker implements Borehole, Renderable
 		boreholeColorBuffer = FastShape.color3ToFloats(colors);
 		pickingColorBuffer = new float[colors.size() * 3];
 
-		fastShape = new FastShape(positions, GL.GL_LINES);
+		fastShape = new FastShape(positions, GL2.GL_LINES);
 		fastShape.setColorBuffer(boreholeColorBuffer);
 		fastShape.setFollowTerrain(true);
 		
-		centreline = new FastShape(centrelinePositions, GL.GL_LINES);
+		centreline = new FastShape(centrelinePositions, GL2.GL_LINES);
 		centreline.setColor(Color.LIGHT_GRAY);
 		centreline.setLineWidth(1.0);
 		centreline.setFollowTerrain(true);

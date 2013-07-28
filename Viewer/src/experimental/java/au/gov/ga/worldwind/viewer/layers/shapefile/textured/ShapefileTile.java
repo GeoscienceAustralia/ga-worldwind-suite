@@ -11,8 +11,10 @@ import gov.nasa.worldwind.util.TileKey;
 
 import java.awt.image.BufferedImage;
 
-import com.sun.opengl.util.texture.TextureData;
-import com.sun.opengl.util.texture.TextureIO;
+import javax.media.opengl.GLProfile;
+
+import com.jogamp.opengl.util.texture.TextureData;
+import com.jogamp.opengl.util.texture.awt.AWTTextureIO;
 
 public class ShapefileTile extends TextureTile
 {
@@ -28,7 +30,7 @@ public class ShapefileTile extends TextureTile
 	public void setShapefile(Shapefile shapefile, boolean useMipMaps)
 	{
 		BufferedImage image = ImageTessellator.tessellate(shapefile, getWidth(), getHeight(), getSector());
-		TextureData data = TextureIO.newTextureData(image, useMipMaps);
+		TextureData data = AWTTextureIO.newTextureData(GLProfile.get(GLProfile.GL2), image, useMipMaps);
 		setTextureData(data);
 	}
 
