@@ -12,6 +12,19 @@ The suite consists of a number of tools, found in the project subfolders. These 
 
 For more information on the project, see the [project wiki](https://github.com/ga-m3dv/ga-worldwind-suite/wiki).
 
+----
+
+**Update: March 2013**
+
+The GA-M3DV team is no longer actively maintaining this project. We have moved our development effort to the [EarthSci platform](https://github.com/ga-m3dv/ga-earthsci-rcp). 
+
+This platform is an open source project that will fill the same niche as the `ga-worldwind-suite`, but has been redesigned from the ground-up to be a flexible earth science visualisation platform. It is built on Eclipse E4AP and has a powerful plugin architecture that makes it easier to add new functionality without having to change the core codebase.
+
+
+Feel free to continue using the `ga-worldwind-suite` if it meets your needs, but if you want to leverage the ongoing development of new features we recommend you consider the `EarthSci` platform.
+
+----
+
 ## Webstart previews ##
 We have created a separate [repository](https://github.com/ga-m3dv/ga-worldwind-webstart) containing webstart versions of some of the tools in this repository. To run these applications, use the following links:
 * [Viewer](https://raw.github.com/ga-m3dv/ga-worldwind-webstart/master/Webstart/jnlp/viewer.jnlp)
