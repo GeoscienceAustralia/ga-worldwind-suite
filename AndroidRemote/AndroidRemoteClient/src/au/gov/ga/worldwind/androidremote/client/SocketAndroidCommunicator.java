@@ -26,7 +26,6 @@ import java.util.Arrays;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.util.Log;
 import android.widget.Toast;
@@ -54,19 +53,13 @@ public class SocketAndroidCommunicator extends AbstractCommunicator
 
 	private Toast toast;
 
-	@SuppressLint("NewApi")
 	public SocketAndroidCommunicator(Activity context)
 	{
 		this.context = context;
 
-		try
+		if (android.os.Build.VERSION.SDK_INT >= 9)
 		{
-			android.os.StrictMode.ThreadPolicy policy =
-					new android.os.StrictMode.ThreadPolicy.Builder().permitAll().build();
-			android.os.StrictMode.setThreadPolicy(policy);
-		}
-		catch (Exception e)
-		{
+			StrictModeHelper.disable();
 		}
 	}
 
