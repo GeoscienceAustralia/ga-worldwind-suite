@@ -36,7 +36,7 @@ import au.gov.ga.worldwind.androidremote.shared.CommunicatorListener;
 import au.gov.ga.worldwind.androidremote.shared.Message;
 import au.gov.ga.worldwind.androidremote.shared.messages.EnableRemoteViewMessage;
 import au.gov.ga.worldwind.androidremote.shared.messages.RemoteViewMessage;
-import au.gov.ga.worldwind.viewer.stereo.StereoSceneController;
+import au.gov.ga.worldwind.viewer.stereo.SettingsSceneController;
 
 import com.jogamp.common.nio.Buffers;
 
@@ -46,7 +46,7 @@ import com.jogamp.common.nio.Buffers;
  * 
  * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
-public class RemoteViewSceneController extends StereoSceneController implements CommunicatorListener
+public class RemoteViewSceneController extends SettingsSceneController implements CommunicatorListener
 {
 	private static final float IMAGE_SCALE = 1f / 2f;
 	private Communicator communicator;
@@ -72,7 +72,7 @@ public class RemoteViewSceneController extends StereoSceneController implements 
 	}
 
 	@Override
-	protected void draw(DrawContext dc)
+	public void draw(DrawContext dc)
 	{
 		if (communicator != null && communicator.getState() == State.CONNECTED && remoteViewEnabled && buffer != null
 				&& imageSendQueue.isEmpty() && !sending)

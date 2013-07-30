@@ -25,15 +25,14 @@ import java.awt.GraphicsEnvironment;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.io.File;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import au.gov.ga.worldwind.common.util.EnumPersistenceDelegate;
 import au.gov.ga.worldwind.common.util.Proxy;
+import au.gov.ga.worldwind.common.view.stereo.StereoMode;
 import au.gov.ga.worldwind.common.view.stereo.StereoViewParameters;
 import au.gov.ga.worldwind.viewer.layers.mouse.MouseLayer;
-import au.gov.ga.worldwind.viewer.stereo.StereoSceneController;
+import au.gov.ga.worldwind.viewer.stereo.SettingsSceneController;
 import au.gov.ga.worldwind.viewer.theme.Theme;
 import au.gov.ga.worldwind.viewer.theme.ThemeHUD;
 import au.gov.ga.worldwind.viewer.theme.ThemePanel;
@@ -84,7 +83,7 @@ public class Settings implements StereoViewParameters
 
 	/**
 	 * @return Does the OpenGL implementation have quad-buffered stereo support?
-	 *         Set by the {@link StereoSceneController}.
+	 *         Set by the {@link SettingsSceneController}.
 	 */
 	public static boolean isStereoSupported()
 	{
@@ -93,7 +92,7 @@ public class Settings implements StereoViewParameters
 
 	/**
 	 * Set whether the OpenGL implementation has quad-buffered stereo support.
-	 * Called by the {@link StereoSceneController}.
+	 * Called by the {@link SettingsSceneController}.
 	 * 
 	 * @param stereoSupported
 	 */
@@ -123,7 +122,7 @@ public class Settings implements StereoViewParameters
 
 	private Proxy proxy = new Proxy();
 	private StereoMode stereoMode = StereoMode.RC_ANAGLYPH;
-	private boolean stereoSwap = false;
+	private boolean swapEyes = false;
 	private String displayId = null;
 	private double eyeSeparation = 1.0;
 	private double eyeSeparationMultiplier = 1.0;
@@ -175,6 +174,7 @@ public class Settings implements StereoViewParameters
 	/**
 	 * @return The stereo mode
 	 */
+	@Override
 	public StereoMode getStereoMode()
 	{
 		return stereoMode;
@@ -185,6 +185,7 @@ public class Settings implements StereoViewParameters
 	 * 
 	 * @param stereoMode
 	 */
+	@Override
 	public void setStereoMode(StereoMode stereoMode)
 	{
 		if (stereoMode == null)
@@ -195,9 +196,10 @@ public class Settings implements StereoViewParameters
 	/**
 	 * @return If stereo is enabled, should the eyes be swapped?
 	 */
-	public boolean isStereoSwap()
+	@Override
+	public boolean isSwapEyes()
 	{
-		return stereoSwap;
+		return swapEyes;
 	}
 
 	/**
@@ -205,14 +207,16 @@ public class Settings implements StereoViewParameters
 	 * 
 	 * @param stereoSwap
 	 */
-	public void setStereoSwap(boolean stereoSwap)
+	@Override
+	public void setSwapEyes(boolean stereoSwap)
 	{
-		this.stereoSwap = stereoSwap;
+		this.swapEyes = stereoSwap;
 	}
 
 	/**
 	 * @return Is stereo rendering enabled?
 	 */
+	@Override
 	public boolean isStereoEnabled()
 	{
 		return stereoEnabled;
@@ -223,6 +227,7 @@ public class Settings implements StereoViewParameters
 	 * 
 	 * @param stereoEnabled
 	 */
+	@Override
 	public void setStereoEnabled(boolean stereoEnabled)
 	{
 		this.stereoEnabled = stereoEnabled;
@@ -716,35 +721,6 @@ public class Settings implements StereoViewParameters
 			prop.setClassName(hud.getClass().getName());
 			if (theme.hasMenuBar())
 				prop.setEnabled(hud.isOn());
-		}
-	}
-
-	/**
-	 * Enum of supported stereo modes
-	 */
-	public enum StereoMode implements Serializable
-	{
-		STEREO_BUFFER("Hardware stereo buffer"),
-		RC_ANAGLYPH("Red/cyan anaglyph"),
-		GM_ANAGLYPH("Green/magenta anaglyph"),
-		BY_ANAGLYPH("Blue/yellow anaglyph");
-
-		private String pretty;
-
-		StereoMode(String pretty)
-		{
-			this.pretty = pretty;
-		}
-
-		@Override
-		public String toString()
-		{
-			return pretty;
-		}
-
-		static
-		{
-			EnumPersistenceDelegate.installFor(values());
 		}
 	}
 

@@ -17,9 +17,12 @@ package au.gov.ga.worldwind.common.render;
 
 import gov.nasa.worldwind.AbstractSceneController;
 import gov.nasa.worldwind.SceneController;
+import gov.nasa.worldwind.geom.Sector;
 import gov.nasa.worldwind.render.DrawContext;
 import gov.nasa.worldwind.terrain.SectorGeometryList;
 import gov.nasa.worldwind.terrain.Tessellator;
+import au.gov.ga.worldwind.common.util.SectorClipPlanes;
+import au.gov.ga.worldwind.common.view.drawable.DrawableView;
 
 /**
  * {@link SceneController} that uses a separate {@link Tessellator} to generate
@@ -28,14 +31,25 @@ import gov.nasa.worldwind.terrain.Tessellator;
  * 
  * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
-public abstract class ExtendedSceneController extends AbstractSceneController
+public class ExtendedSceneController extends AbstractSceneController implements DrawableSceneController
 {
 	private FlatRectangularTessellator flatTessellator = new FlatRectangularTessellator();
-	
+	private SectorClipPlanes sectorClipping = new SectorClipPlanes();
+
 	public ExtendedSceneController()
 	{
 		dc.dispose();
 		dc = new ExtendedDrawContext();
+	}
+
+	public void clipSector(Sector sector)
+	{
+		sectorClipping.clipSector(sector);
+	}
+
+	public void clearClipping()
+	{
+		sectorClipping.clear();
 	}
 
 	@Override
@@ -55,5 +69,59 @@ public abstract class ExtendedSceneController extends AbstractSceneController
 				}
 			}
 		}
+	}
+
+	@Override
+	protected void doRepaint(DrawContext dc)
+	{
+		this.initializeFrame(dc);
+		try
+		{
+			this.applyView(dc);
+			this.createPickFrustum(dc);
+			this.createTerrain(dc);
+			this.preRender(dc);
+			this.clearFrame(dc);
+			this.pick(dc);
+			this.clearFrame(dc);
+			try
+			{
+				sectorClipping.enableClipping(dc);
+				if (view instanceof DrawableView)
+				{
+					((DrawableView) view).draw(dc, this);
+				}
+				else
+				{
+					this.draw(dc);
+				}
+			}
+			finally
+			{
+				sectorClipping.disableClipping(dc);
+			}
+		}
+		finally
+		{
+			this.finalizeFrame(dc);
+		}
+	}
+
+	@Override
+	public void draw(DrawContext dc)
+	{
+		super.draw(dc);
+	}
+
+	@Override
+	public void clearFrame(DrawContext dc)
+	{
+		super.clearFrame(dc);
+	}
+
+	@Override
+	public void applyView(DrawContext dc)
+	{
+		super.applyView(dc);
 	}
 }

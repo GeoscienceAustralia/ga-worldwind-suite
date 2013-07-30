@@ -16,6 +16,8 @@
 package au.gov.ga.worldwind.common.view.stereo;
 
 import gov.nasa.worldwind.geom.Matrix;
+import gov.nasa.worldwind.render.DrawContext;
+import au.gov.ga.worldwind.common.render.DrawableSceneController;
 import au.gov.ga.worldwind.common.view.free.FreeView;
 
 /**
@@ -93,5 +95,11 @@ public class StereoFreeView extends FreeView implements StereoView
 	public Matrix computeProjection()
 	{
 		return helper.computeProjection(this);
+	}
+	
+	@Override
+	public void draw(DrawContext dc, DrawableSceneController sc)
+	{
+		helper.draw(dc, sc);
 	}
 }

@@ -15,15 +15,15 @@
  ******************************************************************************/
 package au.gov.ga.worldwind.common.view.stereo;
 
-import gov.nasa.worldwind.View;
 import gov.nasa.worldwind.geom.Matrix;
+import au.gov.ga.worldwind.common.view.drawable.DrawableView;
 
 /**
  * Interface which stereoscopic capable View subclasses must implement.
  * 
  * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
-public interface StereoView extends View
+public interface StereoView extends DrawableView
 {
 	/**
 	 * Represents an eye.

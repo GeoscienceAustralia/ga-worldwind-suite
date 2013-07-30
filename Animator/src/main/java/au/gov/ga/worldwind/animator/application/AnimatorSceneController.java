@@ -87,7 +87,7 @@ public class AnimatorSceneController extends ExtendedSceneController
     }
 	
 	@Override
-	protected void draw(DrawContext dc)
+	public void draw(DrawContext dc)
 	{
 		//The draw call is the lowest level rendering call for the SceneController,
 		//so we still have depth information at this level, which is needed for DoF.

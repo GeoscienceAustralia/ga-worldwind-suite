@@ -128,7 +128,7 @@ import au.gov.ga.worldwind.viewer.panels.other.GoToCoordinatePanel;
 import au.gov.ga.worldwind.viewer.retrieve.PolylineLayerRetrievalListener;
 import au.gov.ga.worldwind.viewer.settings.Settings;
 import au.gov.ga.worldwind.viewer.settings.SettingsDialog;
-import au.gov.ga.worldwind.viewer.stereo.StereoSceneController;
+import au.gov.ga.worldwind.viewer.stereo.SettingsSceneController;
 import au.gov.ga.worldwind.viewer.theme.Theme;
 import au.gov.ga.worldwind.viewer.theme.ThemeHUD;
 import au.gov.ga.worldwind.viewer.theme.ThemeLayer;
@@ -151,7 +151,7 @@ public class Application
 {
 	private static final String HELP_URL = getMessage(getHelpUrlKey());
 
-	private static Class<? extends SceneController> sceneControllerClass = StereoSceneController.class;
+	private static Class<? extends SceneController> sceneControllerClass = SettingsSceneController.class;
 	private static Class<? extends RectangularTessellator> rectangularTessellatorClass =
 			WireframeRectangularTessellator.class;
 
@@ -1491,7 +1491,7 @@ public class Application
 
 	private void clearClipping()
 	{
-		StereoSceneController sceneController = (StereoSceneController) wwd.getSceneController();
+		SettingsSceneController sceneController = (SettingsSceneController) wwd.getSceneController();
 		sceneController.clearClipping();
 		wwd.redraw();
 		clipSectorAction.setEnabled(true);

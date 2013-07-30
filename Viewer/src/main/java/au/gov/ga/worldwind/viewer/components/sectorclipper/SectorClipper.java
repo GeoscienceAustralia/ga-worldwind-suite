@@ -44,13 +44,14 @@ import javax.swing.JTextField;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
+import au.gov.ga.worldwind.common.render.ExtendedSceneController;
 import au.gov.ga.worldwind.common.ui.BasicAction;
 import au.gov.ga.worldwind.common.util.Util;
-import au.gov.ga.worldwind.viewer.stereo.StereoSceneController;
+import au.gov.ga.worldwind.viewer.stereo.SettingsSceneController;
 
 /**
  * Dialog used to edit the sector clipping planes of the
- * {@link StereoSceneController}.
+ * {@link ExtendedSceneController}.
  * 
  * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
@@ -305,13 +306,13 @@ public class SectorClipper
 
 	private void clipSector(final Frame frame, final WorldWindow wwd)
 	{
-		if (!(wwd.getSceneController() instanceof StereoSceneController))
+		if (!(wwd.getSceneController() instanceof SettingsSceneController))
 		{
 			throw new IllegalStateException("SceneController not an instance of "
-					+ StereoSceneController.class.getName());
+					+ SettingsSceneController.class.getName());
 		}
 
-		final StereoSceneController sceneController = (StereoSceneController) wwd.getSceneController();
+		final SettingsSceneController sceneController = (SettingsSceneController) wwd.getSceneController();
 		sceneController.clipSector(sector);
 		wwd.redraw();
 	}

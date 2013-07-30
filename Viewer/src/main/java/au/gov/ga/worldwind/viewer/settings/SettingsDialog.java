@@ -62,7 +62,7 @@ import javax.swing.event.ChangeListener;
 import au.gov.ga.worldwind.common.ui.JIntegerField;
 import au.gov.ga.worldwind.common.util.Proxy;
 import au.gov.ga.worldwind.common.util.Proxy.ProxyType;
-import au.gov.ga.worldwind.viewer.settings.Settings.StereoMode;
+import au.gov.ga.worldwind.common.view.stereo.StereoMode;
 
 /**
  * {@link JDialog} used to display/edit settings.
@@ -261,7 +261,7 @@ public class SettingsDialog extends JDialog
 
 			settings.setStereoEnabled(stereoEnabled);
 			settings.setHardwareStereoEnabled(hardwareStereoEnabled);
-			settings.setStereoSwap(stereoSwap);
+			settings.setSwapEyes(stereoSwap);
 			settings.setStereoMode(stereoMode);
 			settings.setDynamicStereo(dynamicStereo);
 			settings.setEyeSeparationMultiplier(eyeSeparationMultiplier);
@@ -492,7 +492,7 @@ public class SettingsDialog extends JDialog
 		checks.add(stereoEnabledCheck);
 
 		stereoSwapCheck = new JCheckBox("Swap eyes");
-		stereoSwapCheck.setSelected(settings.isStereoSwap());
+		stereoSwapCheck.setSelected(settings.isSwapEyes());
 		checks.add(stereoSwapCheck);
 
 		stereoModeLabel = new JLabel("Stereo mode:");
