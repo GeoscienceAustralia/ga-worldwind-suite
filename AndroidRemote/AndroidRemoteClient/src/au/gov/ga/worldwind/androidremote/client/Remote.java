@@ -247,22 +247,13 @@ public class Remote extends SherlockFragmentActivity implements CommunicatorList
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu)
 	{
-		MenuItem item;
-		menu.add(0, OPTION_CONNECT, 0, R.string.connect_menu).setIcon(android.R.drawable.ic_menu_search)
-				.setShowAsAction(MenuItem.SHOW_AS_ACTION_WITH_TEXT);
-		menu.add(0, OPTION_EXAGGERATION, 0, R.string.vertical_exaggeration_menu).setShowAsAction(
-				MenuItem.SHOW_AS_ACTION_WITH_TEXT);
-		menu.add(0, OPTION_FLY_HOME, 0, R.string.fly_home).setShowAsAction(MenuItem.SHOW_AS_ACTION_WITH_TEXT);
-		item = menu.add(0, OPTION_LOCK_LANDSCAPE, 0, R.string.lock_landscape_menu);
-		item.setIcon(android.R.drawable.ic_menu_rotate).setCheckable(true).setChecked(isLockLandscape())
-				.setShowAsAction(MenuItem.SHOW_AS_ACTION_WITH_TEXT);
-		item = menu.add(0, OPTION_ENABLE_REMOTE_VIEW, 0, R.string.remote_view_menu);
-		item.setIcon(android.R.drawable.ic_dialog_map).setCheckable(true).setChecked(controlFragment.isRemoteEnabled())
-				.setShowAsAction(MenuItem.SHOW_AS_ACTION_WITH_TEXT);
-		menu.add(0, OPTION_HELP, 0, R.string.help).setIcon(android.R.drawable.ic_menu_help)
-				.setShowAsAction(MenuItem.SHOW_AS_ACTION_WITH_TEXT);
-		menu.add(0, OPTION_EXIT, 0, R.string.exit).setIcon(android.R.drawable.ic_menu_close_clear_cancel)
-				.setShowAsAction(MenuItem.SHOW_AS_ACTION_WITH_TEXT);
+		menu.add(0, OPTION_CONNECT, 0, R.string.connect_menu).setIcon(android.R.drawable.ic_menu_search);
+		menu.add(0, OPTION_EXAGGERATION, 0, R.string.vertical_exaggeration_menu);
+		menu.add(0, OPTION_FLY_HOME, 0, R.string.fly_home);
+		menu.add(0, OPTION_LOCK_LANDSCAPE, 0, R.string.lock_landscape_menu).setIcon(android.R.drawable.ic_menu_rotate);
+		menu.add(0, OPTION_ENABLE_REMOTE_VIEW, 0, R.string.remote_view_menu).setIcon(android.R.drawable.ic_dialog_map);
+		menu.add(0, OPTION_HELP, 0, R.string.help).setIcon(android.R.drawable.ic_menu_help);
+		menu.add(0, OPTION_EXIT, 0, R.string.exit).setIcon(android.R.drawable.ic_menu_close_clear_cancel);
 		return super.onCreateOptionsMenu(menu);
 	}
 
