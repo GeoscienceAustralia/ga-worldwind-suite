@@ -75,15 +75,4 @@ public interface StereoView extends DrawableView
 	 * @return Eye separation used in the last call to doApply()
 	 */
 	double getCurrentEyeSeparation();
-
-	/**
-	 * Calculate a projection matrix for the current state of this view.
-	 * 
-	 * @param nearDistance
-	 *            Near frustum value
-	 * @param farDistance
-	 *            Far frustum value
-	 * @return Projection matrix
-	 */
-	Matrix calculateProjectionMatrix(double nearDistance, double farDistance);
 }

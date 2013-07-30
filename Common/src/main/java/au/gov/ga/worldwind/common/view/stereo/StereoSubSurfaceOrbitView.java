@@ -72,9 +72,9 @@ public class StereoSubSurfaceOrbitView extends SubSurfaceOrbitView implements St
 	}
 
 	@Override
-	public Matrix calculateProjectionMatrix(double nearDistance, double farDistance)
+	public Matrix computeProjection(double nearDistance, double farDistance)
 	{
-		return helper.calculateProjectionMatrix(this, nearDistance, farDistance);
+		return helper.computeProjection(this, nearDistance, farDistance);
 	}
 
 	@Override
@@ -91,12 +91,6 @@ public class StereoSubSurfaceOrbitView extends SubSurfaceOrbitView implements St
 		return helper.transformModelView(matrix);
 	}
 
-	@Override
-	public Matrix computeProjection()
-	{
-		return helper.computeProjection(this);
-	}
-	
 	@Override
 	public void draw(DrawContext dc, DrawableSceneController sc)
 	{

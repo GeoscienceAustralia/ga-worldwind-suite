@@ -49,6 +49,12 @@ public interface TransformView extends View
 	/**
 	 * Calculates a PROJECTION transform for this view. Default implementation
 	 * uses {@link Matrix#fromPerspective}.
+	 * 
+	 * @param nearDistance
+	 *            Near frustum value
+	 * @param farDistance
+	 *            Far frustum value
+	 * @return Projection matrix
 	 */
-	Matrix computeProjection();
+	Matrix computeProjection(double nearDistance, double farDistance);
 }

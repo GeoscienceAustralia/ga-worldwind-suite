@@ -72,9 +72,9 @@ public class StereoFreeView extends FreeView implements StereoView
 	}
 
 	@Override
-	public Matrix calculateProjectionMatrix(double nearDistance, double farDistance)
+	public Matrix computeProjection(double nearDistance, double farDistance)
 	{
-		return helper.calculateProjectionMatrix(this, nearDistance, farDistance);
+		return helper.computeProjection(this, nearDistance, farDistance);
 	}
 
 	@Override
@@ -89,12 +89,6 @@ public class StereoFreeView extends FreeView implements StereoView
 	{
 		Matrix matrix = super.computeModelView();
 		return helper.transformModelView(matrix);
-	}
-
-	@Override
-	public Matrix computeProjection()
-	{
-		return helper.computeProjection(this);
 	}
 	
 	@Override

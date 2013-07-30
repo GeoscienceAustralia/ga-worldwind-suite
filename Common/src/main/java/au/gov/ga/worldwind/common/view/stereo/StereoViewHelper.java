@@ -118,9 +118,9 @@ public class StereoViewHelper
 	}
 
 	/**
-	 * @see StereoView#calculateProjectionMatrix(double, double)
+	 * @see TransformView#computeProjection(double, double)
 	 */
-	public Matrix calculateProjectionMatrix(View view, double nearDistance, double farDistance)
+	public Matrix computeProjection(View view, double nearDistance, double farDistance)
 	{
 		if (stereo)
 		{
@@ -179,14 +179,6 @@ public class StereoViewHelper
 							.multiply(matrix);
 		}
 		return matrix;
-	}
-
-	/**
-	 * @see TransformView#computeProjection()
-	 */
-	public Matrix computeProjection(View view)
-	{
-		return calculateProjectionMatrix(view, view.getNearClipDistance(), view.getFarClipDistance());
 	}
 
 	/**
