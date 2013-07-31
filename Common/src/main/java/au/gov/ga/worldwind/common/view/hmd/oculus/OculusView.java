@@ -31,41 +31,46 @@ import de.fruitfly.ovr.OculusRift;
  */
 public class OculusView extends HMDView
 {
-	private final HMDDistortion distortion;
-	private Matrix headRotation;
+	private HMDDistortion distortion;
+	private Matrix headRotation = Matrix.IDENTITY;
 
 	public OculusView()
 	{
 		System.loadLibrary("JRiftLibrary");
 		final IOculusRift oculus = new OculusRift();
-		oculus.init();
-		HMDInfo hmd = oculus.getHMDInfo();
-		distortion = new HMDDistortion(new OculusHMDParameters(hmd), hmd.HResolution, hmd.VResolution);
+		boolean initialized = oculus.init();
 
-		Thread thread = new Thread(new Runnable()
+		if (initialized)
 		{
-			@Override
-			public void run()
+			HMDInfo hmd = oculus.getHMDInfo();
+			distortion = new HMDDistortion(new OculusHMDParameters(hmd), hmd.HResolution, hmd.VResolution);
+
+			Thread thread = new Thread(new Runnable()
 			{
-				while (true)
+				@Override
+				public void run()
 				{
-					try
+					while (true)
 					{
-						Thread.sleep(10);
+						try
+						{
+							Thread.sleep(10);
+						}
+						catch (InterruptedException e)
+						{
+						}
+						oculus.poll();
+						updateHeadRotation(Angle.fromDegrees(oculus.getYawDegrees_LH()),
+								Angle.fromDegrees(oculus.getPitchDegrees_LH()),
+								Angle.fromDegrees(oculus.getRollDegrees_LH()));
+						firePropertyChange(AVKey.VIEW, null, OculusView.this);
 					}
-					catch (InterruptedException e)
-					{
-					}
-					oculus.poll();
-					updateHeadRotation(Angle.fromDegrees(oculus.getYawDegrees_LH()),
-							Angle.fromDegrees(oculus.getPitchDegrees_LH()),
-							Angle.fromDegrees(oculus.getRollDegrees_LH()));
-					firePropertyChange(AVKey.VIEW, null, OculusView.this);
 				}
-			}
-		});
-		thread.setDaemon(true);
-		thread.start();
+			});
+			thread.setDaemon(true);
+			thread.setName("Oculus poller");
+			thread.start();
+		}
 	}
 
 	private void updateHeadRotation(Angle yaw, Angle pitch, Angle roll)
