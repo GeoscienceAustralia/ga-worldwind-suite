@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package au.gov.ga.worldwind.androidremote.server.view.orbit;
+package au.gov.ga.worldwind.common.view.rotate;
 
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.awt.ViewInputAttributes.ActionAttributes;
@@ -28,6 +28,7 @@ import gov.nasa.worldwind.view.ViewUtil;
 import gov.nasa.worldwind.view.orbit.BasicOrbitView;
 import gov.nasa.worldwind.view.orbit.OrbitView;
 import gov.nasa.worldwind.view.orbit.OrbitViewInputHandler;
+import au.gov.ga.worldwind.common.view.transform.TransformView;
 
 /**
  * {@link OrbitViewInputHandler} subclass that adds support for free rotation of
@@ -87,11 +88,15 @@ public class FreeRotateOrbitViewInputHandler extends OrbitViewInputHandler
 		Matrix rotation = Matrix.fromAxisAngle(amount, leftRotated);
 		Vec4 newCenterPoint = centerPoint.transformBy4(rotation);
 
-		//calculate the new eye positoin
+		//calculate the new eye position
 		Position newCenterPosition = view.getGlobe().computePositionFromPoint(newCenterPoint);
 		view.setCenterPosition(newCenterPosition);
 
 		//compute the new heading
+		if (view instanceof TransformView)
+		{
+			modelview = ((TransformView) view).getPretransformedModelViewMatrix();
+		}
 		Matrix newModelview = modelview.multiply(rotation);
 		Angle newHeading = calculateHeading(view, newModelview);
 		view.setHeading(newHeading);

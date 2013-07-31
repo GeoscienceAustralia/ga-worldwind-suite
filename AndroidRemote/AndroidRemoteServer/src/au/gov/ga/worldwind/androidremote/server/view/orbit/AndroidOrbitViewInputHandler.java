@@ -41,6 +41,7 @@ import au.gov.ga.worldwind.androidremote.shared.messages.finger.Finger;
 import au.gov.ga.worldwind.androidremote.shared.messages.finger.FingerMessage;
 import au.gov.ga.worldwind.androidremote.shared.messages.finger.MoveMessage;
 import au.gov.ga.worldwind.androidremote.shared.messages.finger.UpMessage;
+import au.gov.ga.worldwind.common.view.rotate.FreeRotateOrbitViewInputHandler;
 
 /**
  * Custom {@link ViewInputHandler} that converts Android finger gestures into
