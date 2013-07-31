@@ -15,6 +15,7 @@
  ******************************************************************************/
 package au.gov.ga.worldwind.viewer.panels.view;
 
+import gov.nasa.worldwind.Disposable;
 import gov.nasa.worldwind.View;
 import gov.nasa.worldwind.WorldWindow;
 import gov.nasa.worldwind.avlist.AVKey;
@@ -32,6 +33,7 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 
 import au.gov.ga.worldwind.common.util.Icons;
+import au.gov.ga.worldwind.common.view.hmd.oculus.OculusView;
 import au.gov.ga.worldwind.common.view.stereo.StereoFlyView;
 import au.gov.ga.worldwind.common.view.stereo.StereoFreeView;
 import au.gov.ga.worldwind.common.view.stereo.StereoOrbitView;
@@ -53,6 +55,7 @@ public class ViewPanel extends AbstractThemePanel
 	private JRadioButton subSurfaceRadio;
 	private JRadioButton flyRadio;
 	private JRadioButton freeRadio;
+	private JRadioButton oculusRadio;
 
 	public ViewPanel()
 	{
@@ -82,7 +85,7 @@ public class ViewPanel extends AbstractThemePanel
 		orbitRadio.addActionListener(al);
 		c = new GridBagConstraints();
 		c.gridx = 0;
-		c.weightx = 1d / 4d;
+		c.weightx = 1d / 5d;
 		panel.add(orbitRadio, c);
 
 		subSurfaceRadio = new JRadioButton("Sub-surface");
@@ -90,7 +93,7 @@ public class ViewPanel extends AbstractThemePanel
 		subSurfaceRadio.addActionListener(al);
 		c = new GridBagConstraints();
 		c.gridx = 1;
-		c.weightx = 1d / 4d;
+		c.weightx = 1d / 5d;
 		panel.add(subSurfaceRadio, c);
 
 		flyRadio = new JRadioButton("Fly");
@@ -98,7 +101,7 @@ public class ViewPanel extends AbstractThemePanel
 		flyRadio.addActionListener(al);
 		c = new GridBagConstraints();
 		c.gridx = 2;
-		c.weightx = 1d / 4d;
+		c.weightx = 1d / 5d;
 		panel.add(flyRadio, c);
 
 		freeRadio = new JRadioButton("Free");
@@ -106,8 +109,16 @@ public class ViewPanel extends AbstractThemePanel
 		freeRadio.addActionListener(al);
 		c = new GridBagConstraints();
 		c.gridx = 3;
-		c.weightx = 1d / 4d;
+		c.weightx = 1d / 5d;
 		panel.add(freeRadio, c);
+
+		oculusRadio = new JRadioButton("Oculus");
+		bg.add(oculusRadio);
+		oculusRadio.addActionListener(al);
+		c = new GridBagConstraints();
+		c.gridx = 4;
+		c.weightx = 1d / 5d;
+		panel.add(oculusRadio, c);
 	}
 
 	@Override
@@ -155,6 +166,10 @@ public class ViewPanel extends AbstractThemePanel
 		{
 			freeRadio.setSelected(true);
 		}
+		else if (view instanceof OculusView)
+		{
+			oculusRadio.setSelected(true);
+		}
 	}
 
 	protected void setupView()
@@ -181,6 +196,10 @@ public class ViewPanel extends AbstractThemePanel
 		{
 			view = new StereoFreeView();
 		}
+		else if (oculusRadio.isSelected() && !(oldView instanceof OculusView))
+		{
+			view = new OculusView();
+		}
 
 		if (view == null)
 			return;
@@ -188,5 +207,10 @@ public class ViewPanel extends AbstractThemePanel
 		view.copyViewState(oldView);
 		wwd.setView(view);
 		wwd.redraw();
+
+		if (oldView instanceof Disposable)
+		{
+			((Disposable) oldView).dispose();
+		}
 	}
 }
