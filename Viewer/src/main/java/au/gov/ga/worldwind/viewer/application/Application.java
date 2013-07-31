@@ -108,6 +108,7 @@ import au.gov.ga.worldwind.common.util.GDALDataHelper;
 import au.gov.ga.worldwind.common.util.Icons;
 import au.gov.ga.worldwind.common.util.transform.RegexURLTransform;
 import au.gov.ga.worldwind.common.util.transform.URLTransformer;
+import au.gov.ga.worldwind.common.view.hmd.oculus.OculusSingleton;
 import au.gov.ga.worldwind.common.view.stereo.StereoOrbitView;
 import au.gov.ga.worldwind.viewer.components.locallayer.LocalLayerCreator;
 import au.gov.ga.worldwind.viewer.components.sectorclipper.SectorClipper;
@@ -184,6 +185,8 @@ public class Application
 		Configuration.setValue(AVKey.RETRIEVAL_SERVICE_CLASS_NAME, ExtendedRetrievalService.class.getName());
 
 		GDALDataHelper.init();
+		//the JRiftLibrary must be loaded before JInput, otherwise the Oculus Rift goes undetected:
+		OculusSingleton.getInstance();
 	}
 
 	public static Class<? extends SceneController> getSceneControllerClass()
