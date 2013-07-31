@@ -25,14 +25,14 @@ import gov.nasa.worldwind.util.Logging;
 import gov.nasa.worldwind.view.orbit.AccessibleOrbitViewInputSupport;
 import gov.nasa.worldwind.view.orbit.OrbitView;
 import gov.nasa.worldwind.view.orbit.OrbitViewInputSupport;
-import au.gov.ga.worldwind.common.view.state.ViewStateBasicOrbitView;
+import au.gov.ga.worldwind.common.view.spacemouse.SpaceMouseOrbitView;
 
 /**
  * {@link OrbitView} implementation that allows the user to move sub-surface.
  * 
  * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
-public class SubSurfaceOrbitView extends ViewStateBasicOrbitView
+public class SubSurfaceOrbitView extends SpaceMouseOrbitView
 {
 	public SubSurfaceOrbitView()
 	{

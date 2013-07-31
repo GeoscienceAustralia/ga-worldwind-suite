@@ -15,6 +15,7 @@
  ******************************************************************************/
 package au.gov.ga.worldwind.common.view.subsurface;
 
+import au.gov.ga.worldwind.common.view.spacemouse.SpaceMouseOrbitViewInputHandler;
 import gov.nasa.worldwind.View;
 import gov.nasa.worldwind.animation.AnimationController;
 import gov.nasa.worldwind.avlist.AVKey;
@@ -32,7 +33,7 @@ import gov.nasa.worldwind.view.orbit.OrbitViewLimits;
  * 
  * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
-public class SubSurfaceOrbitViewInputHandler extends OrbitViewInputHandler
+public class SubSurfaceOrbitViewInputHandler extends SpaceMouseOrbitViewInputHandler
 {
 	@Override
 	protected void changeZoom(BasicOrbitView view, AnimationController animControl, double change,
