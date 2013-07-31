@@ -90,6 +90,12 @@ public class FreeView extends BasicView implements TransformView
 	}
 
 	@Override
+	public Matrix getPretransformedModelViewMatrix()
+	{
+		return getModelviewMatrix();
+	}
+
+	@Override
 	public Matrix computeProjection(double nearDistance, double farDistance)
 	{
 		double viewportWidth = this.viewport.getWidth() <= 0.0 ? 1.0 : this.viewport.getWidth();
