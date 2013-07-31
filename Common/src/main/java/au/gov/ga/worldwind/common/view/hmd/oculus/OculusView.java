@@ -15,69 +15,37 @@
  ******************************************************************************/
 package au.gov.ga.worldwind.common.view.hmd.oculus;
 
+import gov.nasa.worldwind.Disposable;
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.geom.Matrix;
 import au.gov.ga.worldwind.common.view.hmd.HMDDistortion;
 import au.gov.ga.worldwind.common.view.hmd.HMDView;
-import de.fruitfly.ovr.HMDInfo;
-import de.fruitfly.ovr.IOculusRift;
-import de.fruitfly.ovr.OculusRift;
+import au.gov.ga.worldwind.common.view.hmd.IHMDParameters;
 
 /**
  * {@link HMDView} implementation for the Oculus Rift. Uses the JRift library.
  * 
  * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
-public class OculusView extends HMDView
+public class OculusView extends HMDView implements IOculusListener, Disposable
 {
-	private HMDDistortion distortion;
+	private final OculusSingleton oculus = OculusSingleton.getInstance();
+	private final HMDDistortion distortion;
 	private Matrix headRotation = Matrix.IDENTITY;
 
 	public OculusView()
 	{
-		System.loadLibrary("JRiftLibrary");
-		final IOculusRift oculus = new OculusRift();
-		boolean initialized = oculus.init();
-
-		if (initialized)
+		if (!oculus.isInitialized())
 		{
-			HMDInfo hmd = oculus.getHMDInfo();
-			distortion = new HMDDistortion(new OculusHMDParameters(hmd), hmd.HResolution, hmd.VResolution);
-
-			Thread thread = new Thread(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					while (true)
-					{
-						try
-						{
-							Thread.sleep(10);
-						}
-						catch (InterruptedException e)
-						{
-						}
-						oculus.poll();
-						updateHeadRotation(Angle.fromDegrees(oculus.getYawDegrees_LH()),
-								Angle.fromDegrees(oculus.getPitchDegrees_LH()),
-								Angle.fromDegrees(oculus.getRollDegrees_LH()));
-						firePropertyChange(AVKey.VIEW, null, OculusView.this);
-					}
-				}
-			});
-			thread.setDaemon(true);
-			thread.setName("Oculus poller");
-			thread.start();
+			distortion = null;
+			return;
 		}
-	}
 
-	private void updateHeadRotation(Angle yaw, Angle pitch, Angle roll)
-	{
-		Matrix z = Matrix.fromRotationZ(roll);
-		Matrix xy = Matrix.fromRotationXYZ(pitch, yaw, Angle.ZERO);
-		headRotation = z.multiply(xy);
+		IHMDParameters parameters = oculus.getParameters();
+		distortion =
+				new HMDDistortion(parameters, parameters.getHorizontalResolution(), parameters.getVerticalResolution());
+		oculus.addListener(this);
 	}
 
 	@Override
@@ -90,5 +58,20 @@ public class OculusView extends HMDView
 	protected Matrix transformModelView(Matrix modelView)
 	{
 		return headRotation.multiply(modelView);
+	}
+
+	@Override
+	public void trackingUpdated(Angle yaw, Angle pitch, Angle roll)
+	{
+		Matrix z = Matrix.fromRotationZ(roll);
+		Matrix xy = Matrix.fromRotationXYZ(pitch, yaw, Angle.ZERO);
+		headRotation = z.multiply(xy);
+		firePropertyChange(AVKey.VIEW, null, this);
+	}
+
+	@Override
+	public void dispose()
+	{
+		oculus.removeListener(this);
 	}
 }
