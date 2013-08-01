@@ -48,7 +48,7 @@ public class FreeRotateOrbitViewInputHandler extends OrbitViewInputHandler
 	 * @param deviceAttributes
 	 * @param actionAttributes
 	 */
-	public void rotateFree(Angle direction, Angle amount, DeviceAttributes deviceAttributes,
+	public void onRotateFree(Angle direction, Angle amount, DeviceAttributes deviceAttributes,
 			ActionAttributes actionAttributes)
 	{
 		if (!(getView() instanceof OrbitView))

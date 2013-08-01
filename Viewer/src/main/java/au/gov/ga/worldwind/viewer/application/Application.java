@@ -39,6 +39,7 @@ import gov.nasa.worldwind.terrain.RectangularTessellator;
 import gov.nasa.worldwind.terrain.Tessellator;
 import gov.nasa.worldwind.view.orbit.FlyToOrbitViewAnimator;
 import gov.nasa.worldwind.view.orbit.OrbitView;
+import gov.nasa.worldwind.view.orbit.OrbitViewInputHandler;
 import gov.nasa.worldwindx.applications.worldwindow.core.WMSLayerInfo;
 import gov.nasa.worldwindx.examples.ClickAndGoSelectListener;
 import jargs.gnu.CmdLineParser;
@@ -91,6 +92,8 @@ import nasa.worldwind.retrieve.ExtendedRetrievalService;
 import org.w3c.dom.Element;
 
 import au.gov.ga.worldwind.common.downloader.DownloaderStatusBar;
+import au.gov.ga.worldwind.common.input.OrbitInputProviderManager;
+import au.gov.ga.worldwind.common.input.ProviderOrbitViewInputHandler;
 import au.gov.ga.worldwind.common.newt.NewtInputHandler;
 import au.gov.ga.worldwind.common.newt.WorldWindowNewtAutoDrawable;
 import au.gov.ga.worldwind.common.newt.WorldWindowNewtCanvas;
@@ -109,6 +112,7 @@ import au.gov.ga.worldwind.common.util.Icons;
 import au.gov.ga.worldwind.common.util.transform.RegexURLTransform;
 import au.gov.ga.worldwind.common.util.transform.URLTransformer;
 import au.gov.ga.worldwind.common.view.hmd.oculus.OculusSingleton;
+import au.gov.ga.worldwind.common.view.spacemouse.SpaceMouseInputProvider;
 import au.gov.ga.worldwind.common.view.stereo.StereoOrbitView;
 import au.gov.ga.worldwind.viewer.components.locallayer.LocalLayerCreator;
 import au.gov.ga.worldwind.viewer.components.sectorclipper.SectorClipper;
@@ -181,12 +185,15 @@ public class Application
 		Configuration.setValue(AVKey.LAYER_FACTORY, ViewerLayerFactory.class.getName());
 		Configuration.setValue(AVKey.ELEVATION_MODEL_FACTORY, ElevationModelFactory.class.getName());
 		Configuration.setValue(AVKey.VIEW_CLASS_NAME, StereoOrbitView.class.getName());
+		Configuration.setValue(AVKey.VIEW_INPUT_HANDLER_CLASS_NAME, ProviderOrbitViewInputHandler.class.getName());
 		Configuration.setValue(AVKey.LAYERS_CLASS_NAMES, "");
 		Configuration.setValue(AVKey.RETRIEVAL_SERVICE_CLASS_NAME, ExtendedRetrievalService.class.getName());
 
 		GDALDataHelper.init();
 		//the JRiftLibrary must be loaded before JInput, otherwise the Oculus Rift goes undetected:
 		OculusSingleton.getInstance();
+
+		OrbitInputProviderManager.getInstance().addProvider(new SpaceMouseInputProvider());
 	}
 
 	public static Class<? extends SceneController> getSceneControllerClass()
@@ -214,7 +221,7 @@ public class Application
 	{
 		startWithArgs(args);
 	}
-	
+
 	public static Application startWithArgs(String[] args)
 	{
 		return startWithArgs(args, true);

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2012 Geoscience Australia
+ * Copyright 2013 Geoscience Australia
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,19 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package au.gov.ga.worldwind.common.view.spacemouse;
-
-import au.gov.ga.worldwind.common.view.state.ViewStateBasicOrbitView;
+package au.gov.ga.worldwind.common.input;
 
 /**
- * OrbitView that accepts SpaceMouse input.
+ * Provides input to an OrbitView input handler.
  * 
  * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
-public class SpaceMouseOrbitView extends ViewStateBasicOrbitView
+public interface IOrbitInputProvider
 {
-	public SpaceMouseOrbitView()
-	{
-		setViewInputHandler(new SpaceMouseOrbitViewInputHandler());
-	}
+	/**
+	 * Apply this provider's input to the given handler.
+	 * 
+	 * @param inputHandler
+	 */
+	void apply(IProviderOrbitViewInputHandler inputHandler);
 }

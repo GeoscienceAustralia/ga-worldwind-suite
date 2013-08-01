@@ -18,14 +18,14 @@ package au.gov.ga.worldwind.common.view.stereo;
 import gov.nasa.worldwind.geom.Matrix;
 import gov.nasa.worldwind.render.DrawContext;
 import au.gov.ga.worldwind.common.render.DrawableSceneController;
-import au.gov.ga.worldwind.common.view.spacemouse.SpaceMouseOrbitView;
+import au.gov.ga.worldwind.common.view.state.ViewStateBasicOrbitView;
 
 /**
  * Orbit view with {@link StereoView} support.
  * 
  * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
-public class StereoOrbitView extends SpaceMouseOrbitView implements StereoView
+public class StereoOrbitView extends ViewStateBasicOrbitView implements StereoView
 {
 	private StereoViewHelper helper = new StereoViewHelper();
 

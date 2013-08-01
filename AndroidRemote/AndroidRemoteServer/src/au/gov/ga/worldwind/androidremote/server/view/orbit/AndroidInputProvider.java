@@ -1,26 +1,9 @@
-/*******************************************************************************
- * Copyright 2012 Geoscience Australia
- * 
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *   http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- ******************************************************************************/
 package au.gov.ga.worldwind.androidremote.server.view.orbit;
 
 import gov.nasa.worldwind.View;
 import gov.nasa.worldwind.WorldWind;
-import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.awt.ViewInputAttributes.ActionAttributes;
 import gov.nasa.worldwind.awt.ViewInputAttributes.DeviceAttributes;
-import gov.nasa.worldwind.awt.ViewInputHandler;
 import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.view.orbit.FlyToOrbitViewAnimator;
@@ -41,16 +24,10 @@ import au.gov.ga.worldwind.androidremote.shared.messages.finger.Finger;
 import au.gov.ga.worldwind.androidremote.shared.messages.finger.FingerMessage;
 import au.gov.ga.worldwind.androidremote.shared.messages.finger.MoveMessage;
 import au.gov.ga.worldwind.androidremote.shared.messages.finger.UpMessage;
-import au.gov.ga.worldwind.common.view.rotate.FreeRotateOrbitViewInputHandler;
+import au.gov.ga.worldwind.common.input.IOrbitInputProvider;
+import au.gov.ga.worldwind.common.input.IProviderOrbitViewInputHandler;
 
-/**
- * Custom {@link ViewInputHandler} that converts Android finger gestures into
- * globe camera movements. Supports dragging, double tapping, pinch-to-zoom,
- * rotation, pitch, and spinning the globe with infinite momentum.
- * 
- * @author Michael de Hoog (michael.dehoog@ga.gov.au)
- */
-public class AndroidOrbitViewInputHandler extends FreeRotateOrbitViewInputHandler implements CommunicatorListener
+public class AndroidInputProvider implements CommunicatorListener, IOrbitInputProvider
 {
 	public static enum DoubleState
 	{
@@ -106,7 +83,9 @@ public class AndroidOrbitViewInputHandler extends FreeRotateOrbitViewInputHandle
 	private Finger doubleGestureLastFinger;
 	private DoubleState gestureDoubleState = DoubleState.NONE;
 
-	public AndroidOrbitViewInputHandler()
+	private IProviderOrbitViewInputHandler inputHandler;
+
+	public AndroidInputProvider()
 	{
 		ServerCommunicator.INSTANCE.addListener(this);
 	}
@@ -137,7 +116,10 @@ public class AndroidOrbitViewInputHandler extends FreeRotateOrbitViewInputHandle
 		}
 		else if (message instanceof ShakeMessage)
 		{
-			onResetHeadingPitchRoll(resetAttributes);
+			if (inputHandler != null)
+			{
+				inputHandler.onResetHeadingPitchRoll(resetAttributes);
+			}
 		}
 	}
 
@@ -395,7 +377,10 @@ public class AndroidOrbitViewInputHandler extends FreeRotateOrbitViewInputHandle
 						lastGestureAngle = gestureAngle;
 						lastGestureTime = System.nanoTime();
 					}
-					getView().firePropertyChange(AVKey.VIEW, null, getView());
+					if (inputHandler != null)
+					{
+						inputHandler.markViewChanged();
+					}
 				}
 
 				if (gestureSpeed == 0)
@@ -425,7 +410,7 @@ public class AndroidOrbitViewInputHandler extends FreeRotateOrbitViewInputHandle
 
 	private void doubleTapZoom(boolean zoomIn)
 	{
-		View v = getView();
+		View v = inputHandler == null ? null : inputHandler.getView();
 		if (!(v instanceof OrbitView))
 			return;
 		OrbitView view = (OrbitView) v;
@@ -445,42 +430,51 @@ public class AndroidOrbitViewInputHandler extends FreeRotateOrbitViewInputHandle
 		view.addAnimator(FlyToOrbitViewAnimator.createFlyToOrbitViewAnimator(view, beginCenter, endCenter,
 				view.getHeading(), view.getHeading(), view.getPitch(), view.getPitch(), view.getZoom(), zoom, 1000,
 				WorldWind.ABSOLUTE));
-		wwd.redraw();
+		if (inputHandler != null)
+		{
+			inputHandler.markViewChanged();
+		}
 	}
 
 	private void move(final double forwardInput, final double sideInput, final double zoomInput,
 			final double headingInput, final double pitchInput)
 	{
-		if (forwardInput != 0 || sideInput != 0 || zoomInput != 0 || headingInput != 0 || pitchInput != 0)
+		final IProviderOrbitViewInputHandler inputHandler = this.inputHandler;
+		if (forwardInput != 0 || sideInput != 0 || zoomInput != 0 || headingInput != 0 || pitchInput != 0
+				&& inputHandler != null)
 		{
 			SwingUtilities.invokeLater(new Runnable()
 			{
 				@Override
 				public void run()
 				{
-					getView().stopAnimations();
+					inputHandler.stopAnimations();
 
 					if (forwardInput != 0 || sideInput != 0)
 					{
 						Angle angle = Angle.fromRadians(Math.atan2(-forwardInput, -sideInput) - HALF_PI);
 						double distance = Math.sqrt(forwardInput * forwardInput + sideInput * sideInput);
-						rotateFree(angle, Angle.fromDegrees(distance), deviceAttributes, horizontalMovementAttributes);
+						inputHandler.onRotateFree(angle, Angle.fromDegrees(distance), deviceAttributes,
+								horizontalMovementAttributes);
 					}
 					if (zoomInput != 0)
 					{
-						onVerticalTranslate(zoomInput, zoomInput, deviceAttributes, verticalMovementAttributes);
+						inputHandler.onVerticalTranslate(zoomInput, zoomInput, deviceAttributes,
+								verticalMovementAttributes);
 					}
 					if (headingInput != 0)
 					{
 						Angle headingChange =
-								Angle.fromDegrees(headingInput * getScaleValueRotate(headingMovementAttributes));
-						onRotateView(headingChange, Angle.ZERO, headingMovementAttributes);
+								Angle.fromDegrees(headingInput
+										* inputHandler.getScaleValueRotate(headingMovementAttributes));
+						inputHandler.onRotateView(headingChange, Angle.ZERO, headingMovementAttributes);
 					}
 					if (pitchInput != 0)
 					{
 						Angle pitchChange =
-								Angle.fromDegrees(pitchInput * getScaleValueRotate(pitchMovementAttributes));
-						onRotateView(Angle.ZERO, pitchChange, pitchMovementAttributes);
+								Angle.fromDegrees(pitchInput
+										* inputHandler.getScaleValueRotate(pitchMovementAttributes));
+						inputHandler.onRotateView(Angle.ZERO, pitchChange, pitchMovementAttributes);
 					}
 				}
 			});
@@ -494,9 +488,9 @@ public class AndroidOrbitViewInputHandler extends FreeRotateOrbitViewInputHandle
 	}
 
 	@Override
-	public void apply()
+	public void apply(IProviderOrbitViewInputHandler inputHandler)
 	{
-		super.apply();
+		this.inputHandler = inputHandler;
 
 		if (gestureLastNanos != null)
 		{
@@ -509,26 +503,29 @@ public class AndroidOrbitViewInputHandler extends FreeRotateOrbitViewInputHandle
 				switch (gestureDoubleState)
 				{
 				case NONE:
-					rotateFree(Angle.fromRadians(gestureAngle), Angle.fromDegrees(time * gestureSpeed),
+					inputHandler.onRotateFree(Angle.fromRadians(gestureAngle), Angle.fromDegrees(time * gestureSpeed),
 							deviceAttributes, horizontalGestureAttributes);
 					break;
 				case PITCH:
 					Angle pitchChange =
-							Angle.fromDegrees(time * gestureSpeed * getScaleValueRotate(pitchGestureAttributes));
-					onRotateView(Angle.ZERO, pitchChange, pitchGestureAttributes);
+							Angle.fromDegrees(time * gestureSpeed
+									* inputHandler.getScaleValueRotate(pitchGestureAttributes));
+					inputHandler.onRotateView(Angle.ZERO, pitchChange, pitchGestureAttributes);
 					break;
 				case HEADING_MOVE:
 				case HEADING_ROTATE:
 					Angle headingMoveChange =
-							Angle.fromDegrees(time * gestureSpeed * getScaleValueRotate(headingGestureAttributes));
-					onRotateView(headingMoveChange, Angle.ZERO, headingGestureAttributes);
+							Angle.fromDegrees(time * gestureSpeed
+									* inputHandler.getScaleValueRotate(headingGestureAttributes));
+					inputHandler.onRotateView(headingMoveChange, Angle.ZERO, headingGestureAttributes);
 					break;
 				case ZOOM:
 					double zoomChange = time * gestureSpeed;
-					onVerticalTranslate(zoomChange, zoomChange, deviceAttributes, verticalGestureAttributes);
+					inputHandler.onVerticalTranslate(zoomChange, zoomChange, deviceAttributes,
+							verticalGestureAttributes);
 					break;
 				}
-				getView().firePropertyChange(AVKey.VIEW, null, getView());
+				inputHandler.markViewChanged();
 			}
 		}
 	}

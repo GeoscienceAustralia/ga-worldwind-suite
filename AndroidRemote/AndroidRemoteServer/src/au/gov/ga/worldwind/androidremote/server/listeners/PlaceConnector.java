@@ -19,7 +19,7 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 import au.gov.ga.worldwind.androidremote.server.listeners.list.PlaceListListener;
-import au.gov.ga.worldwind.androidremote.server.view.orbit.AndroidOrbitViewInputHandler;
+import au.gov.ga.worldwind.androidremote.server.view.orbit.AndroidInputProvider;
 import au.gov.ga.worldwind.androidremote.shared.Communicator;
 import au.gov.ga.worldwind.androidremote.shared.Communicator.State;
 import au.gov.ga.worldwind.androidremote.shared.CommunicatorListener;
@@ -45,15 +45,17 @@ public class PlaceConnector implements CommunicatorListener, PlacesPlayingListen
 {
 	private final Communicator communicator;
 	private final PlacesPanel placesPanel;
+	private final AndroidInputProvider inputProvider;
 	private final ItemModel placesModel;
 	private final PlaceListListener placeListListener;
 	private boolean listening = false;
 	private final ListSelectionListener placeListSelectionListener;
 
-	public PlaceConnector(Communicator communicator, final PlacesPanel placesPanel)
+	public PlaceConnector(Communicator communicator, final PlacesPanel placesPanel, AndroidInputProvider inputProvider)
 	{
 		this.communicator = communicator;
 		this.placesPanel = placesPanel;
+		this.inputProvider = inputProvider;
 
 		placesModel = new ItemModel(2, communicator);
 		placesModel.addListener(placeItemModelListener);
@@ -127,7 +129,7 @@ public class PlaceConnector implements CommunicatorListener, PlacesPlayingListen
 		{
 			if (((PlayPlacesMessage) message).play)
 			{
-				((AndroidOrbitViewInputHandler) placesPanel.getWwd().getView().getViewInputHandler()).stopGesture();
+				inputProvider.stopGesture();
 				placesPanel.playPlaces();
 			}
 			else
@@ -160,7 +162,7 @@ public class PlaceConnector implements CommunicatorListener, PlacesPlayingListen
 		{
 			if (remote)
 			{
-				((AndroidOrbitViewInputHandler) placesPanel.getWwd().getView().getViewInputHandler()).stopGesture();
+				inputProvider.stopGesture();
 				int index = item.indexWithinParent();
 				placesPanel.stopPlaces();
 				placesPanel.flyTo((PlacesPanel.ListItem) placesPanel.getModel().get(index));

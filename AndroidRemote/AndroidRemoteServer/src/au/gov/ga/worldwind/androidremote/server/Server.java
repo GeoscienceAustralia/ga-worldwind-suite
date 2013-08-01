@@ -15,8 +15,6 @@
  ******************************************************************************/
 package au.gov.ga.worldwind.androidremote.server;
 
-import gov.nasa.worldwind.Configuration;
-import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.view.orbit.OrbitView;
 
 import java.awt.event.ActionEvent;
@@ -34,13 +32,14 @@ import javax.swing.JMenuBar;
 
 import au.gov.ga.worldwind.androidremote.server.listeners.DatasetLayerConnector;
 import au.gov.ga.worldwind.androidremote.server.listeners.PlaceConnector;
-import au.gov.ga.worldwind.androidremote.server.view.orbit.AndroidOrbitViewInputHandler;
+import au.gov.ga.worldwind.androidremote.server.view.orbit.AndroidInputProvider;
 import au.gov.ga.worldwind.androidremote.shared.Communicator;
 import au.gov.ga.worldwind.androidremote.shared.Communicator.State;
 import au.gov.ga.worldwind.androidremote.shared.CommunicatorListener;
 import au.gov.ga.worldwind.androidremote.shared.Message;
 import au.gov.ga.worldwind.androidremote.shared.messages.FlyHomeMessage;
 import au.gov.ga.worldwind.androidremote.shared.messages.IpAddressesMessage;
+import au.gov.ga.worldwind.common.input.OrbitInputProviderManager;
 import au.gov.ga.worldwind.common.ui.BasicAction;
 import au.gov.ga.worldwind.common.ui.HtmlViewer;
 import au.gov.ga.worldwind.common.util.Icons;
@@ -60,7 +59,8 @@ public class Server
 	public static void main(String[] args)
 	{
 		Application.setSceneControllerClass(RemoteViewSceneController.class);
-		Configuration.setValue(AVKey.VIEW_INPUT_HANDLER_CLASS_NAME, AndroidOrbitViewInputHandler.class.getName());
+		final AndroidInputProvider inputProvider = new AndroidInputProvider();
+		OrbitInputProviderManager.getInstance().addProvider(inputProvider);
 		final Application application = Application.startWithArgs(args);
 
 		Theme theme = application.getTheme();
@@ -83,7 +83,7 @@ public class Server
 			{
 				if (message instanceof FlyHomeMessage)
 				{
-					((AndroidOrbitViewInputHandler) application.getWwd().getView().getViewInputHandler()).stopGesture();
+					inputProvider.stopGesture();
 					application.resetView();
 				}
 			}
@@ -98,7 +98,7 @@ public class Server
 				new DatasetLayerConnector(communicator, datasetPanel, layersPanel);
 		communicator.addListener(datasetLayerConnector);
 
-		PlaceConnector placeConnector = new PlaceConnector(communicator, placesPanel);
+		PlaceConnector placeConnector = new PlaceConnector(communicator, placesPanel, inputProvider);
 		communicator.addListener(placeConnector);
 
 		//limit zoom out

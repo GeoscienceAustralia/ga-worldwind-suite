@@ -25,7 +25,7 @@ import javax.media.opengl.GL2;
 
 import au.gov.ga.worldwind.common.render.DrawableSceneController;
 import au.gov.ga.worldwind.common.render.FrameBuffer;
-import au.gov.ga.worldwind.common.view.spacemouse.SpaceMouseOrbitView;
+import au.gov.ga.worldwind.common.view.state.ViewStateBasicOrbitView;
 import au.gov.ga.worldwind.common.view.stereo.StereoView.Eye;
 
 /**
@@ -33,7 +33,7 @@ import au.gov.ga.worldwind.common.view.stereo.StereoView.Eye;
  * 
  * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
-public abstract class HMDView extends SpaceMouseOrbitView implements IHMDView
+public abstract class HMDView extends ViewStateBasicOrbitView implements IHMDView
 {
 	private Matrix pretransformedModelView = Matrix.IDENTITY;
 
