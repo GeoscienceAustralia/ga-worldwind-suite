@@ -1123,7 +1123,29 @@ public class Application
 					@Override
 					public void actionPerformed(ActionEvent e)
 					{
-						setFullscreen(false);
+						Thread thread = new Thread(new Runnable()
+						{
+							@Override
+							public void run()
+							{
+								try
+								{
+									Thread.sleep(100);
+								}
+								catch (InterruptedException e)
+								{
+								}
+								SwingUtil.invokeLaterTaskOnEDT(new Runnable()
+								{
+									@Override
+									public void run()
+									{
+										setFullscreen(false);
+									}
+								});
+							}
+						});
+						thread.start();
 					}
 				};
 				fullscreenPanel.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(
