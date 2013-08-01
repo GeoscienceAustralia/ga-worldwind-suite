@@ -39,7 +39,6 @@ import gov.nasa.worldwind.terrain.RectangularTessellator;
 import gov.nasa.worldwind.terrain.Tessellator;
 import gov.nasa.worldwind.view.orbit.FlyToOrbitViewAnimator;
 import gov.nasa.worldwind.view.orbit.OrbitView;
-import gov.nasa.worldwind.view.orbit.OrbitViewInputHandler;
 import gov.nasa.worldwindx.applications.worldwindow.core.WMSLayerInfo;
 import gov.nasa.worldwindx.examples.ClickAndGoSelectListener;
 import jargs.gnu.CmdLineParser;
@@ -50,6 +49,7 @@ import java.awt.Dimension;
 import java.awt.GraphicsConfiguration;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
+import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -1219,10 +1219,12 @@ public class Application
 
 	private GraphicsDevice getGraphicsDeviceContainingBounds(Rectangle bounds, GraphicsEnvironment environment)
 	{
+		int centerx = (int) bounds.getCenterX(), centery = (int) bounds.getCenterY();
+		Point center = new Point(centerx, centery);
 		GraphicsDevice[] gds = environment.getScreenDevices();
 		for (GraphicsDevice g : gds)
 		{
-			if (g.getDefaultConfiguration().getBounds().intersects(bounds))
+			if (g.getDefaultConfiguration().getBounds().contains(center))
 			{
 				return g;
 			}
