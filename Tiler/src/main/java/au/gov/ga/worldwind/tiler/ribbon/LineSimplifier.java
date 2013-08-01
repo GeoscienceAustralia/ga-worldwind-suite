@@ -26,7 +26,8 @@ import org.gdal.ogr.ogrConstants;
 import org.gdal.osr.SpatialReference;
 
 /**
- * 
+ * Command line utility for generating a path for the Ribbon XML layer
+ * definition from a SEGY file. Uses the simplification algorithm in OGR.
  * 
  * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
