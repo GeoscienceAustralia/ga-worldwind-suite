@@ -15,7 +15,9 @@
  ******************************************************************************/
 package au.gov.ga.worldwind.common.layers.curtain;
 
-import static au.gov.ga.worldwind.common.util.message.CommonMessageConstants.*;
+import static au.gov.ga.worldwind.common.util.message.CommonMessageConstants.getTermLevelHeightKey;
+import static au.gov.ga.worldwind.common.util.message.CommonMessageConstants.getTermLevelWidthKey;
+import static au.gov.ga.worldwind.common.util.message.CommonMessageConstants.getTermPathKey;
 import static au.gov.ga.worldwind.common.util.message.MessageSourceAccessor.getMessage;
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.avlist.AVList;
@@ -98,8 +100,8 @@ public class CurtainLevel extends AVListImpl implements Comparable<CurtainLevel>
 		this.texelSize = curtainLength.radians / this.levelWidth;
 
 		//work out this level's tile width/height
-		int widthsPerTile = tileWidth / this.levelWidth;
-		int heightsPerTile = tileHeight / this.levelHeight;
+		int widthsPerTile = Util.previousPowerOfTwo(tileWidth / this.levelWidth);
+		int heightsPerTile = Util.previousPowerOfTwo(tileHeight / this.levelHeight);
 		if (widthsPerTile > 1)
 		{
 			tileWidth /= widthsPerTile;

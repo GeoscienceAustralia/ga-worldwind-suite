@@ -1072,4 +1072,21 @@ public class Util
 		}
 		return "";
 	}
+	
+	/**
+	 * Calculate the previous power of 2. If x is a power of 2, x is returned,
+	 * otherwise the greatest power of two that is less than x is returned.
+	 * 
+	 * @param x
+	 * @return Greatest power of two less than or equal to x
+	 */
+	public static int previousPowerOfTwo(int x)
+	{
+		x = x | (x >> 1);
+		x = x | (x >> 2);
+		x = x | (x >> 4);
+		x = x | (x >> 8);
+		x = x | (x >> 16);
+		return x - (x >> 1);
+	}
 }
