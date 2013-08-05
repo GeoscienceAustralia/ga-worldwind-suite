@@ -56,10 +56,10 @@ public class RibbonTilerUtils
 		}
 
 		int size = (int) (file.length() / 4l);
+		DataInputStream dis = null;
 		try
 		{
-			FileInputStream fis = new FileInputStream(file);
-			DataInputStream dis = new DataInputStream(fis);
+			dis = new DataInputStream(new FileInputStream(file));
 			int[] array = new int[size];
 			for (int i = 0; i < size; i++)
 			{
@@ -70,6 +70,16 @@ public class RibbonTilerUtils
 		catch (IOException e)
 		{
 			e.printStackTrace();
+		}
+		finally
+		{
+			try
+			{
+				dis.close();
+			}
+			catch (IOException e)
+			{
+			}
 		}
 		return null;
 	}

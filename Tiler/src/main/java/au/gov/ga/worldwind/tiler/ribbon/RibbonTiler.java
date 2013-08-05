@@ -427,10 +427,10 @@ public class RibbonTiler
 	{
 		try
 		{
-			context.getStdWriter().write(msg + '\n');
+			context.getStdWriter().write(msg + System.getProperty("line.separator"));
 			if (addToTilingLog)
 			{
-				context.getLogWriter().write(msg + '\n');
+				context.getLogWriter().write(msg + System.getProperty("line.separator"));
 			}
 			context.getStdWriter().flush();
 			context.getLogWriter().flush();

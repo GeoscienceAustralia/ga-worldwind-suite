@@ -16,6 +16,8 @@
 package au.gov.ga.worldwind.tiler.ribbon;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.gdal.ogr.DataSource;
 import org.gdal.ogr.Feature;
@@ -25,6 +27,9 @@ import org.gdal.ogr.ogr;
 import org.gdal.ogr.ogrConstants;
 import org.gdal.osr.SpatialReference;
 
+import au.gov.ga.worldwind.tiler.gdal.GDALUtil;
+import au.gov.ga.worldwind.tiler.util.LatLon;
+
 /**
  * Command line utility for generating a path for the Ribbon XML layer
  * definition from a SEGY file. Uses the simplification algorithm in OGR.
@@ -33,6 +38,67 @@ import org.gdal.osr.SpatialReference;
  */
 public class LineSimplifier
 {
+	public static List<LatLon> simplify(File input, String sourceSRS, String targetSRS, Double simplifyTolerance)
+	{
+		SpatialReference sourceSR = null;
+		if (sourceSRS != null)
+		{
+			sourceSR = new SpatialReference();
+			sourceSR.SetFromUserInput(sourceSRS);
+		}
+
+		if (targetSRS == null)
+		{
+			targetSRS = "EPSG:4326";
+		}
+		SpatialReference targetSR = new SpatialReference();
+		targetSR.SetFromUserInput(targetSRS);
+
+		DataSource source = ogr.Open(input.getAbsolutePath());
+		Geometry lineString = new Geometry(ogrConstants.wkbLineString);
+
+		for (int i = 0; i < source.GetLayerCount(); i++)
+		{
+			Layer layer = source.GetLayer(i);
+			Feature feature;
+			while ((feature = layer.GetNextFeature()) != null)
+			{
+				Geometry geometry = feature.GetGeometryRef();
+				if (geometry != null)
+				{
+					if (sourceSR != null)
+					{
+						geometry.AssignSpatialReference(sourceSR);
+					}
+					geometry.TransformTo(targetSR);
+
+					for (int j = 0; j < geometry.GetPointCount(); j++)
+					{
+						double[] point = geometry.GetPoint(j);
+						if (point.length >= 3)
+						{
+							lineString.AddPoint(point[0], point[1], point[2]);
+						}
+						else
+						{
+							lineString.AddPoint(point[0], point[1]);
+						}
+					}
+				}
+			}
+		}
+
+		Geometry simplified = simplifyTolerance != null ? lineString.Simplify(simplifyTolerance) : lineString;
+
+		List<LatLon> result = new ArrayList<LatLon>();
+		for (int i = 0; i < simplified.GetPointCount(); i++)
+		{
+			double[] point = simplified.GetPoint(i);
+			result.add(new LatLon(point[1], point[0]));
+		}
+		return result;
+	}
+
 	public static void main(String[] args)
 	{
 		run(args);
@@ -53,8 +119,8 @@ public class LineSimplifier
 			System.out.println(usage);
 			return;
 		}
-
-		ogr.RegisterAll();
+		
+		GDALUtil.init();
 
 		File file = new File(args[0]);
 		if (!file.exists())
@@ -63,53 +129,14 @@ public class LineSimplifier
 			return;
 		}
 
-		SpatialReference sourceSR = new SpatialReference();
-		sourceSR.SetFromUserInput(args[1]);
-
-		SpatialReference targetSR = new SpatialReference();
-		targetSR.SetFromUserInput(args[2]);
-
 		double simplify = Double.parseDouble(args[3]);
 
-		DataSource source = ogr.Open(file.getAbsolutePath());
-		Geometry lineString = new Geometry(ogrConstants.wkbLineString);
-
-		for (int i = 0; i < source.GetLayerCount(); i++)
-		{
-			Layer layer = source.GetLayer(i);
-			Feature feature;
-			while ((feature = layer.GetNextFeature()) != null)
-			{
-				Geometry geometry = feature.GetGeometryRef();
-				if (geometry != null)
-				{
-					geometry.AssignSpatialReference(sourceSR);
-					geometry.TransformTo(targetSR);
-
-					for (int j = 0; j < geometry.GetPointCount(); j++)
-					{
-						double[] point = geometry.GetPoint(j);
-						if (point.length >= 3)
-						{
-							lineString.AddPoint(point[0], point[1], point[2]);
-						}
-						else
-						{
-							lineString.AddPoint(point[0], point[1]);
-						}
-					}
-				}
-			}
-		}
-
-		Geometry simplified = lineString.Simplify(simplify);
-
+		List<LatLon> latlons = simplify(file, args[1], args[2], simplify);
 		System.out.println("\t<Path>");
-		for (int i = 0; i < simplified.GetPointCount(); i++)
+		for (LatLon latlon : latlons)
 		{
-			double[] point = simplified.GetPoint(i);
-			System.out.println("\t\t<LatLon units=\"degrees\" latitude=\"" + point[1] + "\" longitude=\"" + point[0]
-					+ "\" />");
+			System.out.println("\t\t<LatLon units=\"degrees\" latitude=\"" + latlon.getLatitude() + "\" longitude=\""
+					+ latlon.getLongitude() + "\" />");
 		}
 		System.out.println("\t</Path>");
 	}

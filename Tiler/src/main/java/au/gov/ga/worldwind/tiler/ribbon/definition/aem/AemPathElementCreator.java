@@ -66,6 +66,16 @@ public class AemPathElementCreator extends AemElementCreatorBase
 			e.printStackTrace();
 			return;
 		}
+		finally
+		{
+			try
+			{
+				csvReader.close();
+			}
+			catch (IOException e)
+			{
+			}
+		}
 	}
 
 }

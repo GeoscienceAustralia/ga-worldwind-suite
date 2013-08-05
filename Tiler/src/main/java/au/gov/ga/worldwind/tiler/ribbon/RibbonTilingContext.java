@@ -81,6 +81,14 @@ public class RibbonTilingContext {
 	private String dataCache;
 	@Parameter(names="-path", description="Provide pipe-separated lat-lon pairs to specify the path", converter=CommaSeparatedConverter.class)
 	private List<String> pathLatLons = new ArrayList<String>();
+	@Parameter(names="-pathFile", description="OGR supported file containing path points", converter=FileConverter.class)
+	private File pathFile;
+	@Parameter(names="-pathFileSourceSRS", description="Source SRS to use for the path file")
+	private String pathFileSourceSRS;
+	@Parameter(names="-pathFileTargetSRS", description="Target SRS to use for the path file")
+	private String pathFileTargetSRS = "EPSG:4326";
+	@Parameter(names="-pathSimplifyTolerance", description="Tolerance to use for simplification of the path file", converter=DoubleConverter.class)
+	private Double pathSimplifyTolerance;
 	@Parameter(names="-top", description="The curtain top elevation", converter=DoubleConverter.class)
 	private Double curtainTop = 0d;
 	@Parameter(names="-bottom", description="The curtain bottom elevation", converter=DoubleConverter.class)
@@ -474,5 +482,45 @@ public class RibbonTilingContext {
 	public void setRemoveConstantColumns(boolean removeConstantColumns)
 	{
 		this.removeConstantColumns = removeConstantColumns;
+	}
+
+	public File getPathFile()
+	{
+		return pathFile;
+	}
+
+	public void setPathFile(File pathFile)
+	{
+		this.pathFile = pathFile;
+	}
+
+	public String getPathFileSourceSRS()
+	{
+		return pathFileSourceSRS;
+	}
+
+	public void setPathFileSourceSRS(String pathFileSourceSRS)
+	{
+		this.pathFileSourceSRS = pathFileSourceSRS;
+	}
+
+	public String getPathFileTargetSRS()
+	{
+		return pathFileTargetSRS;
+	}
+
+	public void setPathFileTargetSRS(String pathFileTargetSRS)
+	{
+		this.pathFileTargetSRS = pathFileTargetSRS;
+	}
+
+	public Double getPathSimplifyTolerance()
+	{
+		return pathSimplifyTolerance;
+	}
+
+	public void setPathSimplifyTolerance(Double pathSimplifyTolerance)
+	{
+		this.pathSimplifyTolerance = pathSimplifyTolerance;
 	}
 }

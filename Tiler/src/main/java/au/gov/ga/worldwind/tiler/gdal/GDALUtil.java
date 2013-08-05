@@ -21,6 +21,7 @@ import org.gdal.gdal.Band;
 import org.gdal.gdal.Dataset;
 import org.gdal.gdal.gdal;
 import org.gdal.gdalconst.gdalconst;
+import org.gdal.ogr.ogr;
 import org.gdal.osr.CoordinateTransformation;
 import org.gdal.osr.SpatialReference;
 
@@ -77,6 +78,7 @@ public class GDALUtil
 		}
 
 		gdal.AllRegister();
+		ogr.RegisterAll();
 	}
 
 	private static boolean gdalDirectoryFound;

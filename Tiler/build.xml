@@ -2,7 +2,7 @@
 
 <project name="Tiler" basedir="." default="run">
 
-	<property name="javac_debug" value="false" />
+	<property name="javac_debug" value="true" />
 
 	<property name="src_dir" value="${basedir}/src/main/java" />
 	<property name="resources_dir" value="${basedir}/src/main/resources" />
@@ -25,6 +25,7 @@
 	<property name="executable_gui_batch_name" value="gui.bat" />
 	<property name="executable_console_batch_name" value="console.bat" />
 	<property name="executable_ribbon_batch_name" value="ribbon.bat" />
+	<property name="executable_linesimplify_batch_name" value="linesimplify.bat" />
 	
 	<property name="splash_image_name" value="tiler-splash-400x230.png"/>
 
@@ -137,6 +138,7 @@
 		<echo file="${target_platform_dir}/${executable_gui_batch_name}">@echo off ${line.separator}SET PATH=.\gdal;%PATH% ${line.separator}java -Xmx1024m -cp ${executable_jar_name} -splash:${splash_image_name} -Djava.library.path=gdal au.gov.ga.worldwind.tiler.application.Executable %*</echo>
 		<echo file="${target_platform_dir}/${executable_console_batch_name}">@echo off ${line.separator}SET PATH=.\gdal;%PATH% ${line.separator}java -Xmx1024m -cp ${executable_jar_name} -Djava.library.path=gdal au.gov.ga.worldwind.tiler.application.Console %*</echo>
 		<echo file="${target_platform_dir}/${executable_ribbon_batch_name}">@echo off ${line.separator}SET PATH=.\gdal;%PATH% ${line.separator}java -Xmx1024m -cp ${executable_jar_name} -Djava.library.path=gdal au.gov.ga.worldwind.tiler.ribbon.RibbonTiler %*</echo>
+		<echo file="${target_platform_dir}/${executable_linesimplify_batch_name}">@echo off ${line.separator}SET PATH=.\gdal;%PATH% ${line.separator}java -Xmx1024m -cp ${executable_jar_name} -Djava.library.path=gdal au.gov.ga.worldwind.tiler.ribbon.LineSimplifier %*</echo>
 	</target>
 	
 	<target name="run" depends="executable" />

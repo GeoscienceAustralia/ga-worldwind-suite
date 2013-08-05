@@ -18,6 +18,7 @@ package au.gov.ga.worldwind.tiler.ribbon.definition;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.io.IOException;
 
 import au.gov.ga.worldwind.tiler.ribbon.RibbonTilingContext;
 
@@ -39,9 +40,10 @@ public class PathFilePathElementCreator extends LayerDefinitionElementCreatorBas
 	{
 		StringBuffer result = new StringBuffer();
 		appendLine(result, level, "<Path>");
+		BufferedReader reader = null;
 		try
 		{
-			BufferedReader reader = new BufferedReader(new FileReader(getPathFile(context)));
+			reader = new BufferedReader(new FileReader(getPathFile(context)));
 			String line;
 			while ((line = reader.readLine()) != null)
 			{
@@ -52,11 +54,21 @@ public class PathFilePathElementCreator extends LayerDefinitionElementCreatorBas
 		{
 			// Do nothing. In the case of an exception we will just print the empty <path> element
 		}
+		finally
+		{
+			try
+			{
+				reader.close();
+			}
+			catch (IOException e)
+			{
+			}
+		}
 		appendLine(result, level, "</Path>");
 		return result.toString();
 	}
 	
-	private File getPathFile(RibbonTilingContext context)
+	protected File getPathFile(RibbonTilingContext context)
 	{
 		File pathFile = new File(context.getSourceLocation(), context.getTilesetName() + ".path");
 		return pathFile;
