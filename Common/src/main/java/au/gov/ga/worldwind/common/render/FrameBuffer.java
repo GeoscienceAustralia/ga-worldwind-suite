@@ -15,8 +15,11 @@
  ******************************************************************************/
 package au.gov.ga.worldwind.common.render;
 
+import gov.nasa.worldwind.util.OGLStackHandler;
+
 import java.awt.Dimension;
 
+import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
 
 import au.gov.ga.worldwind.common.util.Validate;
@@ -260,14 +263,10 @@ public class FrameBuffer
 	 */
 	public static void renderTexturedQuadUsingTarget(GL2 gl, int target, int... textureIds)
 	{
-		gl.glMatrixMode(GL2.GL_MODELVIEW);
-		gl.glPushMatrix();
-		gl.glLoadIdentity();
-		gl.glMatrixMode(GL2.GL_PROJECTION);
-		gl.glPushMatrix();
-		gl.glLoadIdentity();
-		gl.glPushAttrib(GL2.GL_ENABLE_BIT);
-
+		OGLStackHandler oglsh = new OGLStackHandler();
+		oglsh.pushModelviewIdentity(gl);
+		oglsh.pushProjectionIdentity(gl);
+		oglsh.pushAttrib(gl, GL2.GL_ENABLE_BIT);
 		try
 		{
 			gl.glEnable(target);
@@ -292,10 +291,7 @@ public class FrameBuffer
 		}
 		finally
 		{
-			gl.glPopMatrix();
-			gl.glMatrixMode(GL2.GL_MODELVIEW);
-			gl.glPopMatrix();
-			gl.glPopAttrib();
+			oglsh.pop(gl);
 		}
 	}
 }
