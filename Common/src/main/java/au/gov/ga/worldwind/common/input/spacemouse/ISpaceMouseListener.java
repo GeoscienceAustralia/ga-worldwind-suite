@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package au.gov.ga.worldwind.common.view.spacemouse;
+package au.gov.ga.worldwind.common.input.spacemouse;
 
 /**
  * A listener that is notified of 3Dconnexion SpaceMouse events.

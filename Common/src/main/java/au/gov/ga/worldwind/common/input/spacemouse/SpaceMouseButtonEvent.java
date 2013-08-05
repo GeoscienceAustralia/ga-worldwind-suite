@@ -13,33 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package au.gov.ga.worldwind.common.view.spacemouse;
-
-import java.util.Arrays;
+package au.gov.ga.worldwind.common.input.spacemouse;
 
 /**
- * Event passed to the {@link ISpaceMouseListener}s when the user moves the
- * SpaceMouse on one of its axes.
+ * Event passed to the {@link ISpaceMouseListener}s when the user
+ * pushes/releases a SpaceMouse button.
  * 
  * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
-public class SpaceMouseAxisEvent
+public class SpaceMouseButtonEvent
 {
 	/**
-	 * Absolute value of the axes. There are 6 axes: X/Y/Z translation, and
-	 * X/Y/Z rotation.
+	 * Button number.
 	 */
-	public final float[] values = new float[6];
+	public int button;
 
 	/**
-	 * Delta change of the axes since the last event. There are 6 axes: X/Y/Z
-	 * translation, and X/Y/Z rotation.
+	 * Is the button down?
 	 */
-	public final float[] deltas = new float[6];
+	public boolean down;
 
 	@Override
 	public String toString()
 	{
-		return getClass().getName() + " (values = " + Arrays.toString(values) + ")";
+		return getClass().getName() + " (button = " + button + ", down = " + down + ")";
 	}
 }
