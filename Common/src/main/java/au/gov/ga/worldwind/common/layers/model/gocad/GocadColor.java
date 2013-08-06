@@ -184,7 +184,7 @@ public enum GocadColor
 	private final static Pattern color4Pattern = Pattern.compile("[^:]+:\\s*([\\d.\\-]+)\\s+([\\d.\\-]+)\\s+([\\d.\\-]+)\\s+([\\d.\\-]+)\\s*");
 	private final static Pattern color3Pattern = Pattern.compile("[^:]+:\\s*([\\d.\\-]+)\\s+([\\d.\\-]+)\\s+([\\d.\\-]+)\\s*");
 	private final static Pattern colorNamePattern = Pattern.compile("[^:]+:(.+)");
-	private final static Pattern hexCodePattern = Pattern.compile("[^:]+:\\#(.+)");
+	private final static Pattern hexCodePattern = Pattern.compile("[^:]+:\\s*\\#(.+)");
 	
 	private GocadColor(int hex)
 	{
@@ -255,7 +255,7 @@ public enum GocadColor
 		matcher = colorNamePattern.matcher(gocadLine);
 		if (matcher.matches())
 		{
-			String name = matcher.group(1).toLowerCase();
+			String name = matcher.group(1).trim().toLowerCase();
 			GocadColor gc = prettyToColor.get(name);
 			if (gc == null)
 			{
