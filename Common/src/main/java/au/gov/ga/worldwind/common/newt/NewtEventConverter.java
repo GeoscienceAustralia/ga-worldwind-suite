@@ -254,8 +254,15 @@ public class NewtEventConverter
 			int location =
 					id == java.awt.event.KeyEvent.KEY_TYPED ? java.awt.event.KeyEvent.KEY_LOCATION_UNKNOWN
 							: java.awt.event.KeyEvent.KEY_LOCATION_STANDARD;
+			try
+			{
 			return new KeyEventFromNewt(event, awtSource, id, event.getWhen(), newtModifiers2Awt(event.getModifiers()),
 					code, event.getKeyChar(), location);
+			}
+			catch(IllegalArgumentException e)
+			{
+				//sometimes this causes an "invalid keyChar" exception... ignore it
+			}
 		}
 		return null; // no mapping ..
 	}
