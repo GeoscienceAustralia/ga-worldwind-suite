@@ -17,6 +17,8 @@ package au.gov.ga.worldwind.common.view.hmd;
 
 import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.geom.Matrix;
+import gov.nasa.worldwind.geom.Vec4;
+import gov.nasa.worldwind.globes.Globe;
 import gov.nasa.worldwind.render.DrawContext;
 
 import java.awt.Dimension;
@@ -25,6 +27,7 @@ import javax.media.opengl.GL2;
 
 import au.gov.ga.worldwind.common.render.DrawableSceneController;
 import au.gov.ga.worldwind.common.render.FrameBuffer;
+import au.gov.ga.worldwind.common.util.Util;
 import au.gov.ga.worldwind.common.view.state.ViewStateBasicOrbitView;
 import au.gov.ga.worldwind.common.view.stereo.StereoView.Eye;
 
@@ -72,13 +75,54 @@ public abstract class HMDView extends ViewStateBasicOrbitView implements IHMDVie
 		Matrix modelView = super.computeModelView();
 		if (shouldRenderForHMD())
 		{
+			double multiplier = dynamicEyeSeparationMultiplier();
 			modelView =
 					Matrix.fromTranslation(
-							(eye == Eye.LEFT ? -1 : 1) * -getDistortion().getInterpupillaryDistance() * 0.5, 0, 0)
-							.multiply(modelView);
+							(eye == Eye.LEFT ? -1 : 1) * -getDistortion().getInterpupillaryDistance() * 0.5
+									* multiplier, 0, 0).multiply(modelView);
 		}
 		pretransformedModelView = modelView;
 		return transformModelView(pretransformedModelView);
+	}
+
+	private double dynamicEyeSeparationMultiplier()
+	{
+		Vec4 eyePoint = getCurrentEyePoint();
+		double distanceFromOrigin = eyePoint.getLength3();
+
+		Globe globe = getGlobe();
+		double radius = globe.getRadiusAt(globe.computePositionFromPoint(eyePoint));
+		double amount = Util.percentDouble(distanceFromOrigin, radius, radius * 5d);
+
+		Vec4 centerPoint = getCenterPoint();
+		double distanceToCenter;
+		if (centerPoint != null)
+		{
+			distanceToCenter = eyePoint.distanceTo3(centerPoint);
+		}
+		else
+		{
+			distanceToCenter = getHorizonDistance();
+		}
+
+		//limit the distance to center relative to the eye distance from the ellipsoid surface
+		double maxDistanceToCenter = (distanceFromOrigin - radius) * 10;
+		distanceToCenter = Math.min(maxDistanceToCenter, distanceToCenter);
+
+		//calculate focal length as distance to center when zoomed in, and distance from origin when zoomed out
+		double focalLength = Util.mixDouble(amount, distanceToCenter, distanceFromOrigin);
+
+		//exaggerate separation more when zoomed out
+		//double separationExaggeration = Util.mixDouble(amount, separationExaggeration, separationExaggeration * 4);
+
+		//move focal length closer as view is pitched
+		amount = Util.percentDouble(getPitch().degrees, 0d, 90d);
+		focalLength = Util.mixDouble(amount, focalLength, focalLength / 3d);
+
+		//calculate eye separation linearly relative to focal length
+		//double eyeSeparation = separationExaggeration * focalLength / 100d;
+
+		return focalLength;
 	}
 
 	/**
