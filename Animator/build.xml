@@ -116,10 +116,10 @@
 				<formatter type="xml" />
 			</batchtest>
 		</junit>
-		<junitreport todir="${test_reports_dir}">
+		<!--junitreport todir="${test_reports_dir}">
 			<fileset dir="${test_results_dir}" />
 			<report todir="${test_reports_dir}" />
-		</junitreport>
+		</junitreport -->
 		<fail if="junit.failure" message="Unit test(s) failed. See reports!" />
 	</target>
 

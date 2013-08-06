@@ -82,11 +82,11 @@ public class FrameBufferDepthBuffer
 		{
 			if (texture)
 			{
-				gl.glDeleteRenderbuffers(1, new int[] { id }, 0);
+				gl.glDeleteTextures(1, new int[] { id }, 0);
 			}
 			else
 			{
-				gl.glDeleteTextures(1, new int[] { id }, 0);
+				gl.glDeleteRenderbuffers(1, new int[] { id }, 0);
 			}
 			id = 0;
 		}
