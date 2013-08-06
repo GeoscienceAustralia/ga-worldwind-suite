@@ -36,5 +36,6 @@
 			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="Common/lib/package/native/windows-i586"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="lib" path="lib/package/SixenseJava.jar" sourcepath="lib/src/SixenseJava.zip"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

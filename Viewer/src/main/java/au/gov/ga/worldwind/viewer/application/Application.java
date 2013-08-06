@@ -94,6 +94,7 @@ import org.w3c.dom.Element;
 import au.gov.ga.worldwind.common.downloader.DownloaderStatusBar;
 import au.gov.ga.worldwind.common.input.OrbitInputProviderManager;
 import au.gov.ga.worldwind.common.input.ProviderOrbitViewInputHandler;
+import au.gov.ga.worldwind.common.input.hydra.HydraOrbitInputProvider;
 import au.gov.ga.worldwind.common.input.spacemouse.SpaceMouseInputProvider;
 import au.gov.ga.worldwind.common.newt.NewtInputHandler;
 import au.gov.ga.worldwind.common.newt.WorldWindowNewtAutoDrawable;
@@ -193,6 +194,7 @@ public class Application
 		//the JRiftLibrary must be loaded before JInput, otherwise the Oculus Rift goes undetected:
 		OculusSingleton.getInstance();
 
+		OrbitInputProviderManager.getInstance().addProvider(new HydraOrbitInputProvider());
 		OrbitInputProviderManager.getInstance().addProvider(new SpaceMouseInputProvider());
 	}
 

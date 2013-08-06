@@ -38,7 +38,8 @@ public class NativeLibraries
 	protected static final String[] libraries = new String[] { "jogl_desktop", "nativewindow_awt",
 			"nativewindow_win32", "nativewindow_macosx", "nativewindow_x11", "newt", "gluegen-rt", "gdalalljni",
 			"gdalalljni32", "gdalalljni64", "webview", "WebView32", "WebView64", "jinput-linux64", "jinput-linux",
-			"jinput-osx", "jinput-dx8_64", "jinput-raw_64", "jinput-dx8", "jinput-raw", "JRiftLibrary" };
+			"jinput-osx", "jinput-dx8_64", "jinput-raw_64", "jinput-dx8", "jinput-raw", "JRiftLibrary", "sixense",
+			"sixense_utils", "SixenseJava" };
 	protected static final String JAVA_LIBRARY_PATH = "java.library.path";
 
 	/**
