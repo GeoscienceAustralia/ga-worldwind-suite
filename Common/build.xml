@@ -49,6 +49,9 @@
 		<mkdir dir="${build_dir}" />
 		<copy todir="${build_dir}">
 			<fileset dir="${resources_dir}" />
+			<fileset dir="${src_dir}">
+				<exclude name="**/*.java" />
+			</fileset>
 		</copy>
 		<javac source="1.6" target="1.6" destdir="${build_dir}" classpathref="classpath" listfiles="no" fork="true" debug="${javac_debug}" includeantruntime="no">
 			<src path="${src_dir}" />
@@ -73,11 +76,11 @@
 	</target>
 
 	<target name="test" depends="build-test" if="${perform_unit_tests}">
-		
+
 		<mkdir dir="${test_results_dir}" />
 		<mkdir dir="${test_reports_dir}" />
 		<junit printsummary="on" fork="true" forkmode="once" failureproperty="junit.failure" dir="${user.dir}">
-			<jvmarg value="-Duser.dir=${user.dir}"/>
+			<jvmarg value="-Duser.dir=${user.dir}" />
 			<classpath>
 				<path refid="test_classpath" />
 				<path path="${test_build_dir}" />
