@@ -22,6 +22,14 @@ package au.gov.ga.worldwind.common.input.hydra;
  */
 public class HydraButtonEvent
 {
+	public static final int BUTTON1 = 6;
+	public static final int BUTTON2 = 7;
+	public static final int BUTTON3 = 4;
+	public static final int BUTTON4 = 5;
+	public static final int START = 1;
+	public static final int STICK = 9;
+	public static final int BACK = 8;
+	
 	/**
 	 * Button id.
 	 */

@@ -36,6 +36,7 @@ public class HydraOrbitInputProvider implements IOrbitInputProvider, IHydraListe
 
 	private IProviderOrbitViewInputHandler inputHandler;
 	private float x1, y1, x2, y2, z;
+	private boolean flip1 = false, flip2 = false;
 	private long lastNanos;
 
 	public HydraOrbitInputProvider()
@@ -78,6 +79,17 @@ public class HydraOrbitInputProvider implements IOrbitInputProvider, IHydraListe
 	@Override
 	public void buttonChanged(HydraButtonEvent event)
 	{
+		if (event.button == HydraButtonEvent.STICK && !event.down)
+		{
+			if (event.controller == 1)
+			{
+				flip1 = !flip1;
+			}
+			else
+			{
+				flip2 = !flip2;
+			}
+		}
 	}
 
 	@Override
@@ -87,11 +99,14 @@ public class HydraOrbitInputProvider implements IOrbitInputProvider, IHydraListe
 
 		if (x1 != 0 || y1 != 0 || x2 != 0 || y2 != 0 || z != 0)
 		{
+			double mult1 = flip1 ? -1 : 1;
+			double mult2 = flip2 ? -1 : 1;
+
 			long currentNanos = System.nanoTime();
 			double time = (currentNanos - lastNanos) / 1e9d;
 			lastNanos = currentNanos;
 
-			double translationAngle = Math.atan2(x1, -y1);
+			double translationAngle = Math.atan2(-x1 * mult1, y1 * mult1);
 			double translationSpeed = Math.sqrt(x1 * x1 + y1 * y1);
 
 			if (translationSpeed != 0)
@@ -109,7 +124,7 @@ public class HydraOrbitInputProvider implements IOrbitInputProvider, IHydraListe
 			if (x2 != 0)
 			{
 				Angle headingMoveChange =
-						Angle.fromDegrees(time * -x2 * inputHandler.getScaleValueRotate(headingAttributes));
+						Angle.fromDegrees(time * x2 * inputHandler.getScaleValueRotate(headingAttributes) * mult2);
 				inputHandler.onRotateView(headingMoveChange, Angle.ZERO, headingAttributes);
 			}
 
