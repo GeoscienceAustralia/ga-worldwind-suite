@@ -54,13 +54,14 @@ public class NativeLibraries
 
 		String osName = System.getProperty("os.name").toLowerCase();
 		String osArch = System.getProperty("os.arch").toLowerCase();
-		String directory, prefix, suffix;
+		String directory, prefix;
+		String[] suffixes;
 		File tmpdir = new File(System.getProperty("java.io.tmpdir") + "/" + TEMP_DIR);
 
 		if (osName.startsWith("wind"))
 		{
 			prefix = "";
-			suffix = ".dll";
+			suffixes = new String[] { ".dll" };
 			if (osArch.startsWith("x86_64") || osArch.startsWith("amd64"))
 			{
 				directory = "windows-amd64";
@@ -73,7 +74,7 @@ public class NativeLibraries
 		else if (osName.startsWith("mac"))
 		{
 			prefix = "lib";
-			suffix = ".jnilib";
+			suffixes = new String[] { ".jnilib", ".dylib" };
 			if (osArch.startsWith("ppc"))
 			{
 				directory = "macosx-ppc";
@@ -86,7 +87,7 @@ public class NativeLibraries
 		else if (osName.startsWith("linux"))
 		{
 			prefix = "lib";
-			suffix = ".so";
+			suffixes = new String[] { ".so" };
 			if (osArch.startsWith("x86_64") || osArch.startsWith("amd64"))
 			{
 				directory = "linux-amd64";
@@ -99,7 +100,7 @@ public class NativeLibraries
 		else if (osName.startsWith("sun") || osName.startsWith("solaris"))
 		{
 			prefix = "lib";
-			suffix = ".so";
+			suffixes = new String[] { ".so" };
 			if (osArch.startsWith("sparcv9"))
 			{
 				directory = "solaris-sparcv9";
@@ -125,26 +126,29 @@ public class NativeLibraries
 		boolean anyLibrariesWritten = false;
 		for (String lib : libraries)
 		{
-			String filename = prefix + lib + suffix;
-			String library = BASE_DIR + directory + "/" + filename;
-			InputStream is = NativeLibraries.class.getResourceAsStream(library);
-			if (is != null)
+			for (String suffix : suffixes)
 			{
-				if (!tmpdir.exists())
+				String filename = prefix + lib + suffix;
+				String library = BASE_DIR + directory + "/" + filename;
+				InputStream is = NativeLibraries.class.getResourceAsStream(library);
+				if (is != null)
 				{
-					tmpdir.mkdirs();
-				}
-				tmpdir.deleteOnExit();
+					if (!tmpdir.exists())
+					{
+						tmpdir.mkdirs();
+					}
+					tmpdir.deleteOnExit();
 
-				File file = new File(tmpdir, filename);
-				writeStreamToFile(is, file);
-				if (file.exists())
-				{
-					file.deleteOnExit();
-					anyLibrariesWritten = true;
-				}
+					File file = new File(tmpdir, filename);
+					writeStreamToFile(is, file);
+					if (file.exists())
+					{
+						file.deleteOnExit();
+						anyLibrariesWritten = true;
+					}
 
-				System.out.println(file + " written!");
+					System.out.println(file + " written!");
+				}
 			}
 		}
 
