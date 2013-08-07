@@ -28,6 +28,11 @@ import com.sixense.utils.enums.EnumSetupStep;
  */
 public class Hydra
 {
+	static
+	{
+		loadLibrary();
+	}
+
 	private static final Hydra INSTANCE = new Hydra();
 
 	public static Hydra getInstance()
@@ -52,10 +57,6 @@ public class Hydra
 			@Override
 			public void run()
 			{
-				System.loadLibrary("sixense");
-				System.loadLibrary("sixense_utils");
-				System.loadLibrary("SixenseJava");
-
 				if (Sixense.init())
 				{
 					Sixense.setActiveBase(0);
@@ -89,6 +90,38 @@ public class Hydra
 		thread.setDaemon(true);
 		thread.setName("Razer Hydra finder");
 		thread.start();
+	}
+
+	private static void loadLibrary()
+	{
+		Error error = null;
+		try
+		{
+			System.loadLibrary("sixense");
+			System.loadLibrary("sixense_utils");
+		}
+		catch (Error e)
+		{
+			error = e;
+		}
+		if (error != null)
+		{
+			//loading 32-bit didn't work, try 64-bit
+			try
+			{
+				System.loadLibrary("sixense_x64");
+				System.loadLibrary("sixense_utils_x64");
+				error = null;
+			}
+			catch (Error e)
+			{
+			}
+		}
+		if (error != null)
+		{
+			throw error;
+		}
+		System.loadLibrary("SixenseJava");
 	}
 
 	private void startPolling()
