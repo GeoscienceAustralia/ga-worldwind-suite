@@ -97,13 +97,7 @@ public class NewtEventProcessor extends NEWTEventFiFo implements com.jogamp.newt
 	{
 		put(e);
 	}
-
-	@Override
-	public void keyTyped(KeyEvent e)
-	{
-		put(e);
-	}
-
+	
 	@Override
 	public void mouseClicked(MouseEvent e)
 	{

@@ -17,6 +17,7 @@ package au.gov.ga.worldwind.common.newt;
 
 import java.awt.Component;
 import java.awt.Window;
+import java.util.Arrays;
 
 import javax.swing.SwingUtilities;
 
@@ -74,7 +75,6 @@ public class NewtEventConverter
 
 		map.put(com.jogamp.newt.event.KeyEvent.EVENT_KEY_PRESSED, java.awt.event.KeyEvent.KEY_PRESSED);
 		map.put(com.jogamp.newt.event.KeyEvent.EVENT_KEY_RELEASED, java.awt.event.KeyEvent.KEY_RELEASED);
-		map.put(com.jogamp.newt.event.KeyEvent.EVENT_KEY_TYPED, java.awt.event.KeyEvent.KEY_TYPED);
 
 		eventTypeAWT2NEWT = map;
 		
@@ -214,7 +214,7 @@ public class NewtEventConverter
 		if (id != KEY_NOT_FOUND_VALUE)
 		{
 			// AWT/NEWT rotation is reversed - AWT +1 is down, NEWT +1 is up.
-			int rotation = -event.getWheelRotation();
+			int rotation = (int)-event.getRotation()[1];
 			int mods = newtModifiers2Awt(event.getModifiers());
 			int button = newtButton2Awt(event.getButton());
 
