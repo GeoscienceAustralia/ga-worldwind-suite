@@ -28,6 +28,8 @@ import gov.nasa.worldwind.view.ViewUtil;
 import gov.nasa.worldwind.view.orbit.BasicOrbitView;
 import gov.nasa.worldwind.view.orbit.OrbitView;
 import gov.nasa.worldwind.view.orbit.OrbitViewInputHandler;
+import gov.nasa.worldwind.view.orbit.OrbitViewInputSupport;
+import gov.nasa.worldwind.view.orbit.OrbitViewInputSupport.OrbitViewState;
 import au.gov.ga.worldwind.common.view.transform.TransformView;
 
 /**
@@ -127,5 +129,57 @@ public class FreeRotateOrbitViewInputHandler extends OrbitViewInputHandler
 		}
 		Matrix hpzTransform = modelview.multiply(centerTransformInv);
 		return ViewUtil.computeHeading(hpzTransform);
+	}
+
+	/**
+	 * Change the altitude of the eye point, without changing the center (look
+	 * at) point or the heading. Only the zoom and pitch change.
+	 * 
+	 * @param amount
+	 * @param deviceAttributes
+	 * @param actionAttributes
+	 */
+	public void onAltitudeFree(double amount, DeviceAttributes deviceAttributes, ActionAttributes actionAttributes)
+	{
+		if (!(getView() instanceof OrbitView))
+		{
+			String message = "View must be an instance of OrbitView";
+			Logging.logger().severe(message);
+			throw new IllegalStateException(message);
+		}
+
+		amount *= getScaleValueHorizTransRel(deviceAttributes, actionAttributes);
+
+		OrbitView view = (OrbitView) getView();
+
+		//if this view hasn't been applied yet, its globe will be null
+		if (view.getGlobe() == null)
+		{
+			return;
+		}
+
+		Globe globe = view.getGlobe();
+
+		//get the eye point and normalize it
+		Position centerPosition = view.getCenterPosition();
+		Vec4 centerPoint = view.getCenterPoint();
+
+		Position eyePosition = view.getEyePosition();
+		Position newEyePosition = new Position(eyePosition, eyePosition.elevation + amount);
+		Vec4 newEyePoint = globe.computePointFromPosition(newEyePosition);
+
+		Vec4 north =
+				globe.computeNorthPointingTangentAtLocation(centerPosition.getLatitude(), centerPosition.getLongitude());
+
+		Angle heading = view.getHeading();
+		Matrix headingMatrix = Matrix.fromRotationZ(heading);
+		Vec4 up = north.transformBy4(headingMatrix);
+		OrbitViewState state = OrbitViewInputSupport.computeOrbitViewState(globe, newEyePoint, centerPoint, up);
+
+		double pitchDegrees = Math.min(90.0, Math.abs(state.getPitch().degrees));
+		Angle pitch = Angle.fromDegrees(pitchDegrees);
+
+		view.setZoom(state.getZoom());
+		view.setPitch(pitch);
 	}
 }

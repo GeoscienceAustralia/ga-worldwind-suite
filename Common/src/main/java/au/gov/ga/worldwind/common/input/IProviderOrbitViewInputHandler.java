@@ -54,6 +54,12 @@ public interface IProviderOrbitViewInputHandler extends ViewInputHandler
 	 */
 	void onRotateFree(Angle direction, Angle amount, DeviceAttributes deviceAttributes,
 			ActionAttributes actionAttributes);
+	
+	/**
+	 * @see FreeRotateOrbitViewInputHandler#onAltitudeFree
+	 */
+	void onAltitudeFree(double amount, DeviceAttributes deviceAttributes,
+			ActionAttributes actionAttributes);
 
 	/**
 	 * @see OrbitViewInputHandler#getScaleValueRotate
