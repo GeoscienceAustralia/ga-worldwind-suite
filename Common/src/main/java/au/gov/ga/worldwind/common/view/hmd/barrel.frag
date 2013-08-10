@@ -11,7 +11,7 @@ uniform vec2 TexOffset;
 void main()
 {
 	// Scale to [-1, 1]
-	vec2 texCoord = gl_TexCoord[0];
+	vec2 texCoord = gl_TexCoord[0].st;
 	vec2 theta = (texCoord - LensCenter) * ScaleIn;
     float rSq = theta.x * theta.x + theta.y * theta.y;
     vec2 theta1 = theta * (HmdWarpParam.x + HmdWarpParam.y * rSq + HmdWarpParam.z * rSq * rSq + HmdWarpParam.w * rSq * rSq * rSq);
