@@ -59,24 +59,14 @@ public class SpaceMouse
 
 		int button = 0;
 		spacemouse.poll();
+		int axisIndex = 0;
 		for (Component c : spacemouse.getComponents())
 		{
-			String lowerName = c.getName().toLowerCase();
-			int axisIndex =
-					lowerName.contains("x ") ? 0 : lowerName.contains("y ") ? 1 : lowerName.contains("z ") ? 2 : -1;
-			if (lowerName.contains("rotation"))
-			{
-				axisIndex += 3;
-			}
-			else if (!lowerName.contains("axis"))
-			{
-				axisIndex = -1;
-			}
-
-			if (axisIndex >= 0)
+			if (c.isAnalog() && axisIndex < axesValue.length)
 			{
 				axesValue[axisIndex] = deadenValue(c.getPollData());
 				axesIndex.put(c, axisIndex);
+				axisIndex++;
 			}
 			else
 			{
@@ -202,6 +192,11 @@ public class SpaceMouse
 
 	private float deadenValue(float value)
 	{
+		if(System.getProperty("os.name").toLowerCase().contains("mac"))
+		{
+			//mac reports axis values much lower than windows, so pre-multiply
+			value *= 500;
+		}
 		return deadenValue(value, DEAD_ZONE);
 	}
 
