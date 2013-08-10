@@ -146,8 +146,6 @@ public class NativeLibraries
 						file.deleteOnExit();
 						anyLibrariesWritten = true;
 					}
-
-					System.out.println(file + " written!");
 				}
 			}
 		}
