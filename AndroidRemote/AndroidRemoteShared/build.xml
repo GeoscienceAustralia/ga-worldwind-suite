@@ -15,9 +15,6 @@
 	<property name="lib_dir" value="${basedir}/lib" />
 
 	<path id="classpath">
-		<fileset dir="${lib_dir}">
-			<include name="**/*.jar" />
-		</fileset>
 	</path>
 
 	<patternset id="manifest_exclude">
