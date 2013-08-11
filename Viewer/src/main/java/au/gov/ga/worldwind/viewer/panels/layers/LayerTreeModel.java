@@ -220,7 +220,7 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 		refreshLayers();
 	}
 
-	public void addLayer(ILayerDefinition layer, Object[] pathToRoot)
+	public ILayerNode addLayer(ILayerDefinition layer, Object[] pathToRoot)
 	{
 		//convert the list of parents to a list of IData parents
 		List<IData> parents = new ArrayList<IData>();
@@ -257,12 +257,12 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 				}
 			}
 		}
-		addLayer(layer, parents);
+		return addLayer(layer, parents);
 	}
 
-	public void addLayer(ILayerDefinition layer, List<IData> parents)
+	public ILayerNode addLayer(ILayerDefinition layer, List<IData> parents)
 	{
-		INode layerNode = LayerNode.createFromLayerDefinition(layer);
+		ILayerNode layerNode = LayerNode.createFromLayerDefinition(layer);
 		List<INode> expandPath = new ArrayList<INode>();
 
 		//add any parents of this layer that don't already exist in the tree
@@ -348,6 +348,8 @@ public class LayerTreeModel implements TreeModel, TreeExpansionListener
 				tree.scrollPathToVisible(expand);
 			}
 		});
+		
+		return layerNode;
 	}
 
 	protected int findInsertionIndex(IData datasetOrLayer, IDataset directParent, INode currentParent)
