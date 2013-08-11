@@ -45,7 +45,8 @@ public class LazyTreeObjectNode extends LazyTreeNode
 		if (getUserObject() instanceof ILazyTreeObject)
 		{
 			ILazyTreeObject object = (ILazyTreeObject) getUserObject();
-			object.load();
+			if (!object.isLoaded())
+				object.load();
 			return object.getChildren(model);
 		}
 

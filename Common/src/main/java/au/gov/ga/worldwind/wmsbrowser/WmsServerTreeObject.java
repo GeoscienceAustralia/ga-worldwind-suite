@@ -46,6 +46,7 @@ public class WmsServerTreeObject implements ILazyTreeObject
 {
 	private WmsServer wmsServer;
 	private final List<LazyLoadListener> listeners = new ArrayList<LazyLoadListener>();
+	private boolean loaded = false;
 	
 	private static final String ERROR_PREFIX = getMessage(getDefaultWmsLoadingErrorPrefixKey());
 	private static final Map<Class<? extends Throwable>, String> ERROR_MESSAGE_MAP = new HashMap<Class<? extends Throwable>, String>();
@@ -80,11 +81,18 @@ public class WmsServerTreeObject implements ILazyTreeObject
 	}
 
 	@Override
+	public boolean isLoaded()
+	{
+		return loaded;
+	}
+
+	@Override
 	public void load() throws Exception
 	{
 		try
 		{
 			wmsServer.loadLayersImmediately();
+			loaded = true;
 			notifyLoaded();
 		}
 		catch (Exception e)

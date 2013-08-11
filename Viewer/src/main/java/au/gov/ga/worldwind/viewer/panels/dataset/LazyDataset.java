@@ -32,11 +32,18 @@ public class LazyDataset extends Dataset implements ILazyDataset
 {
 	private final URL url;
 	private final List<LazyLoadListener> listeners = new ArrayList<LazyLoadListener>();
+	private boolean loaded = false;
 
 	public LazyDataset(String name, URL url, URL infoURL, URL iconURL, boolean base)
 	{
 		super(name, infoURL, iconURL, base);
 		this.url = url;
+	}
+	
+	@Override
+	public boolean isLoaded()
+	{
+		return loaded;
 	}
 
 	@Override
@@ -57,7 +64,8 @@ public class LazyDataset extends Dataset implements ILazyDataset
 					addChild(child);
 			}
 		}
-
+		
+		loaded = true;
 		for (int i = listeners.size() - 1; i >= 0; i--)
 			listeners.get(i).loaded(this);
 	}
