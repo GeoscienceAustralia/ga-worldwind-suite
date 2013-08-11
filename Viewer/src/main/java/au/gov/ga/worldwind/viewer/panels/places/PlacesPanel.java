@@ -76,8 +76,10 @@ import au.gov.ga.worldwind.common.util.HSLColor;
 import au.gov.ga.worldwind.common.util.Icons;
 import au.gov.ga.worldwind.common.util.URLUtil;
 import au.gov.ga.worldwind.common.util.Util;
+import au.gov.ga.worldwind.viewer.panels.layers.FolderNode;
 import au.gov.ga.worldwind.viewer.panels.layers.ILayerNode;
 import au.gov.ga.worldwind.viewer.panels.layers.INode;
+import au.gov.ga.worldwind.viewer.panels.layers.LayerNode;
 import au.gov.ga.worldwind.viewer.panels.layers.LayerTreeModel;
 import au.gov.ga.worldwind.viewer.panels.layers.LayerTreePersistance;
 import au.gov.ga.worldwind.viewer.panels.layers.LayersPanel;
@@ -975,13 +977,15 @@ public class PlacesPanel extends AbstractThemePanel
 		//also generate a list of the layers required for enabling/opacity changing
 		List<Integer> indexOfPlaceInCurrent = new ArrayList<Integer>();
 		final List<ILayerNode> toModify = new ArrayList<ILayerNode>();
+		final List<ILayerNode> toAdd = new ArrayList<ILayerNode>();
 		for (int i = 0; i < placeLayers.size(); i++)
 		{
 			ILayerNode placeLayer = placeLayers.get(i);
 			URL url = placeLayer.getLayerURL();
 			if (!currentUrlIndexMap.containsKey(url))
 			{
-				placeLayers.remove(i--);
+				ILayerNode missing = placeLayers.remove(i--);
+				toAdd.add(missing);
 				continue;
 			}
 
@@ -1054,6 +1058,36 @@ public class PlacesPanel extends AbstractThemePanel
 			ILayerNode layer = toDisable.get(i);
 			disableStartOpacities[i] = layer.getOpacity();
 		}
+		
+		//add any missing place layers to a separate layer folder
+		String placeLayersName = "Place Layers";
+		FolderNode placeLayersFolder = null;
+		for (INode child : currentNode.getChildren())
+		{
+			if (child instanceof FolderNode && child.getName().equalsIgnoreCase(placeLayersName))
+			{
+				placeLayersFolder = (FolderNode) child;
+				break;
+			}
+		}
+		if (placeLayersFolder == null)
+		{
+			placeLayersFolder = new FolderNode("Place Layers", null, Icons.folder.getURL(), true);
+			model.addToRoot(placeLayersFolder, false);
+		}
+		int index = placeLayersFolder.getChildCount();
+		final double[] addEndOpacities = new double[toAdd.size()];
+		final List<ILayerNode> toAddNew = new ArrayList<ILayerNode>();
+		for(int i = 0; i < toAdd.size(); i++)
+		{
+			ILayerNode missingLayer = toAdd.get(i);
+			ILayerNode layerNode =
+					new LayerNode(missingLayer.getLayerURL().toExternalForm(), null, null, false,
+							missingLayer.getLayerURL(), true, 0, null);
+			model.insertNodeInto(layerNode, placeLayersFolder, index++, true);
+			toAddNew.add(layerNode);
+			addEndOpacities[i] = missingLayer.getOpacity();
+		}
 
 
 		final long startTime = System.currentTimeMillis();
@@ -1079,6 +1113,13 @@ public class PlacesPanel extends AbstractThemePanel
 						{
 							model.setEnabled(layer, false);
 						}
+					}
+					
+					for (int i = 0; i < toAddNew.size(); i++)
+					{
+						ILayerNode layer = toAddNew.get(i);
+						double opacity = Util.mixDouble(percent, 0d, addEndOpacities[i]);
+						model.setOpacity(layer, opacity);
 					}
 
 					for (int i = 0; i < toModify.size(); i++)
