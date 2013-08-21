@@ -209,5 +209,8 @@ public class AnimationMessageConstants extends CommonMessageConstants
 	public static String getDepthOfFieldNearParameterNameKey() { return "animator.effect.depthoffieldnear.name"; }
 	public static String getDepthOfFieldFocusParameterNameKey() { return "animator.effect.depthoffieldfocus.name"; }
 	public static String getEdgeDetectionNameKey() { return "animator.effect.edgedetection.name"; }
+	public static String getClipSectorTitleKey() { return "animator.gui.menu.clipsector.title"; }
+	public static String getClipSectorLabelKey() { return "animator.gui.menu.clipsector.label"; }
+	public static String getClearClipLabelKey() { return "animator.gui.menu.clearclip.label"; }
 	
 }

@@ -34,7 +34,7 @@ import au.gov.ga.worldwind.common.view.drawable.DrawableView;
 public class ExtendedSceneController extends AbstractSceneController implements DrawableSceneController
 {
 	private FlatRectangularTessellator flatTessellator = new FlatRectangularTessellator();
-	private SectorClipPlanes sectorClipping = new SectorClipPlanes();
+	protected final SectorClipPlanes sectorClipping = new SectorClipPlanes();
 
 	public ExtendedSceneController()
 	{

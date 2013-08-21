@@ -100,6 +100,7 @@ import au.gov.ga.worldwind.common.newt.NewtInputHandler;
 import au.gov.ga.worldwind.common.newt.WorldWindowNewtAutoDrawable;
 import au.gov.ga.worldwind.common.newt.WorldWindowNewtCanvas;
 import au.gov.ga.worldwind.common.render.ExtendedDrawContext;
+import au.gov.ga.worldwind.common.render.ExtendedSceneController;
 import au.gov.ga.worldwind.common.terrain.ElevationModelFactory;
 import au.gov.ga.worldwind.common.terrain.WireframeRectangularTessellator;
 import au.gov.ga.worldwind.common.ui.BasicAction;
@@ -107,6 +108,7 @@ import au.gov.ga.worldwind.common.ui.HtmlViewer;
 import au.gov.ga.worldwind.common.ui.SelectableAction;
 import au.gov.ga.worldwind.common.ui.SplashScreen;
 import au.gov.ga.worldwind.common.ui.SwingUtil;
+import au.gov.ga.worldwind.common.ui.sectorclipper.SectorClipper;
 import au.gov.ga.worldwind.common.util.DefaultLauncher;
 import au.gov.ga.worldwind.common.util.DoubleClickZoomListener;
 import au.gov.ga.worldwind.common.util.GDALDataHelper;
@@ -116,7 +118,6 @@ import au.gov.ga.worldwind.common.util.transform.URLTransformer;
 import au.gov.ga.worldwind.common.view.hmd.oculus.OculusSingleton;
 import au.gov.ga.worldwind.common.view.stereo.StereoOrbitView;
 import au.gov.ga.worldwind.viewer.components.locallayer.LocalLayerCreator;
-import au.gov.ga.worldwind.viewer.components.sectorclipper.SectorClipper;
 import au.gov.ga.worldwind.viewer.components.sectorsaver.ImageSectorSaver;
 import au.gov.ga.worldwind.viewer.layers.ViewerLayerFactory;
 import au.gov.ga.worldwind.viewer.layers.mouse.MouseLayer;
@@ -1527,7 +1528,7 @@ public class Application
 
 	private void clearClipping()
 	{
-		SettingsSceneController sceneController = (SettingsSceneController) wwd.getSceneController();
+		ExtendedSceneController sceneController = (ExtendedSceneController) wwd.getSceneController();
 		sceneController.clearClipping();
 		wwd.redraw();
 		clipSectorAction.setEnabled(true);

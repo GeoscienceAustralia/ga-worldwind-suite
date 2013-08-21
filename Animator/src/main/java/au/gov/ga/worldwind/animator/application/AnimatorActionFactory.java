@@ -60,6 +60,8 @@ import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstant
 import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getSmoothEyeSpeedMenuLabelKey;
 import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getStereoCameraMenuLabelKey;
 import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getUseZoomScalingMenuLabelKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getClipSectorLabelKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getClearClipLabelKey;
 import static au.gov.ga.worldwind.common.util.message.MessageSourceAccessor.getMessage;
 
 import java.awt.event.ActionEvent;
@@ -115,6 +117,8 @@ public class AnimatorActionFactory
 	private BasicAction addElevationModelAction;
 	private BasicAction addExaggeratorAction;
 	private BasicAction addEffectAction;
+	private BasicAction clipSectorAction;
+	private BasicAction clearClipAction;
 	private BasicAction setProxyAction;
 	private SelectableAction showCameraPathAction;
 	private SelectableAction showGridAction;
@@ -509,6 +513,27 @@ public class AnimatorActionFactory
 			public void actionPerformed(ActionEvent e)
 			{
 				targetApplication.promptToAddEffect();
+			}
+		});
+		
+		clipSectorAction = new BasicAction(getMessage(getClipSectorLabelKey()), Icons.cut.getIcon());
+		clipSectorAction.addActionListener(new ActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				targetApplication.clipSector();
+			}
+		});
+
+		clearClipAction = new BasicAction(getMessage(getClearClipLabelKey()), Icons.cutdelete.getIcon());
+		clearClipAction.setEnabled(false);
+		clearClipAction.addActionListener(new ActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				targetApplication.clearClipping();
 			}
 		});
 		
@@ -917,5 +942,15 @@ public class AnimatorActionFactory
 	public SelectableAction getShowWireframeAction()
 	{
 		return showWireframeAction;
+	}
+
+	public BasicAction getClipSectorAction()
+	{
+		return clipSectorAction;
+	}
+
+	public BasicAction getClearClipAction()
+	{
+		return clearClipAction;
 	}
 }

@@ -55,6 +55,7 @@ import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstant
 import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getSetFrameCountCaptionKey;
 import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getSetFrameCountMessageKey;
 import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getWindowMenuLabelKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getClipSectorTitleKey;
 import static au.gov.ga.worldwind.common.util.FileUtil.stripExtension;
 import static au.gov.ga.worldwind.common.util.message.MessageSourceAccessor.getMessage;
 import gov.nasa.worldwind.BasicModel;
@@ -159,9 +160,11 @@ import au.gov.ga.worldwind.animator.ui.parametereditor.ParameterEditor;
 import au.gov.ga.worldwind.animator.util.ExaggerationAwareStatusBar;
 import au.gov.ga.worldwind.animator.util.ExceptionLogger;
 import au.gov.ga.worldwind.animator.view.ClipConfigurableView;
+import au.gov.ga.worldwind.common.render.ExtendedSceneController;
 import au.gov.ga.worldwind.common.ui.FileFilters;
 import au.gov.ga.worldwind.common.ui.FileFilters.XmlFilter;
 import au.gov.ga.worldwind.common.ui.SplashScreen;
+import au.gov.ga.worldwind.common.ui.sectorclipper.SectorClipper;
 import au.gov.ga.worldwind.common.util.DefaultLauncher;
 import au.gov.ga.worldwind.common.util.GDALDataHelper;
 import au.gov.ga.worldwind.common.util.exaggeration.VerticalExaggerationAccessor;
@@ -865,6 +868,9 @@ public class Animator
 		actionFactory.getDynamicStereoAction().addToMenu(menu);
 		menu.addSeparator();
 		menu.add(actionFactory.getAddEffectAction());
+		menu.addSeparator();
+		menu.add(actionFactory.getClipSectorAction());
+		menu.add(actionFactory.getClearClipAction());
 
 		// Window menu
 		menu = new JMenu(getMessage(getWindowMenuLabelKey()));
@@ -2182,5 +2188,20 @@ public class Animator
 	void showWireframe(boolean show)
 	{
 		getCurrentAnimation().getWorldWindow().getModel().setShowWireframeInterior(show);
+	}
+
+	void clipSector()
+	{
+		SectorClipper.beginSelection(frame, getMessage(getClipSectorTitleKey()), wwd,
+				actionFactory.getClipSectorAction(), actionFactory.getClearClipAction());
+	}
+
+	void clearClipping()
+	{
+		ExtendedSceneController sceneController = (ExtendedSceneController) wwd.getSceneController();
+		sceneController.clearClipping();
+		wwd.redraw();
+		actionFactory.getClipSectorAction().setEnabled(true);
+		actionFactory.getClearClipAction().setEnabled(false);
 	}
 }

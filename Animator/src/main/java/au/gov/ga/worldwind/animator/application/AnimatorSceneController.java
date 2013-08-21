@@ -33,6 +33,7 @@ import au.gov.ga.worldwind.animator.application.effects.Effect;
 import au.gov.ga.worldwind.animator.application.render.OffscreenRenderer;
 import au.gov.ga.worldwind.animator.application.render.OffscreenSurfaceObjectRenderer;
 import au.gov.ga.worldwind.common.render.ExtendedSceneController;
+import au.gov.ga.worldwind.common.view.drawable.DrawableView;
 
 /**
  * A custom scene controller that supports {@link Effect}s, as well as pre/post
@@ -62,29 +63,9 @@ public class AnimatorSceneController extends ExtendedSceneController
 		gl.glHint(GL2.GL_POLYGON_SMOOTH_HINT, GL2.GL_NICEST);
 
 		doPrePaintTasks(dc);
-		performRepaint(dc);
+		super.doRepaint(dc);
 		doPostPaintTasks(dc);
 	}
-
-	private void performRepaint(DrawContext dc)
-    {
-        this.initializeFrame(dc);
-        try
-        {
-            this.applyView(dc);
-            this.createPickFrustum(dc);
-            this.createTerrain(dc);
-            this.preRender(dc);
-            this.clearFrame(dc);
-            this.pick(dc);
-            this.clearFrame(dc);
-            this.draw(dc);
-        }
-        finally
-        {
-            this.finalizeFrame(dc);
-        }
-    }
 	
 	@Override
 	public void draw(DrawContext dc)
