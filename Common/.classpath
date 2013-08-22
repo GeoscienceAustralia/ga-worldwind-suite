@@ -31,7 +31,7 @@
 			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="Common/lib/package/native/windows-i586"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="lib/package/JRift.jar">
+	<classpathentry kind="lib" path="lib/package/JRift.jar" sourcepath="lib/src/JRift.zip">
 		<attributes>
 			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="Common/lib/package/native/windows-i586"/>
 		</attributes>
