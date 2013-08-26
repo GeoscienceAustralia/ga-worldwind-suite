@@ -78,10 +78,6 @@ public class Executable
 
 
 		//setup the libraries
-		if (Configuration.isWindowsOS())
-		{
-			DirectDraw.disableDirectDraw();
-		}
 		NativeLibraries.init();
 
 		//start the animator

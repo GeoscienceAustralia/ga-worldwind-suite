@@ -37,7 +37,6 @@
 	</security>
 	<resources>
 		<j2se href="http://java.sun.com/products/autodl/j2se" version="1.6+" initial-heap-size="1024m" max-heap-size="1024m" />
-		<property name="sun.java2d.noddraw" value="true" />
 		<jar href="viewer.jar" main="true" />
 		<jar href="common.jar" />
 		<jar href="resources.jar" />
