@@ -433,6 +433,15 @@ public class Application
 		}
 		wwdCanvas = (Canvas) wwd;
 		wwdCanvas.setMinimumSize(new Dimension(1, 1));
+		wwdCanvas.addComponentListener(new ComponentAdapter()
+		{
+			@Override
+			public void componentResized(ComponentEvent e)
+			{
+				//ensure the minimum size is kept during a resize; required for NEWT canvas
+				wwdCanvas.setMinimumSize(new Dimension(1, 1));
+			}
+		});
 		if (splashScreen != null)
 		{
 			splashScreen.addRenderingListener(wwd);
