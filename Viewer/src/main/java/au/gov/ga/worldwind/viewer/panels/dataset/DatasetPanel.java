@@ -17,10 +17,8 @@ package au.gov.ga.worldwind.viewer.panels.dataset;
 
 import static au.gov.ga.worldwind.common.util.message.MessageSourceAccessor.getMessage;
 import static au.gov.ga.worldwind.viewer.util.message.ViewerMessageConstants.getDatasetsPanelTitleKey;
-import static au.gov.ga.worldwind.viewer.util.message.ViewerMessageConstants.getDeleteLayerDialogTitleKey;
 
 import java.awt.BorderLayout;
-import java.awt.Dialog;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -159,6 +157,7 @@ public class DatasetPanel extends AbstractThemePanel
 				ILayerDefinition layer = (ILayerDefinition) selected;
 				layerTreeModel.addLayer(layer, path.getPath());
 				tree.repaint();
+				enableActions();
 			}
 		});
 
@@ -175,6 +174,7 @@ public class DatasetPanel extends AbstractThemePanel
 				ILayerDefinition layer = (ILayerDefinition) selected;
 				layerTreeModel.removeLayer(layer);
 				tree.repaint();
+				enableActions();
 			}
 		});
 
@@ -208,6 +208,7 @@ public class DatasetPanel extends AbstractThemePanel
 									public void run()
 									{
 										tree.repaint();
+										enableActions();
 									}
 								});
 							}
@@ -225,27 +226,38 @@ public class DatasetPanel extends AbstractThemePanel
 			public void valueChanged(TreeSelectionEvent event)
 			{
 				IData selected = getSelectedData(event.getPath());
-				if (selected == null)
-					return;
-
-				addAction.setEnabled(false);
-				removeAction.setEnabled(false);
-				if (selected instanceof ILayerDefinition)
-				{
-					ILayerDefinition layer = (ILayerDefinition) selected;
-					if (layerTreeModel.containsLayer(layer))
-						removeAction.setEnabled(true);
-					else
-						addAction.setEnabled(true);
-
-					addAllAction.setEnabled(false);
-				}
-				else
-				{
-					addAllAction.setEnabled(true);
-				}
+				enableActions(selected);
 			}
 		});
+	}
+
+	protected void enableActions()
+	{
+		IData selected = getSelectedData(tree.getSelectionPath());
+		enableActions(selected);
+	}
+
+	protected void enableActions(IData selected)
+	{
+		if (selected == null)
+			return;
+
+		addAction.setEnabled(false);
+		removeAction.setEnabled(false);
+		if (selected instanceof ILayerDefinition)
+		{
+			ILayerDefinition layer = (ILayerDefinition) selected;
+			if (layerTreeModel.containsLayer(layer))
+				removeAction.setEnabled(true);
+			else
+				addAction.setEnabled(true);
+
+			addAllAction.setEnabled(false);
+		}
+		else
+		{
+			addAllAction.setEnabled(true);
+		}
 	}
 
 	protected void addAll(IData selected, Object[] path)
