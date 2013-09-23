@@ -42,8 +42,18 @@ public class OculusSingleton
 
 	public OculusSingleton()
 	{
-		System.loadLibrary("JRiftLibrary");
 		oculus = new OculusRift();
+		try
+		{
+			System.loadLibrary("JRiftLibrary");
+		}
+		catch (Throwable e)
+		{
+			System.err.println("Unable to load JRiftLibrary");
+			e.printStackTrace();
+			parameters = null;
+			return;
+		}
 
 		boolean initialized = oculus.init();
 		if (!initialized)
