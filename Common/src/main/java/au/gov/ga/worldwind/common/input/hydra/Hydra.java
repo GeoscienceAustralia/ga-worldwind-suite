@@ -28,11 +28,6 @@ import com.sixense.utils.enums.EnumSetupStep;
  */
 public class Hydra
 {
-	static
-	{
-		loadLibrary();
-	}
-
 	private static final Hydra INSTANCE = new Hydra();
 
 	public static Hydra getInstance()
@@ -52,6 +47,11 @@ public class Hydra
 
 	private Hydra()
 	{
+		if (!loadLibrary())
+		{
+			return;
+		}
+
 		Thread thread = new Thread(new Runnable()
 		{
 			@Override
@@ -92,36 +92,46 @@ public class Hydra
 		thread.start();
 	}
 
-	private static void loadLibrary()
+	private static boolean loadLibrary()
 	{
-		Error error = null;
 		try
 		{
-			System.loadLibrary("sixense");
-			System.loadLibrary("sixense_utils");
-		}
-		catch (Error e)
-		{
-			error = e;
-		}
-		if (error != null)
-		{
-			//loading 32-bit didn't work, try 64-bit
+			Error error = null;
 			try
 			{
-				System.loadLibrary("sixense_x64");
-				System.loadLibrary("sixense_utils_x64");
-				error = null;
+				System.loadLibrary("sixense");
+				System.loadLibrary("sixense_utils");
 			}
 			catch (Error e)
 			{
+				error = e;
 			}
+			if (error != null)
+			{
+				//loading 32-bit didn't work, try 64-bit
+				try
+				{
+					System.loadLibrary("sixense_x64");
+					System.loadLibrary("sixense_utils_x64");
+					error = null;
+				}
+				catch (Error e)
+				{
+				}
+			}
+			if (error != null)
+			{
+				throw error;
+			}
+			System.loadLibrary("SixenseJava");
 		}
-		if (error != null)
+		catch (Throwable e)
 		{
-			throw error;
+			System.err.println("Razer Hydra disabled: unable to load SixenseJava library");
+			e.printStackTrace();
+			return false;
 		}
-		System.loadLibrary("SixenseJava");
+		return true;
 	}
 
 	private void startPolling()

@@ -49,7 +49,7 @@ public class OculusSingleton
 		}
 		catch (Throwable e)
 		{
-			System.err.println("Unable to load JRiftLibrary");
+			System.err.println("Oculus Rift disabled: unable to load JRiftLibrary");
 			e.printStackTrace();
 			parameters = null;
 			return;
