@@ -24,8 +24,6 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry exported="true" kind="lib" path="lib/debug/worldwindx-debug.jar" sourcepath="lib/src/worldwind-src.zip"/>
-	<classpathentry exported="true" kind="lib" path="lib/package/gluegen-rt.jar" sourcepath="lib/src/gluegen-java-src.zip"/>
-	<classpathentry exported="true" kind="lib" path="lib/package/jogl-all.jar" sourcepath="lib/src/jogl-java-src.zip"/>
 	<classpathentry kind="lib" path="lib/package/jinput.jar">
 		<attributes>
 			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="Common/lib/package/native/windows-i586"/>
@@ -37,5 +35,15 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="lib" path="lib/package/SixenseJava.jar" sourcepath="lib/src/SixenseJava.zip"/>
+	<classpathentry exported="true" kind="lib" path="lib/include/gluegen-rt.jar" sourcepath="lib/src/gluegen-java-src.zip">
+		<attributes>
+			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="Common/lib/include"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry exported="true" kind="lib" path="lib/include/jogl-all.jar" sourcepath="lib/src/jogl-java-src.zip">
+		<attributes>
+			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="Common/lib/include"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

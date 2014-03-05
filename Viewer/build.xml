@@ -4,7 +4,7 @@
 
 	<property name="perform_unit_tests" value="true" />
 	<property name="javac_debug" value="false" />
-	
+
 	<property name="application_name" value="3D Data Viewer" />
 
 	<property name="src_dir" value="${basedir}/src/main/java" />
@@ -37,6 +37,7 @@
 	<property name="common_dir" value="${basedir}/../Common" />
 	<property name="common_lib_dir" value="${common_dir}/lib" />
 	<property name="common_package_lib_dir" value="${common_lib_dir}/package" />
+	<property name="common_include_lib_dir" value="${common_lib_dir}/include" />
 	<property name="common_test_lib_dir" value="${common_lib_dir}/test" />
 	<property name="common_test_build_dir" value="${common_dir}/target/test-classes" />
 
@@ -46,6 +47,9 @@
 
 	<path id="classpath">
 		<fileset dir="${common_package_lib_dir}">
+			<include name="**/*.jar" />
+		</fileset>
+		<fileset dir="${common_include_lib_dir}">
 			<include name="**/*.jar" />
 		</fileset>
 		<pathelement location="${common_package_dir}/${common_jar_name}" />
@@ -141,7 +145,7 @@
 
 	<target name="unzip_package_natives">
 		<unzip dest="${executable_temp_dir}">
-			<fileset dir="${common_package_lib_dir}">
+			<fileset dir="${common_include_lib_dir}">
 				<include name="**/*natives*${osarch}*.jar" />
 			</fileset>
 			<patternset refid="manifest_exclude" />
@@ -178,6 +182,9 @@
 			</zipgroupfileset>
 
 			<zipgroupfileset dir="${common_package_lib_dir}">
+				<include name="**/*.jar" />
+			</zipgroupfileset>
+			<zipgroupfileset dir="${common_include_lib_dir}">
 				<include name="**/*.jar" />
 				<exclude name="**/*natives*.jar" />
 			</zipgroupfileset>

@@ -18,6 +18,7 @@
 
 	<property name="lib_dir" value="${basedir}/lib" />
 	<property name="package_lib_dir" value="${lib_dir}/package" />
+	<property name="include_lib_dir" value="${lib_dir}/include" />
 	<property name="test_lib_dir" value="${lib_dir}/test" />
 
 	<property name="test_results_dir" value="${target_dir}/test-results" />
@@ -25,6 +26,9 @@
 
 	<path id="classpath">
 		<fileset dir="${package_lib_dir}">
+			<include name="**/*.jar" />
+		</fileset>
+		<fileset dir="${include_lib_dir}">
 			<include name="**/*.jar" />
 		</fileset>
 	</path>
