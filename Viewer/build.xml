@@ -4,6 +4,8 @@
 
 	<property name="perform_unit_tests" value="true" />
 	<property name="javac_debug" value="false" />
+	
+	<property name="application_name" value="3D Data Viewer" />
 
 	<property name="src_dir" value="${basedir}/src/main/java" />
 	<property name="resources_dir" value="${basedir}/src/main/resources" />
@@ -129,6 +131,9 @@
 			<manifest>
 				<attribute name="Main-Class" value="au.gov.ga.worldwind.viewer.application.Application" />
 				<attribute name="SplashScreen-Image" value="images/viewer-splash-400x230.png" />
+				<attribute name="Application-Name" value="${application_name}" />
+				<attribute name="Codebase" value="*" />
+				<attribute name="Permissions" value="all-permissions" />
 			</manifest>
 			<fileset dir="${build_dir}" />
 		</jar>
