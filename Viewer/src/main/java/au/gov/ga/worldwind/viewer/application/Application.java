@@ -1124,6 +1124,8 @@ public class Application
 		{
 			this.fullscreen = fullscreen;
 
+			wwdCanvas.getParent().remove(wwdCanvas); //have to explicitly remove, see http://bugs.java.com/view_bug.do?bug_id=8003398
+			
 			if (!fullscreen)
 			{
 				splitPane.setRightComponent(wwdCanvas);
