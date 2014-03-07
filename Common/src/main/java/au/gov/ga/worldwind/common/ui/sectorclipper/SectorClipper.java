@@ -16,11 +16,13 @@
 package au.gov.ga.worldwind.common.ui.sectorclipper;
 
 import gov.nasa.worldwind.WorldWindow;
+import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.geom.LatLon;
 import gov.nasa.worldwind.geom.Sector;
 import gov.nasa.worldwindx.examples.util.SectorSelector;
 
 import java.awt.BorderLayout;
+import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Frame;
@@ -34,6 +36,8 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.Arrays;
+import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -69,12 +73,14 @@ public class SectorClipper
 	private JTextField toprightField;
 	private JTextField bottomleftField;
 
+	private WorldWindow wwd;
 	private Sector sector;
 	private boolean settingSector = false;
 
 	private SectorClipper(final Frame frame, String title, final WorldWindow wwd, final BasicAction clipAction,
 			final BasicAction clearAction)
 	{
+		this.wwd = wwd;
 		selector = new MySectorSelector(wwd);
 		dialog = new JDialog(frame, title, false);
 
@@ -201,7 +207,7 @@ public class SectorClipper
 			@Override
 			public void actionPerformed(ActionEvent e)
 			{
-				clipSector(frame, wwd);
+				clipSector();
 				clearAction.setEnabled(true);
 				clipAction.setEnabled(false);
 				close();
@@ -209,6 +215,7 @@ public class SectorClipper
 		});
 		okButton.setDefaultCapable(true);
 		dialog.getRootPane().setDefaultButton(okButton);
+		okButton.setEnabled(false);
 
 		JButton button = new JButton("Cancel");
 		buttonsPanel.add(button);
@@ -217,6 +224,8 @@ public class SectorClipper
 			@Override
 			public void actionPerformed(ActionEvent e)
 			{
+				sector = null;
+				clipSector();
 				close();
 			}
 		});
@@ -260,6 +269,17 @@ public class SectorClipper
 
 	private void setSector(Sector sector, boolean fromGlobe)
 	{
+		if(sector == null)
+		{
+			this.sector = sector;
+			bottomleftField.setText("");
+			toprightField.setText("");
+			validate();
+			selector.disable();
+			selector.enable();
+			return;
+		}
+		
 		if (!settingSector)
 		{
 			settingSector = true;
@@ -301,9 +321,14 @@ public class SectorClipper
 	{
 		boolean valid = sector != null && !sector.equals(Sector.EMPTY_SECTOR);
 		okButton.setEnabled(valid);
+
+		if (valid)
+		{
+			clipSector();
+		}
 	}
 
-	private void clipSector(final Frame frame, final WorldWindow wwd)
+	private void clipSector()
 	{
 		if (!(wwd.getSceneController() instanceof ExtendedSceneController))
 		{
@@ -312,11 +337,18 @@ public class SectorClipper
 		}
 
 		final ExtendedSceneController sceneController = (ExtendedSceneController) wwd.getSceneController();
-		sceneController.clipSector(sector);
+		if (sector == null)
+		{
+			sceneController.clearClipping();
+		}
+		else
+		{
+			sceneController.clipSector(sector);
+		}
 		wwd.redraw();
 	}
 
-	private static class MySectorSelector extends SectorSelector
+	protected static class MySectorSelector extends SectorSelector
 	{
 		private WorldWindow wwd;
 
@@ -337,6 +369,60 @@ public class SectorClipper
 		{
 			super.disable();
 			setCursor(null);
+		}
+
+		@Override
+		protected void setCursor(int sideName)
+		{
+			if (sideName == NONE)
+			{
+				setCursor(Cursor.getPredefinedCursor(Cursor.MOVE_CURSOR));
+				return;
+			}
+
+			List<Integer> order = Arrays.asList(NORTH, NORTHEAST, EAST, SOUTHEAST, SOUTH, SOUTHWEST, WEST, NORTHWEST);
+			int index = order.indexOf(sideName);
+			if (index >= 0)
+			{
+				Angle heading = wwd.getView().getHeading();
+				int eighthRotation = getEighth(heading);
+				index = (index + eighthRotation) % order.size();
+				sideName = order.get(index);
+			}
+
+			super.setCursor(sideName);
+		}
+
+		/**
+		 * Calculate which eighth of the circle the angle lies in, clockwise.
+		 * Eg, if the angle is between -22.5 and 22.5, it lies within the top
+		 * eighth (0).
+		 * <p/>
+		 * Values returned:
+		 * <ul>
+		 * <li>22.5 to -22.5 = 0</li>
+		 * <li>-22.5 to -67.5 = 1</li>
+		 * <li>-67.5 to -112.5 = 2</li>
+		 * <li>-112.5 to -157.5 = 3</li>
+		 * <li>-157.5 to 157.5 = 4</li>
+		 * <li>157.5 to 112.5 = 5</li>
+		 * <li>112.5 to 67.5 = 6</li>
+		 * <li>67.5 to 22.5 = 7</li>
+		 * </ul>
+		 * 
+		 * @param angle
+		 * @return
+		 */
+		protected int getEighth(Angle angle)
+		{
+			double degrees = angle.degrees;
+			degrees -= 22.5;
+			while (degrees < 0)
+			{
+				degrees += 360.0;
+			}
+			degrees %= 360.0;
+			return 7 - (int) (degrees / 45.0);
 		}
 	}
 }
