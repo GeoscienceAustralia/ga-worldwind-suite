@@ -84,21 +84,13 @@ public class ExtendedSceneController extends AbstractSceneController implements 
 			this.clearFrame(dc);
 			this.pick(dc);
 			this.clearFrame(dc);
-			try
+			if (view instanceof DrawableView)
 			{
-				sectorClipping.enableClipping(dc);
-				if (view instanceof DrawableView)
-				{
-					((DrawableView) view).draw(dc, this);
-				}
-				else
-				{
-					this.draw(dc);
-				}
+				((DrawableView) view).draw(dc, this);
 			}
-			finally
+			else
 			{
-				sectorClipping.disableClipping(dc);
+				this.draw(dc);
 			}
 		}
 		finally
@@ -110,7 +102,26 @@ public class ExtendedSceneController extends AbstractSceneController implements 
 	@Override
 	public void draw(DrawContext dc)
 	{
-		super.draw(dc);
+		try
+		{
+			sectorClipping.enableClipping(dc);
+			super.draw(dc);
+		}
+		finally
+		{
+			sectorClipping.disableClipping(dc);
+		}
+	}
+
+	@Override
+	protected void drawOrderedSurfaceRenderables(DrawContext dc)
+	{
+		super.drawOrderedSurfaceRenderables(dc);
+
+		//If we disable sector clipping here, the ordered renderables are not clipped.
+		//This means the HUD layers are not clipped, but this has the side-effect that
+		//wireframe elevation isn't clipped, and nor is the graticule.
+		sectorClipping.disableClipping(dc);
 	}
 
 	@Override
