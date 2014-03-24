@@ -84,6 +84,7 @@ public class ProxyDialog extends JDialog
 		proxy.setHost(dialog.host.getText());
 		proxy.setNonProxyHosts(dialog.nonProxyHosts.getText());
 		proxy.setType((ProxyType) dialog.type.getSelectedItem());
+		Settings.get().setProxy(proxy);
 	}
 
 	private JButton okButton;
