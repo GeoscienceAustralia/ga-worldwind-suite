@@ -24,6 +24,7 @@ import javax.swing.SwingUtilities;
 import jogamp.newt.awt.event.AWTNewtEventFactory;
 
 import com.jogamp.common.util.IntIntHashMap;
+import com.jogamp.newt.event.InputEvent;
 import com.jogamp.newt.event.KeyEvent;
 import com.jogamp.newt.event.MouseEvent;
 import com.jogamp.newt.event.NEWTEvent;
@@ -214,7 +215,7 @@ public class NewtEventConverter
 		if (id != KEY_NOT_FOUND_VALUE)
 		{
 			// AWT/NEWT rotation is reversed - AWT +1 is down, NEWT +1 is up.
-			int rotation = (int)-event.getRotation()[1];
+			int rotation = (int) Math.round(-event.getRotation()[1]);
 			int mods = newtModifiers2Awt(event.getModifiers());
 			int button = newtButton2Awt(event.getButton());
 
@@ -249,17 +250,23 @@ public class NewtEventConverter
 		int id = eventTypeAWT2NEWT.get(event.getEventType());
 		if (id != KEY_NOT_FOUND_VALUE)
 		{
-			int code =
-					id == java.awt.event.KeyEvent.KEY_TYPED ? java.awt.event.KeyEvent.VK_UNDEFINED : event.getKeyCode();
-			int location =
-					id == java.awt.event.KeyEvent.KEY_TYPED ? java.awt.event.KeyEvent.KEY_LOCATION_UNKNOWN
-							: java.awt.event.KeyEvent.KEY_LOCATION_STANDARD;
+			if ((event.getModifiers() & InputEvent.AUTOREPEAT_MASK) != 0)
+			{
+				//don't forward autorepeat events
+				return null;
+			}
+
+			//can never be java.awt.event.KeyEvent.VK_UNDEFINED or java.awt.event.KeyEvent.KEY_LOCATION_UNKNOWN,
+			//because id will never be java.awt.event.KeyEvent.KEY_TYPED (doesn't exist in map)
+			int code = AWTNewtEventFactory.newtKeyCode2AWTKeyCode(event.getKeyCode());
+			int location = java.awt.event.KeyEvent.KEY_LOCATION_STANDARD;
 			try
 			{
-			return new KeyEventFromNewt(event, awtSource, id, event.getWhen(), newtModifiers2Awt(event.getModifiers()),
-					code, event.getKeyChar(), location);
+				return new KeyEventFromNewt(event, awtSource, id, event.getWhen(),
+						newtModifiers2Awt(event.getModifiers()),
+						code, event.getKeyChar(), location);
 			}
-			catch(IllegalArgumentException e)
+			catch (IllegalArgumentException e)
 			{
 				//sometimes this causes an "invalid keyChar" exception... ignore it
 			}
