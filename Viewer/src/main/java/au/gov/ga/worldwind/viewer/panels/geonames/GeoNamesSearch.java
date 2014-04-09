@@ -47,6 +47,7 @@ import au.gov.ga.worldwind.viewer.util.ColorFont;
 public class GeoNamesSearch
 {
 	private final static String GEONAMES_SEARCH = "http://ws.geonames.org/search";
+	private final static String GEONAMES_USERNAME = "gam3dv";
 	private final static Map<String, ColorFont> colorFonts = new HashMap<String, ColorFont>();
 	private final static ColorFont defaultColorFont = new ColorFont(Font.decode("Arial-PLAIN-10"), Color.white,
 			Color.black);
@@ -126,7 +127,8 @@ public class GeoNamesSearch
 		URL url = null;
 		try
 		{
-			url = new URL(GEONAMES_SEARCH + "?style=long&" + type.queryParameter + "=" + text);
+			url = new URL(GEONAMES_SEARCH + "?username=" + GEONAMES_USERNAME +
+					"&style=long&" + type.queryParameter + "=" + text);
 		}
 		catch (MalformedURLException e)
 		{
