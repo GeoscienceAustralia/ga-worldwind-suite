@@ -8,6 +8,7 @@ import java.io.InputStream;
 
 import org.w3c.dom.Element;
 
+import au.gov.ga.worldwind.common.WorldWindowRegistry;
 import au.gov.ga.worldwind.common.util.XMLUtil;
 
 public class Sandpit extends ApplicationTemplate
@@ -28,6 +29,8 @@ public class Sandpit extends ApplicationTemplate
 		public AppFrame()
 		{
 			super(true, true, false);
+			
+			WorldWindowRegistry.INSTANCE.register(getWwd());
 
 			InputStream is = Sandpit.class.getResourceAsStream("BH_LITHOLOGY_buf_10m.xml");
 			Element domElement = XMLUtil.getElementFromSource(is);
@@ -35,7 +38,6 @@ public class Sandpit extends ApplicationTemplate
 			BoreholeLayer layer = BoreholeLayerFactory.createBoreholeLayer(domElement, null);
 			layer.setName("Boreholes");
 			insertAfterPlacenames(getWwd(), layer);
-			layer.setup(getWwd());
 			
 			FogLayer fog = new FogLayer();
 			insertBeforeLayerName(getWwd(), fog, "NASA Blue Marble Image");

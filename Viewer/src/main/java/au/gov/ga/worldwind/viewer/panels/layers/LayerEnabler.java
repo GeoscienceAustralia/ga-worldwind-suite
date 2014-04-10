@@ -68,7 +68,6 @@ public class LayerEnabler implements HierarchicalListener
 	private final LayerTree tree;
 
 	private WorldWindow wwd;
-	private boolean layersSetup = false;
 
 	private SectionList<Layer> layerList;
 	private SectionList<ElevationModel> elevationModel;
@@ -399,10 +398,6 @@ public class LayerEnabler implements HierarchicalListener
 		try
 		{
 			loaded = LayerLoader.load(result.getSourceURL(), result.getAsInputStream());
-			if (loaded != null && layersSetup)
-			{
-				loaded.setup(wwd);
-			}
 		}
 		catch (Exception e)
 		{
@@ -486,18 +481,12 @@ public class LayerEnabler implements HierarchicalListener
 
 			if (wrapper.isLoaded())
 			{
-				if (!layersSetup)
-				{
-					wrapper.getLoaded().setup(wwd);
-				}
-
 				wrapper.node.setLegendURL(wrapper.getLoaded().getLegendURL());
 				wrapper.node.setQueryURL(wrapper.getLoaded().getQueryURL());
 
 				wrapper.updateExpiryTime();
 			}
 		}
-		layersSetup = true;
 
 		layerList.addAllFromSection(this, layers);
 		elevationModel.addAllFromSection(this, elevationModels);

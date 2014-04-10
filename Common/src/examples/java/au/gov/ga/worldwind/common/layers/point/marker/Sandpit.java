@@ -7,8 +7,10 @@ import gov.nasa.worldwindx.examples.ApplicationTemplate;
 import java.io.InputStream;
 
 
+
 import org.w3c.dom.Element;
 
+import au.gov.ga.worldwind.common.WorldWindowRegistry;
 import au.gov.ga.worldwind.common.layers.point.PointLayer;
 import au.gov.ga.worldwind.common.layers.point.PointLayerFactory;
 import au.gov.ga.worldwind.common.util.XMLUtil;
@@ -31,6 +33,8 @@ public class Sandpit extends ApplicationTemplate
 		public AppFrame()
 		{
 			super(true, true, false);
+			
+			WorldWindowRegistry.INSTANCE.register(getWwd());
 
 			InputStream is = Sandpit.class.getResourceAsStream("layer_definition.xml");
 			Element domElement = XMLUtil.getElementFromSource(is);
@@ -38,7 +42,6 @@ public class Sandpit extends ApplicationTemplate
 			PointLayer layer = PointLayerFactory.createPointLayer(domElement, null);
 			layer.setName("Markers");
 			insertAfterPlacenames(getWwd(), layer);
-			layer.setup(getWwd());
 			
 			FogLayer fog = new FogLayer();
 			insertBeforeLayerName(getWwd(), fog, "NASA Blue Marble Image");

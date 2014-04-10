@@ -89,6 +89,7 @@ import javax.swing.filechooser.FileFilter;
 
 import org.w3c.dom.Element;
 
+import au.gov.ga.worldwind.common.WorldWindowRegistry;
 import au.gov.ga.worldwind.common.downloader.DownloaderStatusBar;
 import au.gov.ga.worldwind.common.input.OrbitInputProviderManager;
 import au.gov.ga.worldwind.common.input.ProviderOrbitViewInputHandler;
@@ -430,6 +431,7 @@ public class Application
 		{
 			wwd = new WorldWindowGLCanvas();
 		}
+		WorldWindowRegistry.INSTANCE.register(wwd);
 		wwdCanvas = (Canvas) wwd;
 		wwdCanvas.setMinimumSize(new Dimension(1, 1));
 		wwdCanvas.addComponentListener(new ComponentAdapter()
