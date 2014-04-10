@@ -15,7 +15,7 @@
  ******************************************************************************/
 package au.gov.ga.worldwind.common.render;
 
-import gov.nasa.worldwind.AbstractSceneController;
+import gov.nasa.worldwind.BasicSceneController;
 import gov.nasa.worldwind.SceneController;
 import gov.nasa.worldwind.geom.Sector;
 import gov.nasa.worldwind.render.DrawContext;
@@ -23,7 +23,13 @@ import gov.nasa.worldwind.terrain.SectorGeometryList;
 import gov.nasa.worldwind.terrain.Tessellator;
 
 import java.util.ConcurrentModificationException;
+import java.util.LinkedList;
+import java.util.Queue;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
+import au.gov.ga.worldwind.common.exaggeration.VerticalExaggerationListener;
+import au.gov.ga.worldwind.common.exaggeration.VerticalExaggerationService;
 import au.gov.ga.worldwind.common.util.SectorClipPlanes;
 import au.gov.ga.worldwind.common.view.drawable.DrawableView;
 
@@ -31,18 +37,33 @@ import au.gov.ga.worldwind.common.view.drawable.DrawableView;
  * {@link SceneController} that uses a separate {@link Tessellator} to generate
  * a separate set of flat geometry, used by layers that are rendered onto a flat
  * surface.
+ * <p/>
+ * Also provides the ability to add {@link PaintTask}'s to call before or after
+ * a repaint occurs.
  * 
  * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
-public class ExtendedSceneController extends AbstractSceneController implements DrawableSceneController
+public class ExtendedSceneController extends BasicSceneController implements DrawableSceneController, VerticalExaggerationListener
 {
 	private FlatRectangularTessellator flatTessellator = new FlatRectangularTessellator();
 	protected final SectorClipPlanes sectorClipping = new SectorClipPlanes();
+	
+	protected final Queue<PaintTask> prePaintTasks = new LinkedList<PaintTask>();
+	protected final Lock prePaintTasksLock = new ReentrantLock(true);
+
+	protected final Queue<PaintTask> postPaintTasks = new LinkedList<PaintTask>();
+	protected final Lock postPaintTasksLock = new ReentrantLock(true);
 
 	public ExtendedSceneController()
 	{
 		dc.dispose();
-		dc = new ExtendedDrawContext();
+		VerticalExaggerationService.INSTANCE.addListener(this);
+		setVerticalExaggeration(VerticalExaggerationService.INSTANCE.get());
+	}
+	
+	protected ExtendedDrawContext wrapDrawContext(DrawContext dc)
+	{
+		return new ExtendedDrawContext(dc);
 	}
 
 	public void clipSector(Sector sector)
@@ -75,8 +96,9 @@ public class ExtendedSceneController extends AbstractSceneController implements 
 	}
 
 	@Override
-	protected void doRepaint(DrawContext dc)
+	public void doRepaint(DrawContext dc)
 	{
+		doPrePaintTasks(dc);
 		this.initializeFrame(dc);
 		try
 		{
@@ -100,6 +122,7 @@ public class ExtendedSceneController extends AbstractSceneController implements 
 		{
 			this.finalizeFrame(dc);
 		}
+		doPostPaintTasks(dc);
 	}
 
 	@Override
@@ -199,5 +222,76 @@ public class ExtendedSceneController extends AbstractSceneController implements 
 	 */
 	protected void afterPickLayers(DrawContext dc)
 	{
+	}
+	
+
+	@Override
+	public void verticalExaggerationChanged(double oldValue, double newValue)
+	{
+		if (getVerticalExaggeration() != newValue)
+		{
+			//keep this in sync with the vertical exaggeration service
+			setVerticalExaggeration(newValue);
+		}
+	}
+
+	@Override
+	public void setVerticalExaggeration(double verticalExaggeration)
+	{
+		super.setVerticalExaggeration(verticalExaggeration);
+		//keep the vertical exaggeration service in sync with this 
+		VerticalExaggerationService.INSTANCE.set(verticalExaggeration);
+	}
+
+	/**
+	 * Add a task to be executed on the render thread prior to painting
+	 */
+	public void addPrePaintTask(PaintTask r)
+	{
+		prePaintTasksLock.lock();
+		prePaintTasks.add(r);
+		prePaintTasksLock.unlock();
+	}
+
+	/**
+	 * Add a task to be executed on the render thread immediately after
+	 */
+	public void addPostPaintTask(PaintTask r)
+	{
+		postPaintTasksLock.lock();
+		postPaintTasks.add(r);
+		postPaintTasksLock.unlock();
+	}
+
+	protected void doPrePaintTasks(DrawContext dc)
+	{
+		prePaintTasksLock.lock();
+		try
+		{
+			while (!prePaintTasks.isEmpty())
+			{
+				prePaintTasks.remove().run(dc);
+			}
+		}
+		finally
+		{
+			prePaintTasksLock.unlock();
+		}
+	}
+
+	protected void doPostPaintTasks(DrawContext dc)
+	{
+		postPaintTasksLock.lock();
+		try
+		{
+			while (!postPaintTasks.isEmpty())
+			{
+				postPaintTasks.remove().run(dc);
+			}
+		}
+		finally
+		{
+			postPaintTasksLock.unlock();
+		}
 	}
 }

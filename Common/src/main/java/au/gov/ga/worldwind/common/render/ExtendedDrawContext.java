@@ -17,6 +17,7 @@ package au.gov.ga.worldwind.common.render;
 
 import javax.media.opengl.GL2;
 
+import au.gov.ga.worldwind.common.exaggeration.VerticalExaggerationListener;
 import gov.nasa.worldwind.render.DrawContext;
 import gov.nasa.worldwind.render.DrawContextImpl;
 import gov.nasa.worldwind.render.GLRuntimeCapabilities;
@@ -29,22 +30,48 @@ import gov.nasa.worldwind.terrain.SectorGeometryList;
  * 
  * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
-public class ExtendedDrawContext extends DrawContextImpl
+public class ExtendedDrawContext extends DrawContextDelegate implements VerticalExaggerationListener
 {
 	protected boolean wireframe = false;
+	protected ExtendedSurfaceTileRenderer geographicSurfaceTileRenderer;
 	protected SectorGeometryList flatSurfaceGeometry;
 	protected SectorGeometryList oldSurfaceGeomtry;
 
-	public ExtendedDrawContext()
+	public ExtendedDrawContext(DrawContext delegate)
 	{
-		geographicSurfaceTileRenderer.dispose();
+		super(delegate);
+		delegate.getGeographicSurfaceTileRenderer().dispose();
 		geographicSurfaceTileRenderer = new ExtendedSurfaceTileRenderer();
 	}
 
 	@Override
 	public ExtendedSurfaceTileRenderer getGeographicSurfaceTileRenderer()
 	{
-		return (ExtendedSurfaceTileRenderer) super.getGeographicSurfaceTileRenderer();
+		return geographicSurfaceTileRenderer;
+	}
+	
+	@Override
+	public void dispose()
+	{
+		super.dispose();
+		geographicSurfaceTileRenderer.dispose();
+	}
+
+	@Override
+	public void verticalExaggerationChanged(double oldValue, double newValue)
+	{
+		if (getVerticalExaggeration() != newValue)
+		{
+			//keep this in sync with the vertical exaggeration service
+			setVerticalExaggeration(newValue);
+		}
+	}
+
+	@Override
+	public void setVerticalExaggeration(double verticalExaggeration)
+	{
+		super.setVerticalExaggeration(verticalExaggeration);
+		//keep the vertical exaggeration service in sync with this 
 	}
 
 	/**

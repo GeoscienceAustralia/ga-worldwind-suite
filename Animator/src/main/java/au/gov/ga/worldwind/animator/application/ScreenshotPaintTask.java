@@ -22,6 +22,8 @@ import java.io.File;
 import javax.media.opengl.GL2;
 
 import au.gov.ga.worldwind.animator.util.TGAScreenshot;
+import au.gov.ga.worldwind.common.render.PaintTask;
+
 import com.jogamp.opengl.util.awt.Screenshot;
 
 /**

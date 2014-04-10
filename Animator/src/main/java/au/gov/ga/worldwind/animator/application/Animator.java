@@ -24,6 +24,7 @@ import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstant
 import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getCantOpenTutorialsMessageKey;
 import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getCantOpenUserGuideCaptionKey;
 import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getCantOpenUserGuideMessageKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getClipSectorTitleKey;
 import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getConfirmOverwriteCaptionKey;
 import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getConfirmOverwriteMessageKey;
 import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getConfirmRenderOverwriteCaptionKey;
@@ -55,7 +56,6 @@ import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstant
 import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getSetFrameCountCaptionKey;
 import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getSetFrameCountMessageKey;
 import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getWindowMenuLabelKey;
-import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getClipSectorTitleKey;
 import static au.gov.ga.worldwind.common.util.FileUtil.stripExtension;
 import static au.gov.ga.worldwind.common.util.message.MessageSourceAccessor.getMessage;
 import gov.nasa.worldwind.BasicModel;
@@ -150,7 +150,6 @@ import au.gov.ga.worldwind.animator.panels.objectproperties.ObjectPropertiesPane
 import au.gov.ga.worldwind.animator.terrain.DetailedElevationModel;
 import au.gov.ga.worldwind.animator.terrain.ElevationModelIdentifier;
 import au.gov.ga.worldwind.animator.terrain.ElevationModelIdentifierFactory;
-import au.gov.ga.worldwind.animator.terrain.exaggeration.AnimatorVerticalExaggerationServiceImpl;
 import au.gov.ga.worldwind.animator.terrain.exaggeration.ElevationExaggeration;
 import au.gov.ga.worldwind.animator.ui.ExaggeratorDialog;
 import au.gov.ga.worldwind.animator.ui.frameslider.ChangeFrameListener;
@@ -167,7 +166,6 @@ import au.gov.ga.worldwind.common.ui.SplashScreen;
 import au.gov.ga.worldwind.common.ui.sectorclipper.SectorClipper;
 import au.gov.ga.worldwind.common.util.DefaultLauncher;
 import au.gov.ga.worldwind.common.util.GDALDataHelper;
-import au.gov.ga.worldwind.common.util.exaggeration.VerticalExaggerationAccessor;
 
 /**
  * The primary application class for the Animator application.
@@ -685,7 +683,6 @@ public class Animator
 	private void updateElevationModelOnGlobe()
 	{
 		model.getGlobe().setElevationModel(getCurrentAnimation().getRootElevationModel());
-		VerticalExaggerationAccessor.setService(new AnimatorVerticalExaggerationServiceImpl());
 	}
 
 	/**

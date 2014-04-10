@@ -20,11 +20,7 @@ import gov.nasa.worldwind.render.SurfaceObjectTileBuilder;
 
 import java.awt.Dimension;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Queue;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 import javax.media.opengl.GL2;
 
@@ -33,22 +29,14 @@ import au.gov.ga.worldwind.animator.application.effects.Effect;
 import au.gov.ga.worldwind.animator.application.render.OffscreenRenderer;
 import au.gov.ga.worldwind.animator.application.render.OffscreenSurfaceObjectRenderer;
 import au.gov.ga.worldwind.common.render.ExtendedSceneController;
-import au.gov.ga.worldwind.common.view.drawable.DrawableView;
 
 /**
- * A custom scene controller that supports {@link Effect}s, as well as pre/post
- * paint tasks (for taking screen captures when rendering the animation).
+ * A custom scene controller that supports {@link Effect}s.
  * 
  * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
 public class AnimatorSceneController extends ExtendedSceneController
 {
-	private final Queue<PaintTask> prePaintTasks = new LinkedList<PaintTask>();
-	private final Lock prePaintTasksLock = new ReentrantLock(true);
-
-	private final Queue<PaintTask> postPaintTasks = new LinkedList<PaintTask>();
-	private final Lock postPaintTasksLock = new ReentrantLock(true);
-
 	private Dimension renderDimensions;
 	private Animation animation;
 
@@ -62,9 +50,7 @@ public class AnimatorSceneController extends ExtendedSceneController
 		gl.glHint(GL2.GL_POINT_SMOOTH_HINT, GL2.GL_NICEST);
 		gl.glHint(GL2.GL_POLYGON_SMOOTH_HINT, GL2.GL_NICEST);
 
-		doPrePaintTasks(dc);
 		super.doRepaint(dc);
-		doPostPaintTasks(dc);
 	}
 	
 	@Override
@@ -128,58 +114,6 @@ public class AnimatorSceneController extends ExtendedSceneController
 		}
 
 		lastEffect.drawFrameBufferWithEffect(dc, dimensions); //draw the final effect's frame buffer onto the final buffer
-	}
-
-	/**
-	 * Add a task to be executed on the render thread prior to painting
-	 */
-	public void addPrePaintTask(PaintTask r)
-	{
-		prePaintTasksLock.lock();
-		prePaintTasks.add(r);
-		prePaintTasksLock.unlock();
-	}
-
-	/**
-	 * Add a task to be executed on the render thread immediately after
-	 */
-	public void addPostPaintTask(PaintTask r)
-	{
-		postPaintTasksLock.lock();
-		postPaintTasks.add(r);
-		postPaintTasksLock.unlock();
-	}
-
-	private void doPrePaintTasks(DrawContext dc)
-	{
-		prePaintTasksLock.lock();
-		try
-		{
-			while (!prePaintTasks.isEmpty())
-			{
-				prePaintTasks.remove().run(dc);
-			}
-		}
-		finally
-		{
-			prePaintTasksLock.unlock();
-		}
-	}
-
-	private void doPostPaintTasks(DrawContext dc)
-	{
-		postPaintTasksLock.lock();
-		try
-		{
-			while (!postPaintTasks.isEmpty())
-			{
-				postPaintTasks.remove().run(dc);
-			}
-		}
-		finally
-		{
-			postPaintTasksLock.unlock();
-		}
 	}
 
 	@Override

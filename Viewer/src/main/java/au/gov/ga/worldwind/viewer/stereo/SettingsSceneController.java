@@ -43,7 +43,7 @@ public class SettingsSceneController extends ExtendedSceneController
 	private boolean stereoTested = false;
 
 	@Override
-	protected void doRepaint(DrawContext dc)
+	public void doRepaint(DrawContext dc)
 	{
 		Settings settings = Settings.get();
 		double verticalExaggeration = settings.getVerticalExaggeration();

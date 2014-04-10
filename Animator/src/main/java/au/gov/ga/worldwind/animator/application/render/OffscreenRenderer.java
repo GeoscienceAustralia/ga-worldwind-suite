@@ -28,10 +28,10 @@ import au.gov.ga.worldwind.animator.animation.Animation;
 import au.gov.ga.worldwind.animator.animation.RenderParameters;
 import au.gov.ga.worldwind.animator.application.Animator;
 import au.gov.ga.worldwind.animator.application.AnimatorSceneController;
-import au.gov.ga.worldwind.animator.application.PaintTask;
 import au.gov.ga.worldwind.animator.application.ScreenshotPaintTask;
 import au.gov.ga.worldwind.animator.layers.immediate.ImmediateMode;
 import au.gov.ga.worldwind.common.render.FrameBuffer;
+import au.gov.ga.worldwind.common.render.PaintTask;
 import au.gov.ga.worldwind.common.util.Validate;
 
 /**

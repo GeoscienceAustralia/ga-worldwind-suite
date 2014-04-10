@@ -52,7 +52,6 @@ import javax.media.opengl.GL2ES1;
 
 import au.gov.ga.worldwind.common.layers.Bounded;
 import au.gov.ga.worldwind.common.layers.Wireframeable;
-import au.gov.ga.worldwind.common.util.exaggeration.VerticalExaggerationAccessor;
 
 import com.jogamp.opengl.util.texture.Texture;
 
@@ -108,6 +107,7 @@ public class FastShape implements OrderedRenderable, Cacheable, Bounded, Wirefra
 	protected Globe lastGlobe = null;
 	protected boolean verticesDirty = true;
 	protected Vec4 lastEyePoint = null;
+	protected double lastVerticalExaggeration = -Double.MAX_VALUE;
 
 	protected double elevation = 0d;
 	protected boolean elevationChanged = false;
@@ -564,7 +564,7 @@ public class FastShape implements OrderedRenderable, Cacheable, Bounded, Wirefra
 
 		boolean recalculateVertices =
 				followTerrainRecalculationRequired || elevationChanged || verticesDirty || lastGlobe != dc.getGlobe()
-						|| VerticalExaggerationAccessor.isVerticalExaggerationChanged(this, dc);
+						|| lastVerticalExaggeration != dc.getVerticalExaggeration();
 		if (recalculateVertices)
 		{
 			boolean willRecalculate = recalculateVertices(dc, false);
@@ -573,7 +573,7 @@ public class FastShape implements OrderedRenderable, Cacheable, Bounded, Wirefra
 				lastGlobe = dc.getGlobe();
 				verticesDirty = false;
 				elevationChanged = false;
-				VerticalExaggerationAccessor.markVerticalExaggeration(this, dc);
+				lastVerticalExaggeration = dc.getVerticalExaggeration();
 			}
 		}
 
@@ -697,12 +697,10 @@ public class FastShape implements OrderedRenderable, Cacheable, Bounded, Wirefra
 		double elevation = this.elevation;
 		if (followTerrain)
 		{
-			elevation +=
-					VerticalExaggerationAccessor.getUnexaggeratedElevation(dc, position.getLatitude(),
-							position.getLongitude());
+			elevation += dc.getGlobe().getElevation(position.getLatitude(), position.getLongitude());
 		}
 		elevation += calculateElevationOffset(position);
-		elevation = VerticalExaggerationAccessor.applyVerticalExaggeration(dc, elevation);
+		elevation *= dc.getVerticalExaggeration();
 		elevation = Math.max(elevation, -dc.getGlobe().getMaximumRadius());
 		return dc.getGlobe().computePointFromPosition(position.add(calculateLatLonOffset()), elevation);
 	}

@@ -47,7 +47,6 @@ import org.w3c.dom.Element;
 
 import au.gov.ga.worldwind.common.layers.Bounded;
 import au.gov.ga.worldwind.common.util.AVKeyMore;
-import au.gov.ga.worldwind.common.util.exaggeration.VerticalExaggerationAccessor;
 
 import com.jogamp.opengl.util.awt.TextRenderer;
 
@@ -588,9 +587,7 @@ public abstract class TiledCurtainLayer extends AbstractLayer implements Bounded
 
 		// TODO: Fix this - see CWW-129
 		Sector pathBoundingSector = getSector();
-		Extent extent =
-				Sector.computeBoundingBox(dc.getGlobe(),
-						VerticalExaggerationAccessor.getGlobalVerticalExaggeration(dc), pathBoundingSector);
+		Extent extent = Sector.computeBoundingBox(dc.getGlobe(), dc.getVerticalExaggeration(), pathBoundingSector);
 
 		return extent.intersects(dc.getView().getFrustumInModelCoordinates());
 	}
