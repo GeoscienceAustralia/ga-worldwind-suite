@@ -22,6 +22,7 @@ import gov.nasa.worldwind.layers.ViewControlsSelectListener;
 
 import javax.swing.Icon;
 
+import au.gov.ga.worldwind.common.layers.controls.ControlsLayer;
 import au.gov.ga.worldwind.common.util.Icons;
 import au.gov.ga.worldwind.viewer.theme.AbstractThemeHUD;
 import au.gov.ga.worldwind.viewer.theme.Theme;
@@ -34,12 +35,12 @@ import au.gov.ga.worldwind.viewer.theme.ThemeHUD;
  */
 public class ControlsHUD extends AbstractThemeHUD
 {
-	private ViewControlsLayer layer;
+	private ControlsLayer layer;
 
 	@Override
 	protected Layer createLayer()
 	{
-		layer = new ViewControlsLayer();
+		layer = new ControlsLayer();
 		layer.setShowVeControls(false);
 		layer.setShowFovControls(false);
 		return layer;
