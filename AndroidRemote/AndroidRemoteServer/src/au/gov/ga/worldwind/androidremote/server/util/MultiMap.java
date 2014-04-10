@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package au.gov.ga.worldwind.common.util;
+package au.gov.ga.worldwind.androidremote.server.util;
 
 import java.util.ArrayList;
 import java.util.HashMap;
