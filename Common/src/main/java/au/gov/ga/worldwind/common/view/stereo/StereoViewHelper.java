@@ -269,15 +269,20 @@ public class StereoViewHelper
 		double viewportWidth = viewport.getWidth() <= 0d ? 1d : viewport.getWidth();
 		double viewportHeight = viewport.getHeight() <= 0d ? 1d : viewport.getHeight();
 		double aspectratio = viewportWidth / viewportHeight;
-		double vfov = view.getFieldOfView().radians / aspectratio;
-		double widthdiv2 = nearDistance * Math.tan(vfov / 2.0);
-		double multiplier = eye == Eye.RIGHT ? 1d : -1d;
-		double distance = multiplier * 0.5 * eyeSeparation * nearDistance / focalLength;
+		double widthdiv2 = nearDistance * view.getFieldOfView().tanHalfAngle();
+		double multiplier = eye == Eye.RIGHT ? 0.5 : -0.5;
+		double distance = multiplier * eyeSeparation * nearDistance / focalLength;
 
-		double top = widthdiv2;
-		double bottom = -widthdiv2;
-		double left = -aspectratio * widthdiv2 + distance;
-		double right = aspectratio * widthdiv2 + distance;
+		//hfov:
+		double top = widthdiv2 / aspectratio;
+		double bottom = -widthdiv2 / aspectratio;
+		double left = -widthdiv2 + distance;
+		double right = widthdiv2 + distance;
+		//vfov:
+		//double top = widthdiv2;
+		//double bottom = -widthdiv2;
+		//double left = -widthdiv2 * aspectratio + distance;
+		//double right = widthdiv2 * aspectratio + distance;
 
 		return fromFrustum(left, right, bottom, top, nearDistance, farDistance);
 	}
