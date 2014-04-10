@@ -21,6 +21,9 @@ import gov.nasa.worldwind.geom.Sector;
 import gov.nasa.worldwind.render.DrawContext;
 import gov.nasa.worldwind.terrain.SectorGeometryList;
 import gov.nasa.worldwind.terrain.Tessellator;
+
+import java.util.ConcurrentModificationException;
+
 import au.gov.ga.worldwind.common.util.SectorClipPlanes;
 import au.gov.ga.worldwind.common.view.drawable.DrawableView;
 
@@ -114,8 +117,20 @@ public class ExtendedSceneController extends AbstractSceneController implements 
 	}
 
 	@Override
+	protected void preRenderOrderedSurfaceRenderables(DrawContext dc)
+	{
+		//preRenderOrderedSurfaceRenderables is called immediately after prerendering the layer list, so we
+		//can inject our overridable function here
+		afterPreRenderLayers(dc);
+		super.preRenderOrderedSurfaceRenderables(dc);
+	}
+
+	@Override
 	protected void drawOrderedSurfaceRenderables(DrawContext dc)
 	{
+		//drawOrderedSurfaceRenderables is called immediately after drawing the layer list, so we can inject
+		//our overridable function here
+		afterDrawLayers(dc);
 		super.drawOrderedSurfaceRenderables(dc);
 
 		//If we disable sector clipping here, the ordered renderables are not clipped.
@@ -134,5 +149,55 @@ public class ExtendedSceneController extends AbstractSceneController implements 
 	public void applyView(DrawContext dc)
 	{
 		super.applyView(dc);
+	}
+
+	@Override
+	protected void pickTerrain(DrawContext dc)
+	{
+		try
+		{
+			super.pickTerrain(dc);
+		}
+		catch (ConcurrentModificationException e)
+		{
+			//ignore CME, seems to be a bug in the SectorGeometryList
+		}
+	}
+
+	@Override
+	protected void pickLayers(DrawContext dc)
+	{
+		super.pickLayers(dc);
+		afterPickLayers(dc);
+	}
+
+	/**
+	 * Called immediately after the layer list is prerendered. Subclasses can
+	 * override to add custom functionality.
+	 * 
+	 * @param dc
+	 */
+	protected void afterPreRenderLayers(DrawContext dc)
+	{
+	}
+
+	/**
+	 * Called immediately after the layer list is drawn. Subclasses can override
+	 * to add custom functionality.
+	 * 
+	 * @param dc
+	 */
+	protected void afterDrawLayers(DrawContext dc)
+	{
+	}
+
+	/**
+	 * Called immediately after the layer list is picked. Subclasses can
+	 * override to add custom functionality.
+	 * 
+	 * @param dc
+	 */
+	protected void afterPickLayers(DrawContext dc)
+	{
 	}
 }
