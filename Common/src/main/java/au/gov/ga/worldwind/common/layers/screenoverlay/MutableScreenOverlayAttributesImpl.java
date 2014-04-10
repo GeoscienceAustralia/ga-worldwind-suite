@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package au.gov.ga.worldwind.viewer.layers.screenoverlay;
+package au.gov.ga.worldwind.common.layers.screenoverlay;
 
 import gov.nasa.worldwind.avlist.AVList;
 

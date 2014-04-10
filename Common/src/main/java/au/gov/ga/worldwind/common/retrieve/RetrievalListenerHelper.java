@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package au.gov.ga.worldwind.viewer.retrieve;
+package au.gov.ga.worldwind.common.retrieve;
 
 import gov.nasa.worldwind.globes.ElevationModel;
 import gov.nasa.worldwind.layers.BasicTiledImageLayer;
@@ -35,8 +35,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import au.gov.ga.worldwind.common.layers.data.AbstractDataProvider;
+import au.gov.ga.worldwind.common.layers.geonames.GeoNamesLayer;
 import au.gov.ga.worldwind.common.layers.tiled.image.delegate.DelegatorTiledImageLayer;
-import au.gov.ga.worldwind.viewer.layers.geonames.GeoNamesLayer;
 
 /**
  * Helper class for pulling out {@link Tile}s, {@link Layer}s, or

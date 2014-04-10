@@ -1,4 +1,4 @@
-package au.gov.ga.worldwind.viewer.layers.screenoverlay;
+package au.gov.ga.worldwind.common.layers.screenoverlay;
 
 import static org.junit.Assert.*;
 import gov.nasa.worldwind.avlist.AVListImpl;
@@ -7,6 +7,11 @@ import java.awt.Color;
 import java.net.URL;
 
 import org.junit.Test;
+
+import au.gov.ga.worldwind.common.layers.screenoverlay.LengthExpression;
+import au.gov.ga.worldwind.common.layers.screenoverlay.MutableScreenOverlayAttributesImpl;
+import au.gov.ga.worldwind.common.layers.screenoverlay.ScreenOverlayKeys;
+import au.gov.ga.worldwind.common.layers.screenoverlay.ScreenOverlayPosition;
 
 /**
  * Unit tests for the {@link MutableScreenOverlayAttributesImpl} class

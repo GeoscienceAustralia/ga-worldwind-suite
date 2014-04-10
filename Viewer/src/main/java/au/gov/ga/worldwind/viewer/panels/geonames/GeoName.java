@@ -22,7 +22,7 @@ import gov.nasa.worldwind.render.GeographicText;
 import java.awt.Color;
 import java.awt.Font;
 
-import au.gov.ga.worldwind.viewer.util.ColorFont;
+import au.gov.ga.worldwind.common.util.ColorFont;
 
 /**
  * Represents a single GeoName from the geoname.org database.

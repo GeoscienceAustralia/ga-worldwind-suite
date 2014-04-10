@@ -52,7 +52,7 @@ import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.TreePath;
 
-import nasa.worldwind.retrieve.ExtendedRetrievalService;
+import au.gov.ga.worldwind.common.retrieve.ExtendedRetrievalService;
 import au.gov.ga.worldwind.common.ui.BasicAction;
 import au.gov.ga.worldwind.common.ui.resizabletoolbar.ResizableToolBar;
 import au.gov.ga.worldwind.common.util.FlyToSectorAnimator;

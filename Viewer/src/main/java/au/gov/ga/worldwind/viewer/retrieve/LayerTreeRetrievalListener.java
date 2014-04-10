@@ -22,8 +22,9 @@ import gov.nasa.worldwind.retrieve.Retriever;
 import java.util.HashMap;
 import java.util.Map;
 
-import nasa.worldwind.retrieve.ExtendedRetrievalService;
-import nasa.worldwind.retrieve.ExtendedRetrievalService.RetrievalListener;
+import au.gov.ga.worldwind.common.retrieve.ExtendedRetrievalService;
+import au.gov.ga.worldwind.common.retrieve.RetrievalListenerHelper;
+import au.gov.ga.worldwind.common.retrieve.ExtendedRetrievalService.RetrievalListener;
 import au.gov.ga.worldwind.viewer.panels.layers.ILayerNode;
 import au.gov.ga.worldwind.viewer.panels.layers.LayerEnabler;
 

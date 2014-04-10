@@ -1,4 +1,4 @@
-package au.gov.ga.worldwind.viewer.layers.screenoverlay;
+package au.gov.ga.worldwind.common.layers.screenoverlay;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -11,6 +11,13 @@ import org.junit.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import au.gov.ga.worldwind.common.layers.screenoverlay.LengthExpression;
+import au.gov.ga.worldwind.common.layers.screenoverlay.MutableScreenOverlayAttributesImpl;
+import au.gov.ga.worldwind.common.layers.screenoverlay.ScreenOverlayAttributes;
+import au.gov.ga.worldwind.common.layers.screenoverlay.ScreenOverlayKeys;
+import au.gov.ga.worldwind.common.layers.screenoverlay.ScreenOverlayLayer;
+import au.gov.ga.worldwind.common.layers.screenoverlay.ScreenOverlayLayerFactory;
+import au.gov.ga.worldwind.common.layers.screenoverlay.ScreenOverlayPosition;
 import au.gov.ga.worldwind.common.util.XMLUtil;
 
 /**

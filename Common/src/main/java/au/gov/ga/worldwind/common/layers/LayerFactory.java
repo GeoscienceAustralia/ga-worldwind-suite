@@ -36,6 +36,7 @@ import au.gov.ga.worldwind.common.layers.kml.KMLLayer;
 import au.gov.ga.worldwind.common.layers.mercator.delegate.DelegatorMercatorTiledImageLayer;
 import au.gov.ga.worldwind.common.layers.model.ModelLayerFactory;
 import au.gov.ga.worldwind.common.layers.point.PointLayerFactory;
+import au.gov.ga.worldwind.common.layers.screenoverlay.ScreenOverlayLayerFactory;
 import au.gov.ga.worldwind.common.layers.shapefile.surfaceshape.ShapefileLayerFactory;
 import au.gov.ga.worldwind.common.layers.sphere.SphereLayerFactory;
 import au.gov.ga.worldwind.common.layers.tiled.image.delegate.DelegatorTiledImageLayer;
@@ -103,6 +104,10 @@ public class LayerFactory extends BasicLayerFactory
 		if ("SphereLayer".equalsIgnoreCase(layerType))
 		{
 			return SphereLayerFactory.createSphereLayer(domElement, params);
+		}
+		if ("ScreenOverlayLayer".equals(layerType))
+		{
+			return ScreenOverlayLayerFactory.createScreenOverlayLayer(domElement, params);
 		}
 
 		return super.createFromLayerDocument(domElement, params);

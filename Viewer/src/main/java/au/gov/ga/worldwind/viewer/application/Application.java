@@ -87,8 +87,6 @@ import javax.swing.ToolTipManager;
 import javax.swing.UIManager;
 import javax.swing.filechooser.FileFilter;
 
-import nasa.worldwind.retrieve.ExtendedRetrievalService;
-
 import org.w3c.dom.Element;
 
 import au.gov.ga.worldwind.common.downloader.DownloaderStatusBar;
@@ -101,6 +99,7 @@ import au.gov.ga.worldwind.common.newt.WorldWindowNewtAutoDrawable;
 import au.gov.ga.worldwind.common.newt.WorldWindowNewtCanvas;
 import au.gov.ga.worldwind.common.render.ExtendedDrawContext;
 import au.gov.ga.worldwind.common.render.ExtendedSceneController;
+import au.gov.ga.worldwind.common.retrieve.ExtendedRetrievalService;
 import au.gov.ga.worldwind.common.terrain.ElevationModelFactory;
 import au.gov.ga.worldwind.common.terrain.WireframeRectangularTessellator;
 import au.gov.ga.worldwind.common.ui.BasicAction;

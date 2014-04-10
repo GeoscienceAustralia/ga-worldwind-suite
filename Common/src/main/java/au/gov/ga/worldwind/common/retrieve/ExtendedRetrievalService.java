@@ -3,7 +3,7 @@
  * National Aeronautics and Space Administration.
  * All Rights Reserved.
  */
-package nasa.worldwind.retrieve;
+package au.gov.ga.worldwind.common.retrieve;
 
 import gov.nasa.worldwind.Configuration;
 import gov.nasa.worldwind.WWObjectImpl;

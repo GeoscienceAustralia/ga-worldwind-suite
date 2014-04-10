@@ -13,40 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package au.gov.ga.worldwind.viewer.layers.geonames;
-
-import java.util.HashMap;
-
-import au.gov.ga.worldwind.viewer.util.ColorFont;
+package au.gov.ga.worldwind.common.layers.screenoverlay;
 
 /**
- * Simple map between a String and {@link ColorFont}. Used for providing
- * different font/color combinations for different attribute values.
+ * The position to place the screen overlay in
  * 
- * @author Michael de Hoog (michael.dehoog@ga.gov.au)
+ * @author James Navin (james.navin@ga.gov.au)
  */
-public class ColorFontProvider extends HashMap<String, ColorFont>
+public enum ScreenOverlayPosition
 {
-	private ColorFont def;
-
-	public ColorFontProvider()
-	{
-		def = new ColorFont(null, null, null);
-	}
-
-	public ColorFontProvider(ColorFont def)
-	{
-		this.def = def;
-	}
-
-	@Override
-	public ColorFont get(Object key)
-	{
-		ColorFont font = super.get(key);
-		if (font == null)
-		{
-			font = def;
-		}
-		return font;
-	}
+	NORTH,
+	NORTHEAST,
+	EAST,
+	SOUTHEAST,
+	SOUTH,
+	SOUTHWEST,
+	WEST,
+	NORTHWEST,
+	CENTER
 }

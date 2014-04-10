@@ -1,9 +1,11 @@
-package au.gov.ga.worldwind.viewer.layers.screenoverlay;
+package au.gov.ga.worldwind.common.layers.screenoverlay;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 import org.junit.Test;
+
+import au.gov.ga.worldwind.common.layers.screenoverlay.LengthExpression;
 
 
 /**

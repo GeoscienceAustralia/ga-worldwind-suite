@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package au.gov.ga.worldwind.viewer.layers.geonames;
+package au.gov.ga.worldwind.common.layers.geonames;
 
 import gov.nasa.worldwind.WorldWind;
 import gov.nasa.worldwind.geom.Angle;
@@ -42,7 +42,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import au.gov.ga.worldwind.viewer.util.ColorFont;
+import au.gov.ga.worldwind.common.util.ColorFont;
 
 /**
  * Represents a single GeoName from the geoname.org database.

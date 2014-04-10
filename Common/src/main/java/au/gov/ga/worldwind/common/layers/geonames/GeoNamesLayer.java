@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package au.gov.ga.worldwind.viewer.layers.geonames;
+package au.gov.ga.worldwind.common.layers.geonames;
 
 import gov.nasa.worldwind.View;
 import gov.nasa.worldwind.WorldWind;
@@ -45,8 +45,8 @@ import java.util.Comparator;
 import java.util.Queue;
 import java.util.concurrent.PriorityBlockingQueue;
 
+import au.gov.ga.worldwind.common.util.ColorFont;
 import au.gov.ga.worldwind.common.util.IterableProxy;
-import au.gov.ga.worldwind.viewer.util.ColorFont;
 
 /**
  * Place name layer which uses place data from geonames.org. Uses

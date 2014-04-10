@@ -13,26 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package au.gov.ga.worldwind.viewer.util;
-
-import java.awt.Color;
-import java.awt.Font;
+package au.gov.ga.worldwind.common.layers.geonames;
 
 /**
- * Simple container class for storing a font with a color and background color.
+ * Interface for {@link GeoName} visibility calculation.
  * 
  * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
-public class ColorFont
+public interface VisibilityCalculator
 {
-	public final Color backgroundColor;
-	public final Color color;
-	public final Font font;
-
-	public ColorFont(Font font, Color color, Color backgroundColor)
-	{
-		this.font = font;
-		this.color = color;
-		this.backgroundColor = backgroundColor;
-	}
+	public boolean isVisible(GeoName geoname);
 }
