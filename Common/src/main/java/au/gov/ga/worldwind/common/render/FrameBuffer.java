@@ -185,7 +185,7 @@ public class FrameBuffer
 	 * Delete if created.
 	 * 
 	 * @param gl
-	 * @see FrameBuffer#delete(GL)
+	 * @see FrameBuffer#delete(GL2)
 	 */
 	public void deleteIfCreated(GL2 gl)
 	{
