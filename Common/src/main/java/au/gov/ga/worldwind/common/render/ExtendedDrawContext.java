@@ -15,13 +15,16 @@
  ******************************************************************************/
 package au.gov.ga.worldwind.common.render;
 
-import javax.media.opengl.GL2;
-
-import au.gov.ga.worldwind.common.exaggeration.VerticalExaggerationListener;
 import gov.nasa.worldwind.render.DrawContext;
 import gov.nasa.worldwind.render.DrawContextImpl;
 import gov.nasa.worldwind.render.GLRuntimeCapabilities;
 import gov.nasa.worldwind.terrain.SectorGeometryList;
+
+import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
+
+import au.gov.ga.worldwind.common.exaggeration.VerticalExaggerationListener;
+import au.gov.ga.worldwind.common.exaggeration.VerticalExaggerationService;
 
 /**
  * Extension of {@link DrawContextImpl} that provides better wireframe elevation
@@ -71,7 +74,8 @@ public class ExtendedDrawContext extends DrawContextDelegate implements Vertical
 	public void setVerticalExaggeration(double verticalExaggeration)
 	{
 		super.setVerticalExaggeration(verticalExaggeration);
-		//keep the vertical exaggeration service in sync with this 
+		//keep the vertical exaggeration service in sync with this
+		VerticalExaggerationService.INSTANCE.set(verticalExaggeration);
 	}
 
 	/**
