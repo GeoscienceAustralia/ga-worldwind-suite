@@ -195,7 +195,7 @@ public class GDALRasterModelProviderTest
 		assertEquals(testRaster.width * testRaster.height * 4, colourBuffer.length);
 
 		// Sector will be sampled from 'bottom-left' corners of cells
-		Sector sector = shape.getSector();
+		Sector sector = shape.getBounds().toSector();
 		assertNotNull(sector);
 		assertEquals(testRaster.minLon, sector.getMinLongitude().degrees, 0.0001);
 		assertEquals(testRaster.maxLon - testRaster.xCellSize, sector.getMaxLongitude().degrees, 0.0001);

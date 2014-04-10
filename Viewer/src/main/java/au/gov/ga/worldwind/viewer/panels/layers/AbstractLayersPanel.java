@@ -52,6 +52,7 @@ import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.TreePath;
 
+import au.gov.ga.worldwind.common.layers.Bounds;
 import au.gov.ga.worldwind.common.retrieve.ExtendedRetrievalService;
 import au.gov.ga.worldwind.common.ui.BasicAction;
 import au.gov.ga.worldwind.common.ui.resizabletoolbar.ResizableToolBar;
@@ -218,7 +219,8 @@ public abstract class AbstractLayersPanel extends AbstractThemePanel
 			}
 		}
 
-		Sector sector = layerEnabler.getLayerExtents(layer);
+		Bounds bounds = layerEnabler.getLayerExtents(layer);
+		Sector sector = bounds.toSector();
 		if (sector == null || !(wwd.getView() instanceof OrbitView))
 		{
 			return;

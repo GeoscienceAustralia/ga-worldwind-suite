@@ -20,7 +20,7 @@ import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.geom.Sector;
 
 /**
- * Represents an object that can be bounded by a sector.
+ * Represents an object that is bounded.
  * 
  * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
@@ -29,7 +29,12 @@ public interface Bounded
 	/**
 	 * @return This object's bounds
 	 */
-	public Sector getSector();
+	Bounds getBounds();
+
+	/**
+	 * @return Does this object follow the terrain?
+	 */
+	boolean isFollowTerrain();
 
 	/**
 	 * Utility class which reads a sector from an Object.
@@ -44,17 +49,19 @@ public interface Bounded
 		 * @param source
 		 * @return source's bounds, or null if they couldn't be determined
 		 */
-		public static Sector getSector(Object source)
+		public static Bounds getBounds(Object source)
 		{
 			if (source instanceof Bounded)
 			{
-				return ((Bounded) source).getSector();
+				return ((Bounded) source).getBounds();
 			}
 			else if (source instanceof AVList)
 			{
 				Object o = ((AVList) source).getValue(AVKey.SECTOR);
 				if (o instanceof Sector)
-					return (Sector) o;
+				{
+					return Bounds.fromSector((Sector) o);
+				}
 			}
 
 			return null;

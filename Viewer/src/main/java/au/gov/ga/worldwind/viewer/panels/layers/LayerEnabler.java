@@ -18,7 +18,6 @@ package au.gov.ga.worldwind.viewer.panels.layers;
 import gov.nasa.worldwind.WorldWind;
 import gov.nasa.worldwind.WorldWindow;
 import gov.nasa.worldwind.avlist.AVKey;
-import gov.nasa.worldwind.geom.Sector;
 import gov.nasa.worldwind.globes.ElevationModel;
 import gov.nasa.worldwind.layers.Layer;
 import gov.nasa.worldwind.layers.LayerList;
@@ -46,6 +45,7 @@ import au.gov.ga.worldwind.common.downloader.Downloader;
 import au.gov.ga.worldwind.common.downloader.RetrievalHandler;
 import au.gov.ga.worldwind.common.downloader.RetrievalResult;
 import au.gov.ga.worldwind.common.layers.Bounded;
+import au.gov.ga.worldwind.common.layers.Bounds;
 import au.gov.ga.worldwind.common.layers.Hierarchical;
 import au.gov.ga.worldwind.common.layers.Hierarchical.HierarchicalListener;
 import au.gov.ga.worldwind.common.util.DaemonThreadFactory;
@@ -534,7 +534,7 @@ public class LayerEnabler implements HierarchicalListener
 		return layerMap.containsKey(layer);
 	}
 
-	public synchronized Sector getLayerExtents(ILayerNode node)
+	public synchronized Bounds getLayerExtents(ILayerNode node)
 	{
 		if (!nodeMap.containsKey(node))
 		{
@@ -546,7 +546,7 @@ public class LayerEnabler implements HierarchicalListener
 				wrapper.hasLayer() ? wrapper.getLayer() : wrapper.hasElevationModel() ? wrapper.getElevationModel()
 						: null;
 
-		return Bounded.Reader.getSector(wrapped);
+		return Bounded.Reader.getBounds(wrapped);
 	}
 
 	public synchronized Layer getLayer(ILayerNode node)

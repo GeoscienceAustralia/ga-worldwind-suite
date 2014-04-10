@@ -18,6 +18,7 @@ package au.gov.ga.worldwind.common.layers.model.gocad;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import gov.nasa.worldwind.geom.Sector;
 
 import java.net.URL;
 
@@ -72,9 +73,10 @@ public class GocadVoxetReaderTest extends AbstractGocadReaderTest<FastShape>
 		assertEquals(125, result.getPositions().size());
 		assertEquals("test2", result.getName());
 		
-		assertEquals(-4535070.00, result.getSector().getMinLatitude().degrees, 0.001);
-		assertEquals(-1731127.25, result.getSector().getMinLongitude().degrees, 0.001);
-		assertEquals(-1355693.00, result.getSector().getMaxLatitude().degrees, 0.001);
-		assertEquals(1542068.00, result.getSector().getMaxLongitude().degrees, 0.001);
+		Sector sector = result.getBounds().toSector();
+		assertEquals(-4535070.00, sector.getMinLatitude().degrees, 0.001);
+		assertEquals(-1731127.25, sector.getMinLongitude().degrees, 0.001);
+		assertEquals(-1355693.00, sector.getMaxLatitude().degrees, 0.001);
+		assertEquals(1542068.00, sector.getMaxLongitude().degrees, 0.001);
 	}
 }
