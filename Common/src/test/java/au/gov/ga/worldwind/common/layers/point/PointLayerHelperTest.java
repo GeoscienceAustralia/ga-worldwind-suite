@@ -65,32 +65,6 @@ public class PointLayerHelperTest
 		new PointLayerHelper(params);
 	}
 	
-	@Test (expected = IllegalArgumentException.class)
-	public void testCreateWithShapefileProviderNoURL()
-	{
-		AVList params = new AVListImpl();
-		params.setValue(AVKeyMore.DATA_LAYER_PROVIDER, new ShapefilePointProvider());
-		params.setValue(AVKeyMore.URL, "");
-		params.setValue(AVKeyMore.DATA_CACHE_NAME, "test");
-		params.setValue(AVKeyMore.DATA_LAYER_STYLES, new ArrayList<Style>());
-		params.setValue(AVKeyMore.DATA_LAYER_ATTRIBUTES, new ArrayList<Attribute>());
-		
-		new PointLayerHelper(params);
-	}
-	
-	@Test (expected = IllegalArgumentException.class)
-	public void testCreateWithShapefileProviderNoDataCache()
-	{
-		AVList params = new AVListImpl();
-		params.setValue(AVKeyMore.DATA_LAYER_PROVIDER, new ShapefilePointProvider());
-		params.setValue(AVKeyMore.URL, "file:/some/url");
-		params.setValue(AVKeyMore.DATA_CACHE_NAME, "");
-		params.setValue(AVKeyMore.DATA_LAYER_STYLES, new ArrayList<Style>());
-		params.setValue(AVKeyMore.DATA_LAYER_ATTRIBUTES, new ArrayList<Attribute>());
-		
-		new PointLayerHelper(params);
-	}
-	
 	@Test
 	public void testCreateWithXMLProvider()
 	{
