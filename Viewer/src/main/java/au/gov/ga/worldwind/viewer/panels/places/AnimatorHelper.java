@@ -26,12 +26,9 @@ import gov.nasa.worldwind.globes.Globe;
 import gov.nasa.worldwind.view.ViewUtil;
 import gov.nasa.worldwind.view.firstperson.BasicFlyView;
 import gov.nasa.worldwind.view.firstperson.FlyToFlyViewAnimator;
-import gov.nasa.worldwind.view.orbit.AccessibleOrbitViewInputSupport;
-import gov.nasa.worldwind.view.orbit.AccessibleOrbitViewInputSupport.AccessibleOrbitViewState;
 import gov.nasa.worldwind.view.orbit.FlyToOrbitViewAnimator;
 import gov.nasa.worldwind.view.orbit.OrbitView;
 import gov.nasa.worldwind.view.orbit.OrbitViewInputSupport;
-import au.gov.ga.worldwind.common.view.free.FreeView;
 import au.gov.ga.worldwind.viewer.settings.Settings;
 import au.gov.ga.worldwind.viewer.util.SettingsUtil;
 
@@ -92,8 +89,8 @@ public class AnimatorHelper
 
 		if (view instanceof OrbitView)
 		{
-			AccessibleOrbitViewState ovs =
-					AccessibleOrbitViewInputSupport.computeOrbitViewState(globe, eyePoint, centerPoint, up);
+			OrbitViewInputSupport.OrbitViewState ovs =
+					OrbitViewInputSupport.computeOrbitViewState(globe, eyePoint, centerPoint, up);
 
 			if (ovs == null)
 			{
@@ -138,10 +135,6 @@ public class AnimatorHelper
 					lengthMillis, WorldWind.ABSOLUTE);
 
 			return lengthMillis;
-		}
-		else if (view instanceof FreeView)
-		{
-			//TODO
 		}
 		return -1;
 	}

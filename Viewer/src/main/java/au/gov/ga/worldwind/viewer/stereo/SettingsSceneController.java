@@ -25,7 +25,9 @@ import java.nio.ByteBuffer;
 import javax.media.opengl.GL2;
 
 import au.gov.ga.worldwind.common.render.ExtendedSceneController;
-import au.gov.ga.worldwind.common.view.stereo.StereoView;
+import au.gov.ga.worldwind.common.view.delegate.IDelegateView;
+import au.gov.ga.worldwind.common.view.delegate.IViewDelegate;
+import au.gov.ga.worldwind.common.view.stereo.IStereoViewDelegate;
 import au.gov.ga.worldwind.viewer.settings.Settings;
 
 import com.jogamp.common.nio.Buffers;
@@ -70,11 +72,14 @@ public class SettingsSceneController extends ExtendedSceneController
 		}
 
 		View view = dc.getView();
-		StereoView stereo = null;
-		if (view instanceof StereoView)
+		if (view instanceof IDelegateView)
 		{
-			stereo = (StereoView) view;
-			stereo.setParameters(settings);
+			IDelegateView delegateView = (IDelegateView) view;
+			IViewDelegate delegate = delegateView.getDelegate();
+			if (delegate instanceof IStereoViewDelegate)
+			{
+				((IStereoViewDelegate) delegate).setParameters(settings);
+			}
 		}
 
 		super.doRepaint(dc);

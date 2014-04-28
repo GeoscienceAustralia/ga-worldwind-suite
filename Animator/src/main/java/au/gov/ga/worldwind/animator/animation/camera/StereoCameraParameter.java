@@ -18,6 +18,7 @@ package au.gov.ga.worldwind.animator.animation.camera;
 import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getCameraEyeSeparationNameKey;
 import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getCameraFocalLengthNameKey;
 import static au.gov.ga.worldwind.common.util.message.MessageSourceAccessor.getMessageOrDefault;
+import gov.nasa.worldwind.View;
 import gov.nasa.worldwind.avlist.AVList;
 
 import org.w3c.dom.Element;
@@ -30,7 +31,9 @@ import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterBase;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterValue;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterValueFactory;
-import au.gov.ga.worldwind.common.view.stereo.StereoView;
+import au.gov.ga.worldwind.common.view.delegate.IDelegateView;
+import au.gov.ga.worldwind.common.view.delegate.IViewDelegate;
+import au.gov.ga.worldwind.common.view.stereo.IStereoViewDelegate;
 
 /**
  * Contains {@link Parameter}s used by the {@link StereoCamera}
@@ -51,10 +54,18 @@ public abstract class StereoCameraParameter extends CameraParameter
 		super(name, animation);
 	}
 
-	@Override
-	protected StereoView getView()
+	protected IStereoViewDelegate getDelegate()
 	{
-		return (StereoView) super.getView();
+		View view = getView();
+		if (view instanceof IDelegateView)
+		{
+			IViewDelegate delegate = ((IDelegateView) view).getDelegate();
+			if (delegate instanceof IStereoViewDelegate)
+			{
+				return (IStereoViewDelegate) delegate;
+			}
+		}
+		return null;
 	}
 
 	/**
@@ -88,15 +99,20 @@ public abstract class StereoCameraParameter extends CameraParameter
 		@Override
 		public ParameterValue getCurrentValue()
 		{
-			double value = getView().getCurrentFocalLength();
+			IStereoViewDelegate delegate = getDelegate();
+			double value = delegate == null ? 0.0 : delegate.getCurrentFocalLength();
 			return ParameterValueFactory.createParameterValue(this, value, animation.getCurrentFrame());
 		}
 
 		@Override
 		protected void doApplyValue(double value)
 		{
-			getView().getParameters().setFocalLength(value);
-			redraw();
+			IStereoViewDelegate delegate = getDelegate();
+			if (delegate != null)
+			{
+				delegate.getParameters().setFocalLength(value);
+				redraw();
+			}
 		}
 
 		@Override
@@ -134,7 +150,7 @@ public abstract class StereoCameraParameter extends CameraParameter
 		{
 			super();
 		}
-		
+
 		@Override
 		protected String getDefaultName()
 		{
@@ -144,15 +160,20 @@ public abstract class StereoCameraParameter extends CameraParameter
 		@Override
 		public ParameterValue getCurrentValue()
 		{
-			double value = getView().getCurrentEyeSeparation();
+			IStereoViewDelegate delegate = getDelegate();
+			double value = delegate == null ? 0.0 : delegate.getCurrentEyeSeparation();
 			return ParameterValueFactory.createParameterValue(this, value, animation.getCurrentFrame());
 		}
 
 		@Override
 		protected void doApplyValue(double value)
 		{
-			getView().getParameters().setEyeSeparation(value);
-			redraw();
+			IStereoViewDelegate delegate = getDelegate();
+			if (delegate != null)
+			{
+				delegate.getParameters().setEyeSeparation(value);
+				redraw();
+			}
 		}
 
 		@Override

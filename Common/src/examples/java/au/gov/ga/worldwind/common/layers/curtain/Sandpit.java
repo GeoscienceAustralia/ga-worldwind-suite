@@ -11,7 +11,6 @@ import org.w3c.dom.Element;
 
 import au.gov.ga.worldwind.common.layers.curtain.delegate.DelegatorTiledCurtainLayer;
 import au.gov.ga.worldwind.common.util.XMLUtil;
-import au.gov.ga.worldwind.common.view.free.FreeView;
 
 public class Sandpit extends ApplicationTemplate
 {
@@ -25,7 +24,6 @@ public class Sandpit extends ApplicationTemplate
 		Configuration.setValue(AVKey.INITIAL_PITCH, 90);
 		Configuration.setValue(AVKey.INITIAL_LATITUDE, -27);
 		Configuration.setValue(AVKey.INITIAL_LONGITUDE, 133.5);
-		Configuration.setValue(AVKey.VIEW_CLASS_NAME, FreeView.class.getName());
 		Configuration.setValue(AVKey.LAYERS_CLASS_NAMES, BMNGWMSLayer.class.getName());
 		Configuration.setValue(AVKey.VERTICAL_EXAGGERATION, 10);
 

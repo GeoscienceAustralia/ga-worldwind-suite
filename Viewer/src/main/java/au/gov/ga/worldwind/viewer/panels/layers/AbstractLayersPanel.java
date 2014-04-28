@@ -27,8 +27,11 @@ import gov.nasa.worldwind.ogc.kml.KMLAbstractFeature;
 import gov.nasa.worldwind.retrieve.RetrievalService;
 import gov.nasa.worldwind.util.layertree.KMLFeatureTreeNode;
 import gov.nasa.worldwind.util.tree.TreeNode;
+import gov.nasa.worldwind.view.firstperson.BasicFlyView;
 import gov.nasa.worldwind.view.orbit.FlyToOrbitViewAnimator;
 import gov.nasa.worldwind.view.orbit.OrbitView;
+import gov.nasa.worldwindx.examples.kml.KMLFlyViewController;
+import gov.nasa.worldwindx.examples.kml.KMLOrbitViewController;
 import gov.nasa.worldwindx.examples.kml.KMLViewController;
 
 import java.awt.BorderLayout;
@@ -58,7 +61,6 @@ import au.gov.ga.worldwind.common.ui.BasicAction;
 import au.gov.ga.worldwind.common.ui.resizabletoolbar.ResizableToolBar;
 import au.gov.ga.worldwind.common.util.FlyToSectorAnimator;
 import au.gov.ga.worldwind.common.util.Icons;
-import au.gov.ga.worldwind.common.view.kml.CustomKMLViewControllerFactory;
 import au.gov.ga.worldwind.viewer.panels.layers.LayerEnabler.RefreshListener;
 import au.gov.ga.worldwind.viewer.retrieve.LayerTreeRetrievalListener;
 import au.gov.ga.worldwind.viewer.theme.AbstractThemePanel;
@@ -209,7 +211,7 @@ public abstract class AbstractLayersPanel extends AbstractThemePanel
 			{
 				KMLAbstractFeature feature = ((KMLFeatureTreeNode) treeNode).getFeature();
 
-				KMLViewController viewController = CustomKMLViewControllerFactory.create(wwd);
+				KMLViewController viewController = KMLViewController.create(wwd);
 				if (viewController != null)
 				{
 					viewController.goTo(feature);

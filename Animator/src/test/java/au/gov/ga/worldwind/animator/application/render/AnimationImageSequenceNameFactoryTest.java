@@ -13,7 +13,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import au.gov.ga.worldwind.animator.animation.Animation;
-import au.gov.ga.worldwind.common.view.stereo.StereoView.Eye;
+import au.gov.ga.worldwind.common.view.stereo.IStereoViewDelegate.Eye;
 
 /**
  * Unit tests for the {@link AnimationImageSequenceNameFactory} class

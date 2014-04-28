@@ -15,15 +15,18 @@
  ******************************************************************************/
 package au.gov.ga.worldwind.animator.application.render;
 
+import gov.nasa.worldwind.WorldWindow;
+
 import java.io.File;
 
-import gov.nasa.worldwind.WorldWindow;
 import au.gov.ga.worldwind.animator.animation.Animation;
 import au.gov.ga.worldwind.animator.animation.RenderParameters;
 import au.gov.ga.worldwind.animator.animation.camera.StereoCamera;
 import au.gov.ga.worldwind.animator.application.Animator;
-import au.gov.ga.worldwind.common.view.stereo.StereoView;
-import au.gov.ga.worldwind.common.view.stereo.StereoView.Eye;
+import au.gov.ga.worldwind.common.view.delegate.IDelegateView;
+import au.gov.ga.worldwind.common.view.delegate.IViewDelegate;
+import au.gov.ga.worldwind.common.view.stereo.IStereoViewDelegate;
+import au.gov.ga.worldwind.common.view.stereo.IStereoViewDelegate.Eye;
 
 /**
  * An extension of the basic {@link OffscreenRenderer} that supports a stereo view,
@@ -42,25 +45,28 @@ public class StereoOffscreenRenderer extends OffscreenRenderer
 	protected void renderFrame(int frame, Animation animation, RenderParameters renderParams)
 	{
 		//if the view is not a stereo view, then just render with the super method
-		boolean stereo = wwd.getView() instanceof StereoView && animation.getCamera() instanceof StereoCamera;
+		boolean stereo = wwd.getView() instanceof IDelegateView &&
+				((IDelegateView) wwd.getView()).getDelegate() instanceof IStereoViewDelegate &&
+				animation.getCamera() instanceof StereoCamera;
 		if (!stereo)
 		{
 			super.renderFrame(frame, animation, renderParams);
 			return;
 		}
 
-		StereoView view = (StereoView) wwd.getView();
-		view.setup(true, Eye.LEFT);
+		IDelegateView view = (IDelegateView) wwd.getView();
+		IStereoViewDelegate delegate = (IStereoViewDelegate) view.getDelegate();
+		delegate.setup(true, Eye.LEFT);
 
 		File targetFile = AnimationImageSequenceNameFactory.createStereoImageSequenceFile(animation, frame, renderParams.getFrameName(), renderParams.getRenderDirectory(), Eye.LEFT);
 		doRender(frame, targetFile, animation, renderParams);
 
-		view.setup(true, Eye.RIGHT);
+		delegate.setup(true, Eye.RIGHT);
 
 		targetFile = AnimationImageSequenceNameFactory.createStereoImageSequenceFile(animation, frame, renderParams.getFrameName(), renderParams.getRenderDirectory(), Eye.RIGHT);
 		doRender(frame, targetFile, animation, renderParams);
 
-		view.setup(false, Eye.LEFT);
+		delegate.setup(false, Eye.LEFT);
 	}
 
 }

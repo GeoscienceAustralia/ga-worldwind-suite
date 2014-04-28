@@ -23,6 +23,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import au.gov.ga.worldwind.animator.animation.Animation;
 import au.gov.ga.worldwind.animator.animation.RenderParameters;
 import au.gov.ga.worldwind.common.util.DaemonThreadFactory;
+import au.gov.ga.worldwind.common.view.target.ITargetView;
+import au.gov.ga.worldwind.common.view.target.TargetOrbitView;
 
 /**
  * A base class for animation renderers
@@ -82,7 +84,7 @@ public abstract class AnimationRendererBase implements AnimationRenderer
 	protected void renderOnThread(Animation animation, RenderParameters renderParams)
 	{
 		notifyStarted();
-		doPreRender(animation, renderParams);
+		preRender(animation, renderParams);
 		
 		for (int frame = renderParams.getStartFrame(); frame <= renderParams.getEndFrame(); frame ++)
 		{
@@ -100,7 +102,7 @@ public abstract class AnimationRendererBase implements AnimationRenderer
 			}
 		}
 		
-		doPostRender(animation, renderParams);
+		postRender(animation, renderParams);
 		notifyCompleted(renderParams.getEndFrame());
 	}
 	
@@ -119,6 +121,15 @@ public abstract class AnimationRendererBase implements AnimationRenderer
 		started.set(false);
 	}
 	
+	protected void preRender(Animation animation, RenderParameters renderParams)
+	{
+		if(animation.getView() instanceof ITargetView)
+		{
+			((ITargetView) animation.getView()).setDrawAxisMarker(false);
+		}
+		doPreRender(animation, renderParams);
+	}
+	
 	/**
 	 * Perform any required pre-render setup
 	 */
@@ -129,6 +140,15 @@ public abstract class AnimationRendererBase implements AnimationRenderer
 	 * Render the given frame of the given animation into the given file
 	 */
 	protected abstract void doRender(int frame, File targetFile, Animation animation, RenderParameters renderParams);
+	
+	protected void postRender(Animation animation, RenderParameters renderParams)
+	{
+		if(animation.getView() instanceof ITargetView)
+		{
+			((ITargetView) animation.getView()).setDrawAxisMarker(true);
+		}
+		doPostRender(animation, renderParams);
+	}
 	
 	/**
 	 * Perform any required post-render cleanup

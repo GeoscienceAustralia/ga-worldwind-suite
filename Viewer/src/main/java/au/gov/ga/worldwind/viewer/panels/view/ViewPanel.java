@@ -15,7 +15,6 @@
  ******************************************************************************/
 package au.gov.ga.worldwind.viewer.panels.view;
 
-import gov.nasa.worldwind.Disposable;
 import gov.nasa.worldwind.View;
 import gov.nasa.worldwind.WorldWindow;
 import gov.nasa.worldwind.avlist.AVKey;
@@ -33,11 +32,11 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 
 import au.gov.ga.worldwind.common.util.Icons;
-import au.gov.ga.worldwind.common.view.hmd.oculus.OculusView;
-import au.gov.ga.worldwind.common.view.stereo.StereoFlyView;
-import au.gov.ga.worldwind.common.view.stereo.StereoFreeView;
-import au.gov.ga.worldwind.common.view.stereo.StereoOrbitView;
-import au.gov.ga.worldwind.common.view.stereo.StereoSubSurfaceOrbitView;
+import au.gov.ga.worldwind.common.view.delegate.IDelegateView;
+import au.gov.ga.worldwind.common.view.delegate.IViewDelegate;
+import au.gov.ga.worldwind.common.view.hmd.oculus.OculusViewDelegate;
+import au.gov.ga.worldwind.common.view.stereo.IStereoViewDelegate;
+import au.gov.ga.worldwind.common.view.stereo.StereoViewDelegate;
 import au.gov.ga.worldwind.viewer.theme.AbstractThemePanel;
 import au.gov.ga.worldwind.viewer.theme.Theme;
 import au.gov.ga.worldwind.viewer.theme.ThemePanel;
@@ -52,9 +51,6 @@ public class ViewPanel extends AbstractThemePanel
 	private WorldWindow wwd;
 
 	private JRadioButton orbitRadio;
-	private JRadioButton subSurfaceRadio;
-	private JRadioButton flyRadio;
-	private JRadioButton freeRadio;
 	private JRadioButton oculusRadio;
 
 	public ViewPanel()
@@ -87,30 +83,6 @@ public class ViewPanel extends AbstractThemePanel
 		c.gridx = 0;
 		c.weightx = 1d / 5d;
 		panel.add(orbitRadio, c);
-
-		subSurfaceRadio = new JRadioButton("Sub-surface");
-		bg.add(subSurfaceRadio);
-		subSurfaceRadio.addActionListener(al);
-		c = new GridBagConstraints();
-		c.gridx = 1;
-		c.weightx = 1d / 5d;
-		panel.add(subSurfaceRadio, c);
-
-		flyRadio = new JRadioButton("Fly");
-		bg.add(flyRadio);
-		flyRadio.addActionListener(al);
-		c = new GridBagConstraints();
-		c.gridx = 2;
-		c.weightx = 1d / 5d;
-		panel.add(flyRadio, c);
-
-		freeRadio = new JRadioButton("Free");
-		bg.add(freeRadio);
-		freeRadio.addActionListener(al);
-		c = new GridBagConstraints();
-		c.gridx = 3;
-		c.weightx = 1d / 5d;
-		panel.add(freeRadio, c);
 
 		oculusRadio = new JRadioButton("Oculus");
 		bg.add(oculusRadio);
@@ -150,25 +122,17 @@ public class ViewPanel extends AbstractThemePanel
 	protected void updateRadioButtons()
 	{
 		View view = wwd.getView();
-		if (view instanceof StereoSubSurfaceOrbitView)
+		if (view instanceof IDelegateView)
 		{
-			subSurfaceRadio.setSelected(true);
-		}
-		else if (view instanceof StereoOrbitView)
-		{
-			orbitRadio.setSelected(true);
-		}
-		else if (view instanceof StereoFlyView)
-		{
-			flyRadio.setSelected(true);
-		}
-		else if (view instanceof StereoFreeView)
-		{
-			freeRadio.setSelected(true);
-		}
-		else if (view instanceof OculusView)
-		{
-			oculusRadio.setSelected(true);
+			IViewDelegate delegate = ((IDelegateView) view).getDelegate();
+			if (delegate instanceof IStereoViewDelegate)
+			{
+				orbitRadio.setSelected(true);
+			}
+			else if (delegate instanceof OculusViewDelegate)
+			{
+				oculusRadio.setSelected(true);
+			}
 		}
 	}
 
@@ -177,40 +141,26 @@ public class ViewPanel extends AbstractThemePanel
 		if (wwd == null)
 			return;
 
-		View oldView = wwd.getView();
-		View view = null;
-
-		if (orbitRadio.isSelected() && !(oldView instanceof StereoOrbitView))
-		{
-			view = new StereoOrbitView();
-		}
-		else if (subSurfaceRadio.isSelected() && !(oldView instanceof StereoSubSurfaceOrbitView))
-		{
-			view = new StereoSubSurfaceOrbitView();
-		}
-		else if (flyRadio.isSelected() && !(oldView instanceof StereoFlyView))
-		{
-			view = new StereoFlyView();
-		}
-		else if (freeRadio.isSelected() && !(oldView instanceof StereoFreeView))
-		{
-			view = new StereoFreeView();
-		}
-		else if (oculusRadio.isSelected() && !(oldView instanceof OculusView))
-		{
-			view = new OculusView();
-		}
-
-		if (view == null)
+		if (!(wwd.getView() instanceof IDelegateView))
 			return;
 
-		view.copyViewState(oldView);
-		wwd.setView(view);
-		wwd.redraw();
+		IDelegateView view = (IDelegateView) wwd.getView();
+		IViewDelegate oldDelegate = view.getDelegate();
+		IViewDelegate delegate = null;
 
-		if (oldView instanceof Disposable)
+		if (orbitRadio.isSelected() && !(oldDelegate instanceof IStereoViewDelegate))
 		{
-			((Disposable) oldView).dispose();
+			delegate = new StereoViewDelegate();
 		}
+		else if (oculusRadio.isSelected() && !(oldDelegate instanceof OculusViewDelegate))
+		{
+			delegate = new OculusViewDelegate();
+		}
+
+		if (delegate == null)
+			return;
+
+		view.setDelegate(delegate);
+		wwd.redraw();
 	}
 }

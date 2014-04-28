@@ -109,14 +109,16 @@ import au.gov.ga.worldwind.common.ui.SelectableAction;
 import au.gov.ga.worldwind.common.ui.SplashScreen;
 import au.gov.ga.worldwind.common.ui.SwingUtil;
 import au.gov.ga.worldwind.common.ui.sectorclipper.SectorClipper;
+import au.gov.ga.worldwind.common.util.AVKeyMore;
 import au.gov.ga.worldwind.common.util.DefaultLauncher;
 import au.gov.ga.worldwind.common.util.DoubleClickZoomListener;
 import au.gov.ga.worldwind.common.util.GDALDataHelper;
 import au.gov.ga.worldwind.common.util.Icons;
 import au.gov.ga.worldwind.common.util.transform.RegexURLTransform;
 import au.gov.ga.worldwind.common.util.transform.URLTransformer;
+import au.gov.ga.worldwind.common.view.delegate.DelegateOrbitView;
 import au.gov.ga.worldwind.common.view.hmd.oculus.OculusSingleton;
-import au.gov.ga.worldwind.common.view.stereo.StereoOrbitView;
+import au.gov.ga.worldwind.common.view.stereo.StereoViewDelegate;
 import au.gov.ga.worldwind.viewer.components.locallayer.LocalLayerCreator;
 import au.gov.ga.worldwind.viewer.components.sectorsaver.ImageSectorSaver;
 import au.gov.ga.worldwind.viewer.layers.ViewerLayerFactory;
@@ -186,7 +188,8 @@ public class Application
 
 		Configuration.setValue(AVKey.LAYER_FACTORY, ViewerLayerFactory.class.getName());
 		Configuration.setValue(AVKey.ELEVATION_MODEL_FACTORY, ElevationModelFactory.class.getName());
-		Configuration.setValue(AVKey.VIEW_CLASS_NAME, StereoOrbitView.class.getName());
+		Configuration.setValue(AVKey.VIEW_CLASS_NAME, DelegateOrbitView.class.getName());
+		Configuration.setValue(AVKeyMore.DELEGATE_VIEW_DELEGATE_CLASS_NAME, StereoViewDelegate.class.getName());
 		Configuration.setValue(AVKey.VIEW_INPUT_HANDLER_CLASS_NAME, ProviderOrbitViewInputHandler.class.getName());
 		Configuration.setValue(AVKey.LAYERS_CLASS_NAMES, "");
 		Configuration.setValue(AVKey.RETRIEVAL_SERVICE_CLASS_NAME, ExtendedRetrievalService.class.getName());

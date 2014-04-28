@@ -17,7 +17,6 @@ package au.gov.ga.worldwind.common.render;
 
 import gov.nasa.worldwind.SceneController;
 import gov.nasa.worldwind.render.DrawContext;
-import au.gov.ga.worldwind.common.view.drawable.DrawableView;
 
 /**
  * {@link SceneController} that provides public access to methods required for

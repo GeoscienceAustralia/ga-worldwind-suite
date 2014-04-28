@@ -16,15 +16,16 @@
 package au.gov.ga.worldwind.animator.view;
 
 import gov.nasa.worldwind.geom.Position;
-import au.gov.ga.worldwind.common.view.stereo.StereoOrbitView;
+import au.gov.ga.worldwind.common.view.delegate.DelegateOrbitView;
+import au.gov.ga.worldwind.common.view.stereo.StereoViewDelegate;
 
 /**
- * {@link StereoOrbitView} subclass that provides support for configuration of
+ * {@link StereoViewDelegate} subclass that provides support for configuration of
  * the clipping far/near distances.
  * 
  * @author James Navin (james.navin@ga.gov.au)
  */
-public class AnimatorView extends StereoOrbitView implements ClipConfigurableView
+public class AnimatorView extends DelegateOrbitView implements ClipConfigurableView
 {
 	private boolean autoNearClip = true;
 	private boolean autoFarClip = true;

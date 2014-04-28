@@ -33,7 +33,9 @@ import au.gov.ga.worldwind.animator.animation.io.AnimationFileVersion;
 import au.gov.ga.worldwind.animator.animation.io.AnimationIOConstants;
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 import au.gov.ga.worldwind.common.util.XMLUtil;
-import au.gov.ga.worldwind.common.view.stereo.StereoView;
+import au.gov.ga.worldwind.common.view.delegate.IDelegateView;
+import au.gov.ga.worldwind.common.view.delegate.IViewDelegate;
+import au.gov.ga.worldwind.common.view.stereo.IStereoViewDelegate;
 
 /**
  * A default implementation of the {@link StereoCamera} interface
@@ -111,15 +113,19 @@ public class StereoCameraImpl extends CameraImpl implements StereoCamera
 		super.doApply();
 
 		View view = animation.getView();
-		if (view instanceof StereoView)
+		if (view instanceof IDelegateView)
 		{
-			StereoView stereo = (StereoView) view;
-			int frame = animation.getCurrentFrame();
-			double focalLength = this.focalLength.getValueAtFrame(frame).getValue();
-			double eyeSeparation = this.eyeSeparation.getValueAtFrame(frame).getValue();
-			stereo.getParameters().setDynamicStereo(dynamicStereo);
-			stereo.getParameters().setFocalLength(focalLength);
-			stereo.getParameters().setEyeSeparation(eyeSeparation);
+			IViewDelegate delegate = ((IDelegateView) view).getDelegate();
+			if (delegate instanceof IStereoViewDelegate)
+			{
+				IStereoViewDelegate stereo = (IStereoViewDelegate) delegate;
+				int frame = animation.getCurrentFrame();
+				double focalLength = this.focalLength.getValueAtFrame(frame).getValue();
+				double eyeSeparation = this.eyeSeparation.getValueAtFrame(frame).getValue();
+				stereo.getParameters().setDynamicStereo(dynamicStereo);
+				stereo.getParameters().setFocalLength(focalLength);
+				stereo.getParameters().setEyeSeparation(eyeSeparation);
+			}
 		}
 	}
 

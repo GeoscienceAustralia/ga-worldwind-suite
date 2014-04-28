@@ -21,7 +21,7 @@ import au.gov.ga.worldwind.animator.animation.Animation;
 import au.gov.ga.worldwind.animator.util.FileUtil;
 import au.gov.ga.worldwind.common.util.Util;
 import au.gov.ga.worldwind.common.util.Validate;
-import au.gov.ga.worldwind.common.view.stereo.StereoView.Eye;
+import au.gov.ga.worldwind.common.view.stereo.IStereoViewDelegate.Eye;
 
 /**
  * A Factory that produces filename strings for the rendered animation frames.
