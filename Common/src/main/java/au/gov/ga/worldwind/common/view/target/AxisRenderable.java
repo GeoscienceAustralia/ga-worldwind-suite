@@ -30,6 +30,8 @@ import java.awt.Rectangle;
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
 
+import au.gov.ga.worldwind.common.view.delegate.IDelegateView;
+
 /**
  * {@link Renderable} that displays a red/green/blue axis marker at the view's
  * center of rotation point. The red axis lies east-west, the green axis lies
@@ -211,8 +213,16 @@ public class AxisRenderable implements Renderable
 			double length = distance * size;
 
 			Rectangle viewport = view.getViewport();
-			Matrix projection = Matrix.fromPerspective(view.getFieldOfView(), viewport.width, viewport.height,
-					distance - length, distance + length);
+			Matrix projection;
+			if (dc.getView() instanceof IDelegateView)
+			{
+				projection = ((IDelegateView) dc.getView()).computeProjection(distance - length, distance + length);
+			}
+			else
+			{
+				projection = Matrix.fromPerspective(view.getFieldOfView(), viewport.width, viewport.height,
+						distance - length, distance + length);
+			}
 
 			Position centerPosition = dc.getGlobe().computePositionFromPoint(centerPoint);
 			Matrix rotation = Matrix.fromRotationXYZ(Angle.ZERO, centerPosition.longitude, Angle.ZERO).multiply(
