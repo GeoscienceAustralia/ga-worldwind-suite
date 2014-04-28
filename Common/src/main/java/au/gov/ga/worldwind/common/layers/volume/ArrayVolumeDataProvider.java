@@ -76,10 +76,10 @@ public class ArrayVolumeDataProvider extends AbstractVolumeDataProvider
 				double maxLatitude = ois.readDouble();
 				double minLongitude = ois.readDouble();
 				double maxLongitude = ois.readDouble();
-				bounds = new Bounds(Position.fromDegrees(minLatitude, minLongitude, top - depth),
-						Position.fromDegrees(maxLatitude, maxLongitude, top));
 				top = ois.readDouble();
 				depth = ois.readDouble();
+				bounds = new Bounds(Position.fromDegrees(minLatitude, minLongitude, top - depth),
+						Position.fromDegrees(maxLatitude, maxLongitude, top));
 				noDataValue = ois.readFloat();
 				minValue = Float.MAX_VALUE;
 				maxValue = -Float.MAX_VALUE;
