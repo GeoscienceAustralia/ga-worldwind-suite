@@ -50,6 +50,7 @@ public class TargetOrbitView extends BaseOrbitView implements ITargetView
 	protected Angle targetMaxPitch = Angle.fromDegrees(170);
 
 	protected boolean drawAxisMarker = true;
+	protected Vec4 lastEye = Vec4.ZERO;
 	protected final AxisRenderable axisMarker = new AxisRenderable();
 	protected final EmptyScreenCredit viewScreenCredit = new EmptyScreenCredit()
 	{
@@ -136,8 +137,6 @@ public class TargetOrbitView extends BaseOrbitView implements ITargetView
 	@Override
 	protected void doApply(DrawContext dc)
 	{
-		Vec4 beforeApply = Vec4.UNIT_W.transformBy4(this.modelview);
-
 		super.doApply(dc);
 
 		//the screen credits are stored in a map, so adding this each frame is not a problem
@@ -145,12 +144,13 @@ public class TargetOrbitView extends BaseOrbitView implements ITargetView
 
 		if (isDrawAxisMarker())
 		{
-			Vec4 afterApply = Vec4.UNIT_W.transformBy4(this.modelview);
-			if (beforeApply.distanceToSquared3(afterApply) > 10)
+			Vec4 eye = getEyePoint();
+			if (lastEye.distanceToSquared3(eye) > 10)
 			{
 				//view has changed, so show the axis marker
 				axisMarker.trigger();
 			}
+			lastEye = eye;
 		}
 	}
 
