@@ -41,6 +41,11 @@ public interface IDelegateView extends View
 	 * Set the {@link IViewDelegate} this view should delegate to. Passing
 	 * <code>null</code> will cause the view to use a default implementation,
 	 * generally defined by the superclass.
+	 * <p/>
+	 * Implementations should call
+	 * {@link IViewDelegate#uninstalled(IDelegateView)} on the previously set
+	 * delegate (if any), and {@link IViewDelegate#installed(IDelegateView)} on
+	 * the new delegate.
 	 * 
 	 * @param delegate
 	 */
