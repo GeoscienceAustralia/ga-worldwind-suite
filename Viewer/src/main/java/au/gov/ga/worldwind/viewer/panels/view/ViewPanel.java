@@ -28,6 +28,7 @@ import java.beans.PropertyChangeListener;
 
 import javax.swing.ButtonGroup;
 import javax.swing.Icon;
+import javax.swing.JCheckBox;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 
@@ -37,6 +38,7 @@ import au.gov.ga.worldwind.common.view.delegate.IViewDelegate;
 import au.gov.ga.worldwind.common.view.hmd.oculus.OculusViewDelegate;
 import au.gov.ga.worldwind.common.view.stereo.IStereoViewDelegate;
 import au.gov.ga.worldwind.common.view.stereo.StereoViewDelegate;
+import au.gov.ga.worldwind.common.view.target.ITargetView;
 import au.gov.ga.worldwind.viewer.theme.AbstractThemePanel;
 import au.gov.ga.worldwind.viewer.theme.Theme;
 import au.gov.ga.worldwind.viewer.theme.ThemePanel;
@@ -52,6 +54,7 @@ public class ViewPanel extends AbstractThemePanel
 
 	private JRadioButton orbitRadio;
 	private JRadioButton oculusRadio;
+	private JCheckBox targetCheck;
 
 	public ViewPanel()
 	{
@@ -81,16 +84,25 @@ public class ViewPanel extends AbstractThemePanel
 		orbitRadio.addActionListener(al);
 		c = new GridBagConstraints();
 		c.gridx = 0;
-		c.weightx = 1d / 5d;
+		c.weightx = 1d / 2d;
 		panel.add(orbitRadio, c);
 
 		oculusRadio = new JRadioButton("Oculus");
 		bg.add(oculusRadio);
 		oculusRadio.addActionListener(al);
 		c = new GridBagConstraints();
-		c.gridx = 4;
-		c.weightx = 1d / 5d;
+		c.gridx = 1;
+		c.weightx = 1d / 2d;
 		panel.add(oculusRadio, c);
+
+		targetCheck = new JCheckBox("Lock rotation point on surface");
+		targetCheck.addActionListener(al);
+		c = new GridBagConstraints();
+		c.gridx = 0;
+		c.gridy = 1;
+		c.gridwidth = 2;
+		c.anchor = GridBagConstraints.WEST;
+		panel.add(targetCheck, c);
 	}
 
 	@Override
@@ -134,6 +146,10 @@ public class ViewPanel extends AbstractThemePanel
 				oculusRadio.setSelected(true);
 			}
 		}
+		if (view instanceof ITargetView)
+		{
+			targetCheck.setSelected(!((ITargetView) view).isTargetMode());
+		}
 	}
 
 	protected void setupView()
@@ -155,6 +171,12 @@ public class ViewPanel extends AbstractThemePanel
 		else if (oculusRadio.isSelected() && !(oldDelegate instanceof OculusViewDelegate))
 		{
 			delegate = new OculusViewDelegate();
+		}
+
+		if (view instanceof ITargetView)
+		{
+			ITargetView target = (ITargetView) view;
+			target.setTargetMode(!targetCheck.isSelected());
 		}
 
 		if (delegate == null)
