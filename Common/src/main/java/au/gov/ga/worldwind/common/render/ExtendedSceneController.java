@@ -223,7 +223,6 @@ public class ExtendedSceneController extends BasicSceneController implements Dra
 	protected void afterPickLayers(DrawContext dc)
 	{
 	}
-	
 
 	@Override
 	public void verticalExaggerationChanged(double oldValue, double newValue)

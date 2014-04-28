@@ -115,7 +115,7 @@ public class RSSEarthquakesLayer extends RenderableLayer implements Loader, Sele
 		});
 		updateTimer.start();
 		startEarthquakeDownload();
-		
+
 		WorldWindowRegistry.INSTANCE.addSelectListener(this);
 	}
 

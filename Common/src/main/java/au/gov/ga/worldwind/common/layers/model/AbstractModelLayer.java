@@ -16,7 +16,6 @@
 package au.gov.ga.worldwind.common.layers.model;
 
 import gov.nasa.worldwind.geom.Extent;
-import gov.nasa.worldwind.geom.Sector;
 import gov.nasa.worldwind.layers.AbstractLayer;
 import gov.nasa.worldwind.render.DrawContext;
 import gov.nasa.worldwind.render.WWTexture;

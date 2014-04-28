@@ -47,7 +47,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import javax.imageio.ImageIO;
 import javax.media.opengl.GL2;
-import javax.media.opengl.GL2ES1;
+import javax.media.opengl.GL2GL3;
 
 import au.gov.ga.worldwind.common.layers.Bounded;
 import au.gov.ga.worldwind.common.layers.Bounds;
@@ -66,9 +66,9 @@ import com.jogamp.opengl.util.texture.Texture;
 public class FastShape implements OrderedRenderable, Cacheable, Bounded, Wireframeable
 {
 	protected final static SingleTaskRunner VertexUpdater = new SingleTaskRunner(FastShape.class.getName()
-			+ " VertexUpdater");
+			+ " VertexUpdater"); //$NON-NLS-1$
 	protected final static SingleTaskRunner IndexUpdater = new SingleTaskRunner(FastShape.class.getName()
-			+ " IndexUpdater");
+			+ " IndexUpdater"); //$NON-NLS-1$
 
 	protected final ReadWriteLock positionLock = new ReentrantReadWriteLock();
 	protected final PickSupport pickSupport = new PickSupport();
@@ -215,7 +215,7 @@ public class FastShape implements OrderedRenderable, Cacheable, Bounded, Wirefra
 
 		if (!dc.getGLRuntimeCapabilities().isUseVertexBufferObject())
 		{
-			String message = "Vertex Buffer Objects are disabled or unsupported by your graphics card.";
+			String message = "Vertex Buffer Objects are disabled or unsupported by your graphics card."; //$NON-NLS-1$
 			Logging.logger().severe(message);
 			setEnabled(false);
 			return;
@@ -432,7 +432,7 @@ public class FastShape implements OrderedRenderable, Cacheable, Bounded, Wirefra
 				//gl.glTexEnvi(GL.GL_TEXTURE_ENV, GL.GL_COMBINE_RGB, GL.GL_MODULATE);
 
 				gl.glTexEnvi(GL2.GL_TEXTURE_ENV, GL2.GL_SRC0_ALPHA, GL2.GL_PREVIOUS);
-				gl.glTexEnvi(GL2.GL_TEXTURE_ENV, GL2ES1.GL_SRC1_ALPHA, GL2.GL_TEXTURE);
+				gl.glTexEnvi(GL2.GL_TEXTURE_ENV, GL2GL3.GL_SRC1_ALPHA, GL2.GL_TEXTURE);
 				gl.glTexEnvi(GL2.GL_TEXTURE_ENV, GL2.GL_COMBINE_ALPHA, GL2.GL_MODULATE);
 
 				pointTexture.bind(dc);
@@ -459,7 +459,7 @@ public class FastShape implements OrderedRenderable, Cacheable, Bounded, Wirefra
 				gl.glTexEnvi(GL2.GL_TEXTURE_ENV, GL2.GL_COMBINE_RGB, GL2.GL_MODULATE);
 
 				gl.glTexEnvi(GL2.GL_TEXTURE_ENV, GL2.GL_SRC0_ALPHA, GL2.GL_PREVIOUS);
-				gl.glTexEnvi(GL2.GL_TEXTURE_ENV, GL2ES1.GL_SRC1_ALPHA, GL2.GL_CONSTANT);
+				gl.glTexEnvi(GL2.GL_TEXTURE_ENV, GL2GL3.GL_SRC1_ALPHA, GL2.GL_CONSTANT);
 				gl.glTexEnvi(GL2.GL_TEXTURE_ENV, GL2.GL_COMBINE_ALPHA, GL2.GL_MODULATE);
 
 				gl.glTexEnvfv(GL2.GL_TEXTURE_ENV, GL2.GL_TEXTURE_ENV_COLOR, new float[] { r, g, b, (float) alpha }, 0);

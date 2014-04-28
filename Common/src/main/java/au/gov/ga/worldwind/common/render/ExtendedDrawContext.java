@@ -52,7 +52,7 @@ public class ExtendedDrawContext extends DrawContextDelegate implements Vertical
 	{
 		return geographicSurfaceTileRenderer;
 	}
-	
+
 	@Override
 	public void dispose()
 	{
@@ -74,10 +74,10 @@ public class ExtendedDrawContext extends DrawContextDelegate implements Vertical
 	public void setVerticalExaggeration(double verticalExaggeration)
 	{
 		super.setVerticalExaggeration(verticalExaggeration);
-		//keep the vertical exaggeration service in sync with this
+		//keep the vertical exaggeration service in sync with this 
 		VerticalExaggerationService.INSTANCE.set(verticalExaggeration);
 	}
-	
+
 	@Override
 	public void setSurfaceGeometry(SectorGeometryList surfaceGeometry)
 	{
@@ -151,7 +151,9 @@ public class ExtendedDrawContext extends DrawContextDelegate implements Vertical
 		//it would be better to override the initialize method, but unfortunately (for some unknown reason) it's final
 
 		if (this.flatSurfaceGeometry != null)
+		{
 			this.flatSurfaceGeometry.clear();
+		}
 		this.flatSurfaceGeometry = null;
 	}
 
@@ -180,7 +182,10 @@ public class ExtendedDrawContext extends DrawContextDelegate implements Vertical
 	 */
 	public void switchToFlatSurfaceGeometry()
 	{
-		oldSurfaceGeomtry = getSurfaceGeometry();
+		if (oldSurfaceGeomtry == null)
+		{
+			oldSurfaceGeomtry = getSurfaceGeometry();
+		}
 		setSurfaceGeometry(flatSurfaceGeometry);
 	}
 
@@ -189,6 +194,10 @@ public class ExtendedDrawContext extends DrawContextDelegate implements Vertical
 	 */
 	public void switchToStandardSurfaceGeometry()
 	{
-		setSurfaceGeometry(oldSurfaceGeomtry);
+		if (oldSurfaceGeomtry != null)
+		{
+			setSurfaceGeometry(oldSurfaceGeomtry);
+			oldSurfaceGeomtry = null;
+		}
 	}
 }

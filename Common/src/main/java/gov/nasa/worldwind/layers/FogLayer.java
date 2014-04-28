@@ -1,7 +1,6 @@
 package gov.nasa.worldwind.layers;
 
 import gov.nasa.worldwind.geom.Position;
-import gov.nasa.worldwind.layers.RenderableLayer;
 import gov.nasa.worldwind.render.DrawContext;
 import gov.nasa.worldwind.util.Logging;
 
@@ -106,7 +105,9 @@ public class FogLayer extends RenderableLayer
 	{
 		Position eyePos = dc.getView().getEyePosition();
 		if (eyePos == null)
+		{
 			return;
+		}
 		// View altitude
 		float alt = (float) eyePos.getElevation();
 		alt = alt < 100 ? 100 : alt; // Clamp altitudes below 100m

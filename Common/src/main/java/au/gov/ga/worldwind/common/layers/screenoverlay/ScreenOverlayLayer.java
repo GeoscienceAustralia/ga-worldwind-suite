@@ -33,16 +33,14 @@ import java.nio.DoubleBuffer;
 
 import javax.imageio.ImageIO;
 import javax.media.opengl.GL2;
+import javax.media.opengl.GLProfile;
+import javax.swing.SwingUtilities;
 
-import au.gov.ga.worldwind.common.ui.SwingUtil;
 import au.gov.ga.worldwind.common.util.Validate;
 
 import com.jogamp.opengl.util.texture.Texture;
 import com.jogamp.opengl.util.texture.TextureCoords;
-import com.jogamp.opengl.util.texture.TextureIO;
 import com.jogamp.opengl.util.texture.awt.AWTTextureIO;
-
-import javax.media.opengl.GLProfile;
 
 /**
  * A layer that can display html formatted text and images overlayed on the
@@ -269,7 +267,7 @@ public class ScreenOverlayLayer extends AbstractLayer
 			if (!imageLoading)
 			{
 				imageLoading = true;
-				SwingUtil.invokeLaterTaskOnEDT(new Runnable()
+				SwingUtilities.invokeLater(new Runnable()
 				{
 					@Override
 					public void run()

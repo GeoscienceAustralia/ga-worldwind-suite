@@ -827,14 +827,14 @@ public class DrawContextDelegate implements DrawContext
 	}
 
 	@Override
-	public ClutterFilter getClutterFilter()
+	public void setClutterFilter(ClutterFilter filter)
 	{
-		return delegate.getClutterFilter();
+		delegate.setClutterFilter(filter);
 	}
 
 	@Override
-	public void setClutterFilter(ClutterFilter clutterFilter)
+	public ClutterFilter getClutterFilter()
 	{
-		delegate.setClutterFilter(clutterFilter);
+		return delegate.getClutterFilter();
 	}
 }

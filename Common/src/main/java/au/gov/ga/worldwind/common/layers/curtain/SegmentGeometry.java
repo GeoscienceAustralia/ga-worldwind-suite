@@ -81,7 +81,7 @@ public class SegmentGeometry implements Renderable
 				{
 					vboIds = fillVerticesVBO(dc);
 				}
-				
+
 				gl.glBindBuffer(GL2.GL_ARRAY_BUFFER, vboIds[0]);
 				gl.glVertexPointer(3, GL2.GL_FLOAT, 0, 0);
 
@@ -142,17 +142,17 @@ public class SegmentGeometry implements Renderable
 	{
 		return 5 * vertexCount * Float.SIZE / 8;
 	}
-	
-	protected void update(DrawContext dc, Vec4 referenceCenter)
-    {
-        this.time = System.currentTimeMillis();
-        this.referenceCenter = referenceCenter;
 
-        if (dc.getGLRuntimeCapabilities().isUseVertexBufferObject())
-        {
-            this.fillVerticesVBO(dc);
-        }
-    }
+	protected void update(DrawContext dc, Vec4 referenceCenter)
+	{
+		this.time = System.currentTimeMillis();
+		this.referenceCenter = referenceCenter;
+
+		if (dc.getGLRuntimeCapabilities().isUseVertexBufferObject())
+		{
+			this.fillVerticesVBO(dc);
+		}
+	}
 
 	protected int[] fillVerticesVBO(DrawContext dc)
 	{

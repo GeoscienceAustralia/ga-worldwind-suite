@@ -51,7 +51,7 @@ public class PointLayerHelper implements Bounded
 	{
 		//retrieve the globals from the params
 		Validate.notNull(params, "Parameters are required");
-		
+
 		context = (URL) params.getValue(AVKeyMore.CONTEXT_URL);
 		url = params.getStringValue(AVKey.URL);
 		dataCacheName = params.getStringValue(AVKey.DATA_CACHE_NAME);
@@ -59,7 +59,7 @@ public class PointLayerHelper implements Bounded
 
 		styleProvider.setStyles((List<Style>) params.getValue(AVKeyMore.DATA_LAYER_STYLES));
 		styleProvider.setAttributes((List<Attribute>) params.getValue(AVKeyMore.DATA_LAYER_ATTRIBUTES));
-		
+
 		// Disable validation of URL and DataCacheName, because some point providers
 		// (such as the XMLPointProvider) don't require them:
 		//Validate.notBlank(url, "Point data url not set");

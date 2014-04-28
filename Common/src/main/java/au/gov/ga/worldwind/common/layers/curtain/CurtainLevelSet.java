@@ -15,8 +15,8 @@
  ******************************************************************************/
 package au.gov.ga.worldwind.common.layers.curtain;
 
-import static au.gov.ga.worldwind.common.util.message.MessageSourceAccessor.getMessage;
 import static au.gov.ga.worldwind.common.util.message.CommonMessageConstants.*;
+import static au.gov.ga.worldwind.common.util.message.MessageSourceAccessor.getMessage;
 import gov.nasa.worldwind.WWObjectImpl;
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.avlist.AVList;

@@ -119,7 +119,9 @@ public abstract class TiledCurtainLayer extends AbstractLayer implements Bounded
 	{
 		// Offer it to the level set
 		if (this.getLevels() != null)
+		{
 			this.getLevels().setValue(key, value);
+		}
 
 		return super.setValue(key, value);
 	}
@@ -387,13 +389,17 @@ public abstract class TiledCurtainLayer extends AbstractLayer implements Bounded
 		super.setExpiryTime(expiryTime);
 
 		if (expiryTime > 0)
+		{
 			this.levels.setExpiryTime(expiryTime); // remove this in sub-class to use level-specific expiry times
+		}
 	}
 
 	public List<CurtainTextureTile> getTopLevels()
 	{
 		if (this.topLevels == null)
+		{
 			this.createTopLevelTiles();
+		}
 
 		return topLevels;
 	}
@@ -562,7 +568,9 @@ public abstract class TiledCurtainLayer extends AbstractLayer implements Bounded
 		{
 			// Request only tiles with data associated at this level
 			if (!this.levels.isResourceAbsent(tile))
+			{
 				this.requestTexture(dc, tile);
+			}
 		}
 
 		// Set up to use the currentResource tile's texture
@@ -571,7 +579,9 @@ public abstract class TiledCurtainLayer extends AbstractLayer implements Bounded
 			if (this.currentResourceTile.getLevelNumber() == 0 && this.forceLevelZeroLoads
 					&& !this.currentResourceTile.isTextureInMemory(dc.getTextureCache())
 					&& !this.currentResourceTile.isTextureInMemory(dc.getTextureCache()))
+			{
 				this.forceTextureLoad(this.currentResourceTile);
+			}
 
 			if (this.currentResourceTile.isTextureInMemory(dc.getTextureCache()))
 			{
@@ -657,9 +667,13 @@ public abstract class TiledCurtainLayer extends AbstractLayer implements Bounded
 	protected final void doRender(DrawContext dc)
 	{
 		if (this.forceLevelZeroLoads && !this.levelZeroLoaded)
+		{
 			this.loadAllTopLevelTextures(dc);
+		}
 		if (dc.getSurfaceGeometry() == null || dc.getSurfaceGeometry().size() < 1)
+		{
 			return;
+		}
 
 		//TODO add tile boundary rendering to the curtain tile renderer
 		//dc.getGeographicSurfaceTileRenderer().setShowImageTileOutlines(this.showImageTileOutlines);
@@ -705,17 +719,23 @@ public abstract class TiledCurtainLayer extends AbstractLayer implements Bounded
 			gl.glPopAttrib();
 
 			if (this.drawTileIDs)
+			{
 				this.drawTileIDs(dc, this.currentTiles);
+			}
 
 			if (this.drawBoundingVolumes)
+			{
 				this.drawBoundingVolumes(dc, this.currentTiles);
+			}
 
 			// Check texture expiration. Memory-cached textures are checked for expiration only when an explicit,
 			// non-zero expiry time has been set for the layer. If none has been set, the expiry times of the layer's
 			// individual levels are used, but only for images in the local file cache, not textures in memory. This is
 			// to avoid incurring the overhead of checking expiration of in-memory textures, a very rarely used feature.
 			if (this.getExpiryTime() > 0 && this.getExpiryTime() < System.currentTimeMillis())
+			{
 				this.checkTextureExpiration(dc, this.currentTiles);
+			}
 
 			this.currentTiles.clear();
 		}
@@ -729,7 +749,9 @@ public abstract class TiledCurtainLayer extends AbstractLayer implements Bounded
 		for (CurtainTextureTile tile : tiles)
 		{
 			if (tile.isTextureExpired())
+			{
 				this.requestTexture(dc, tile);
+			}
 		}
 	}
 
@@ -789,7 +811,9 @@ public abstract class TiledCurtainLayer extends AbstractLayer implements Bounded
 	protected Vec4 computeReferencePoint(DrawContext dc)
 	{
 		if (dc.getViewportCenterPosition() != null)
+		{
 			return dc.getGlobe().computePointFromPosition(dc.getViewportCenterPosition());
+		}
 
 		java.awt.geom.Rectangle2D viewport = dc.getView().getViewport();
 		int x = (int) viewport.getWidth() / 2;
@@ -797,7 +821,9 @@ public abstract class TiledCurtainLayer extends AbstractLayer implements Bounded
 		{
 			Position pos = dc.getView().computePositionFromScreenPoint(x, y);
 			if (pos == null)
+			{
 				continue;
+			}
 
 			return dc.getGlobe().computePointFromPosition(pos.getLatitude(), pos.getLongitude(), 0d);
 		}
@@ -829,9 +855,9 @@ public abstract class TiledCurtainLayer extends AbstractLayer implements Bounded
 				OGLTextRenderer.getOrCreateTextRenderer(dc.getTextRendererCache(),
 						java.awt.Font.decode("Arial-Plain-13"));
 
-		dc.getGL().getGL2().glDisable(GL2.GL_DEPTH_TEST);
-		dc.getGL().getGL2().glDisable(GL2.GL_BLEND);
-		dc.getGL().getGL2().glDisable(GL2.GL_TEXTURE_2D);
+		dc.getGL().glDisable(GL2.GL_DEPTH_TEST);
+		dc.getGL().glDisable(GL2.GL_BLEND);
+		dc.getGL().glDisable(GL2.GL_TEXTURE_2D);
 
 		textRenderer.beginRendering(viewport.width, viewport.height);
 		textRenderer.setColor(java.awt.Color.YELLOW);
@@ -840,7 +866,9 @@ public abstract class TiledCurtainLayer extends AbstractLayer implements Bounded
 			String tileLabel = tile.getLabel();
 
 			if (tile.getFallbackTile() != null)
+			{
 				tileLabel += "/" + tile.getFallbackTile().getLabel();
+			}
 
 			Vec4 pt = path.getSegmentCenterPoint(dc, tile.getSegment(), curtainTop, curtainBottom, followTerrain);
 			pt = dc.getView().project(pt);
@@ -853,7 +881,7 @@ public abstract class TiledCurtainLayer extends AbstractLayer implements Bounded
 	protected void drawBoundingVolumes(DrawContext dc, List<CurtainTextureTile> tiles)
 	{
 		float[] previousColor = new float[4];
-		dc.getGL().getGL2().glGetFloatv(GL2.GL_CURRENT_COLOR, previousColor, 0);
+		dc.getGL().glGetFloatv(GL2.GL_CURRENT_COLOR, previousColor, 0);
 		dc.getGL().getGL2().glColor3d(0, 1, 0);
 
 		for (CurtainTextureTile tile : tiles)
@@ -861,15 +889,17 @@ public abstract class TiledCurtainLayer extends AbstractLayer implements Bounded
 			Extent extent =
 					path.getSegmentExtent(dc, tile.getSegment(), curtainTop, curtainBottom, subsegments, followTerrain);
 			if (extent instanceof Renderable)
+			{
 				((Renderable) extent).render(dc);
+			}
 
-			/*dc.getGL().getGL2().glBegin(GL.GL_POINTS);
+			/*dc.getGL().glBegin(GL.GL_POINTS);
 			Vec4[] points = path.getPointsInSegment(dc, tile.getSegment(), top, bottom);
 			for (Vec4 point : points)
 			{
-				dc.getGL().getGL2().glVertex3d(point.x, point.y, point.z);
+				dc.getGL().glVertex3d(point.x, point.y, point.z);
 			}
-			dc.getGL().getGL2().glEnd();*/
+			dc.getGL().glEnd();*/
 		}
 
 		dc.getGL().getGL2().glColor4fv(previousColor, 0);
@@ -889,7 +919,9 @@ public abstract class TiledCurtainLayer extends AbstractLayer implements Bounded
 		}
 
 		if (params == null)
+		{
 			params = new AVListImpl();
+		}
 
 		XPath xpath = WWXML.makeXPath();
 
@@ -993,7 +1025,9 @@ public abstract class TiledCurtainLayer extends AbstractLayer implements Bounded
 		}
 
 		if (params == null)
+		{
 			params = new AVListImpl();
+		}
 
 		XPath xpath = WWXML.makeXPath();
 
@@ -1002,7 +1036,9 @@ public abstract class TiledCurtainLayer extends AbstractLayer implements Bounded
 		{
 			Boolean b = WWXML.getBoolean(domElement, "CompressTextures", xpath);
 			if (b != null && b)
+			{
 				params.setValue(AVKey.TEXTURE_FORMAT, "image/dds");
+			}
 		}
 
 		return params;
@@ -1032,6 +1068,8 @@ public abstract class TiledCurtainLayer extends AbstractLayer implements Bounded
 		this.supportedImageFormats.clear();
 
 		if (formats != null)
+		{
 			this.supportedImageFormats.addAll(Arrays.asList(formats));
+		}
 	}
 }

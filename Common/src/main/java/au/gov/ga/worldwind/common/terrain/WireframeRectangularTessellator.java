@@ -191,7 +191,7 @@ public class WireframeRectangularTessellator extends RectangularTessellatorAcces
 	{
 		if (!backfaceCulling)
 		{
-			dc.getGL().getGL2().glDisable(GL2.GL_CULL_FACE);
+			dc.getGL().glDisable(GL2.GL_CULL_FACE);
 		}
 		return super.render(dc, tile, numTextureUnits);
 	}

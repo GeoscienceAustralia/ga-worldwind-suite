@@ -15,9 +15,7 @@
  ******************************************************************************/
 package au.gov.ga.worldwind.common.layers.curtain;
 
-import static au.gov.ga.worldwind.common.util.message.CommonMessageConstants.getTermLevelHeightKey;
-import static au.gov.ga.worldwind.common.util.message.CommonMessageConstants.getTermLevelWidthKey;
-import static au.gov.ga.worldwind.common.util.message.CommonMessageConstants.getTermPathKey;
+import static au.gov.ga.worldwind.common.util.message.CommonMessageConstants.*;
 import static au.gov.ga.worldwind.common.util.message.MessageSourceAccessor.getMessage;
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.avlist.AVList;

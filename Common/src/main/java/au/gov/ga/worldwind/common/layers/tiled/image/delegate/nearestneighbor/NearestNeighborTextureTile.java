@@ -58,7 +58,7 @@ public class NearestNeighborTextureTile extends DelegatorTextureTile
 		//set the magnification filter to nearest neighbor if this tile's level is the layer's last level
 		if ((numLevels > 0 && getLevelNumber() >= numLevels - 1) || dc.getCurrentLayer().isAtMaxResolution())
 		{
-			dc.getGL().getGL2().glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_MAG_FILTER, GL2.GL_NEAREST);
+			dc.getGL().glTexParameteri(GL2.GL_TEXTURE_2D, GL2.GL_TEXTURE_MAG_FILTER, GL2.GL_NEAREST);
 		}
 	}
 }

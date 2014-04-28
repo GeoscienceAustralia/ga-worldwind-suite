@@ -19,7 +19,6 @@ import gov.nasa.worldwind.util.OGLStackHandler;
 
 import java.awt.Dimension;
 
-import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
 
 import au.gov.ga.worldwind.common.util.Validate;

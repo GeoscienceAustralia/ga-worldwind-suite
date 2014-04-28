@@ -20,6 +20,8 @@ import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.avlist.AVListImpl;
 import gov.nasa.worldwind.layers.BasicLayerFactory;
 import gov.nasa.worldwind.layers.Layer;
+import gov.nasa.worldwind.layers.SkyGradientLayer;
+import gov.nasa.worldwind.layers.StarsLayer;
 import gov.nasa.worldwind.layers.mercator.BasicMercatorTiledImageLayer;
 import gov.nasa.worldwind.ogc.OGCConstants;
 import gov.nasa.worldwind.util.WWXML;
@@ -40,6 +42,8 @@ import au.gov.ga.worldwind.common.layers.screenoverlay.ScreenOverlayLayerFactory
 import au.gov.ga.worldwind.common.layers.shapefile.surfaceshape.ShapefileLayerFactory;
 import au.gov.ga.worldwind.common.layers.sphere.SphereLayerFactory;
 import au.gov.ga.worldwind.common.layers.tiled.image.delegate.DelegatorTiledImageLayer;
+import au.gov.ga.worldwind.common.layers.transform.TransformSkyGradientLayer;
+import au.gov.ga.worldwind.common.layers.transform.TransformStarsLayer;
 import au.gov.ga.worldwind.common.layers.volume.VolumeLayerFactory;
 import au.gov.ga.worldwind.common.util.XMLUtil;
 
@@ -110,6 +114,28 @@ public class LayerFactory extends BasicLayerFactory
 			return ScreenOverlayLayerFactory.createScreenOverlayLayer(domElement, params);
 		}
 
+		String className = WWXML.getText(domElement, "@className");
+		if (className != null && className.length() > 0)
+		{
+			try
+			{
+				Class<?> c = Class.forName(className);
+				if (c.equals(StarsLayer.class))
+				{
+					className = TransformStarsLayer.class.getName();
+				}
+				else if (c.equals(SkyGradientLayer.class))
+				{
+					className = TransformSkyGradientLayer.class.getName();
+				}
+			}
+			catch (ClassNotFoundException e)
+			{
+			}
+
+			domElement.setAttribute("className", className);
+		}
+
 		return super.createFromLayerDocument(domElement, params);
 	}
 
@@ -137,7 +163,7 @@ public class LayerFactory extends BasicLayerFactory
 
 		return layer;
 	}
-	
+
 	protected Layer createTiledMercatorLayer(Element domElement, AVList params)
 	{
 		if (params == null)
