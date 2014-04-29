@@ -33,6 +33,7 @@ import au.gov.ga.worldwind.common.terrain.ElevationModelFactory;
 import au.gov.ga.worldwind.common.util.AVKeyMore;
 import au.gov.ga.worldwind.common.util.message.MessageSourceAccessor;
 import au.gov.ga.worldwind.common.view.stereo.StereoViewDelegate;
+import au.gov.ga.worldwind.common.view.target.TargetOrbitViewInputHandler;
 
 /**
  * Class that holds and initialises the configuration details for the Animator application
@@ -91,6 +92,7 @@ public class AnimatorConfiguration
 	{
 		Configuration.setValue(AVKey.LAYERS_CLASS_NAMES, "");
 		Configuration.setValue(AVKey.VIEW_CLASS_NAME, AnimatorView.class.getName());
+		Configuration.setValue(AVKey.VIEW_INPUT_HANDLER_CLASS_NAME, TargetOrbitViewInputHandler.class.getName());
 		Configuration.setValue(AVKeyMore.DELEGATE_VIEW_DELEGATE_CLASS_NAME, StereoViewDelegate.class.getName());
 		Configuration.setValue(AVKey.SCENE_CONTROLLER_CLASS_NAME, AnimatorSceneController.class.getName());
 		Configuration.setValue(AVKey.TASK_SERVICE_CLASS_NAME, ImmediateTaskService.class.getName());
