@@ -19,6 +19,7 @@ import gov.nasa.worldwind.BasicSceneController;
 import gov.nasa.worldwind.SceneController;
 import gov.nasa.worldwind.geom.Sector;
 import gov.nasa.worldwind.render.DrawContext;
+import gov.nasa.worldwind.render.SurfaceObjectTileBuilder;
 import gov.nasa.worldwind.terrain.SectorGeometryList;
 import gov.nasa.worldwind.terrain.Tessellator;
 
@@ -64,6 +65,12 @@ public class ExtendedSceneController extends BasicSceneController implements Dra
 	protected ExtendedDrawContext wrapDrawContext(DrawContext dc)
 	{
 		return new ExtendedDrawContext(dc);
+	}
+	
+	@Override
+	protected SurfaceObjectTileBuilder createSurfaceObjectTileBuilder()
+	{
+		return new OffscreenSurfaceObjectRenderer();
 	}
 
 	public void clipSector(Sector sector)

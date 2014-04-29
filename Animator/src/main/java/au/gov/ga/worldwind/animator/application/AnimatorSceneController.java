@@ -16,7 +16,6 @@
 package au.gov.ga.worldwind.animator.application;
 
 import gov.nasa.worldwind.render.DrawContext;
-import gov.nasa.worldwind.render.SurfaceObjectTileBuilder;
 
 import java.awt.Dimension;
 import java.util.ArrayList;
@@ -28,7 +27,6 @@ import au.gov.ga.worldwind.animator.animation.Animation;
 import au.gov.ga.worldwind.animator.application.effects.Effect;
 import au.gov.ga.worldwind.animator.application.render.OffscreenRenderer;
 import au.gov.ga.worldwind.common.render.ExtendedSceneController;
-import au.gov.ga.worldwind.common.render.OffscreenSurfaceObjectRenderer;
 
 /**
  * A custom scene controller that supports {@link Effect}s.
@@ -114,12 +112,6 @@ public class AnimatorSceneController extends ExtendedSceneController
 		}
 
 		lastEffect.drawFrameBufferWithEffect(dc, dimensions); //draw the final effect's frame buffer onto the final buffer
-	}
-
-	@Override
-	protected SurfaceObjectTileBuilder createSurfaceObjectTileBuilder()
-	{
-		return new OffscreenSurfaceObjectRenderer();
 	}
 
 	/**
