@@ -179,15 +179,7 @@ public class ExtendedSceneController extends BasicSceneController implements Dra
 		//if there's no enabled effects, draw normally
 		if (effects.isEmpty())
 		{
-			try
-			{
-				sectorClipping.enableClipping(dc);
-				super.draw(dc);
-			}
-			finally
-			{
-				sectorClipping.disableClipping(dc);
-			}
+			clippedDraw(dc);
 			return;
 		}
 
@@ -199,15 +191,7 @@ public class ExtendedSceneController extends BasicSceneController implements Dra
 			firstEffect.bindFrameBuffer(dc, dimensions);
 			this.clearFrame(dc);
 			//draw the actual scene onto the first effect's frame buffer:
-			try
-			{
-				sectorClipping.enableClipping(dc);
-				super.draw(dc);
-			}
-			finally
-			{
-				sectorClipping.disableClipping(dc);
-			}
+			clippedDraw(dc);
 		}
 		finally
 		{
@@ -230,6 +214,24 @@ public class ExtendedSceneController extends BasicSceneController implements Dra
 		}
 
 		lastEffect.drawFrameBufferWithEffect(dc, dimensions); //draw the final effect's frame buffer onto the final buffer
+	}
+
+	protected void clippedDraw(DrawContext dc)
+	{
+		try
+		{
+			sectorClipping.enableClipping(dc);
+			doDraw(dc);
+		}
+		finally
+		{
+			sectorClipping.disableClipping(dc);
+		}
+	}
+	
+	protected void doDraw(DrawContext dc)
+	{
+		super.draw(dc);
 	}
 
 	@Override
