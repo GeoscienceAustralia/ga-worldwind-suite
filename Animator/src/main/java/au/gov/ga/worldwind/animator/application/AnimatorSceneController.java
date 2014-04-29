@@ -27,8 +27,8 @@ import javax.media.opengl.GL2;
 import au.gov.ga.worldwind.animator.animation.Animation;
 import au.gov.ga.worldwind.animator.application.effects.Effect;
 import au.gov.ga.worldwind.animator.application.render.OffscreenRenderer;
-import au.gov.ga.worldwind.animator.application.render.OffscreenSurfaceObjectRenderer;
 import au.gov.ga.worldwind.common.render.ExtendedSceneController;
+import au.gov.ga.worldwind.common.render.OffscreenSurfaceObjectRenderer;
 
 /**
  * A custom scene controller that supports {@link Effect}s.

@@ -13,16 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package au.gov.ga.worldwind.animator.application.render;
+package au.gov.ga.worldwind.common.render;
 
 import gov.nasa.worldwind.render.DrawContext;
 import gov.nasa.worldwind.render.SurfaceObjectTileBuilder;
 import gov.nasa.worldwind.util.OGLRenderToTextureSupport;
 
 import javax.media.opengl.GL2;
-
-import au.gov.ga.worldwind.common.render.FrameBuffer;
-import au.gov.ga.worldwind.common.render.FrameBufferStack;
 
 /**
  * This {@link SurfaceObjectTileBuilder} subclass uses the
