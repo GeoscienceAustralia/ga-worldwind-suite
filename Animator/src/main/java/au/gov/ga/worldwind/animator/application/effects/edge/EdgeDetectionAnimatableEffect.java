@@ -18,11 +18,6 @@ package au.gov.ga.worldwind.animator.application.effects.edge;
 import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getEdgeDetectionNameKey;
 import static au.gov.ga.worldwind.common.util.message.MessageSourceAccessor.getMessageOrDefault;
 import gov.nasa.worldwind.avlist.AVList;
-import gov.nasa.worldwind.render.DrawContext;
-
-import java.awt.Dimension;
-
-import javax.media.opengl.GL2;
 
 import org.w3c.dom.Element;
 
@@ -30,35 +25,33 @@ import au.gov.ga.worldwind.animator.animation.AnimatableBase;
 import au.gov.ga.worldwind.animator.animation.Animation;
 import au.gov.ga.worldwind.animator.animation.io.AnimationFileVersion;
 import au.gov.ga.worldwind.animator.animation.io.AnimationIOConstants;
-import au.gov.ga.worldwind.animator.application.effects.Effect;
-import au.gov.ga.worldwind.animator.application.effects.EffectBase;
-import au.gov.ga.worldwind.common.render.FrameBuffer;
+import au.gov.ga.worldwind.animator.application.effects.AnimatableEffect;
+import au.gov.ga.worldwind.animator.application.effects.AnimatableEffectBase;
+import au.gov.ga.worldwind.common.effects.edge.EdgeDetectionEffect;
 
 /**
- * Example {@link Effect} that convolves the input with a kernel matrix,
+ * Example {@link AnimatableEffect} that convolves the input with a kernel matrix,
  * producing different filter effects like blurring, edge detection, sharpening,
  * embossing, etc.
  * 
  * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
-public class EdgeDetectionEffect extends EffectBase
+public class EdgeDetectionAnimatableEffect extends AnimatableEffectBase<EdgeDetectionEffect>
 {
-	private final EdgeShader edgeShader = new EdgeShader();
-
-	public EdgeDetectionEffect(String name, Animation animation)
+	public EdgeDetectionAnimatableEffect(String name, Animation animation)
 	{
-		super(name, animation);
+		super(name, animation, new EdgeDetectionEffect());
 	}
 
-	protected EdgeDetectionEffect()
+	protected EdgeDetectionAnimatableEffect()
 	{
-		super();
+		super(new EdgeDetectionEffect());
 	}
 
 	@Override
-	public Effect createWithAnimation(Animation animation)
+	public AnimatableEffect createWithAnimation(Animation animation)
 	{
-		return new EdgeDetectionEffect(null, animation);
+		return new EdgeDetectionAnimatableEffect(null, animation);
 	}
 
 	@Override
@@ -71,35 +64,12 @@ public class EdgeDetectionEffect extends EffectBase
 	protected AnimatableBase createAnimatableFromXml(String name, Animation animation, boolean enabled,
 			Element element, AnimationFileVersion version, AVList context)
 	{
-		return new EdgeDetectionEffect(name, animation);
+		return new EdgeDetectionAnimatableEffect(name, animation);
 	}
 
 	@Override
 	public String getDefaultName()
 	{
 		return getMessageOrDefault(getEdgeDetectionNameKey(), "Edge Detection");
-	}
-
-	@Override
-	protected void drawFrameBufferWithEffect(DrawContext dc, Dimension dimensions, FrameBuffer frameBuffer)
-	{
-		GL2 gl = dc.getGL().getGL2();
-
-		edgeShader.createIfRequired(gl);
-		try
-		{
-			edgeShader.use(gl, dimensions.width, dimensions.height);
-			FrameBuffer.renderTexturedQuad(gl, frameBuffer.getTexture().getId(), frameBuffer.getDepth().getId());
-		}
-		finally
-		{
-			edgeShader.unuse(gl);
-		}
-	}
-
-	@Override
-	protected void releaseEffect(DrawContext dc)
-	{
-		edgeShader.deleteIfCreated(dc.getGL().getGL2());
 	}
 }

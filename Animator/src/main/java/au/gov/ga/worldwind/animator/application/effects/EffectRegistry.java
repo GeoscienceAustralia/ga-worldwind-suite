@@ -32,7 +32,7 @@ import au.gov.ga.worldwind.animator.animation.AnimatableFactoryRegistry;
 import au.gov.ga.worldwind.animator.animation.io.AnimationFileVersion;
 
 /**
- * Singleton with which {@link Effect}s are registered. To be able to use an
+ * Singleton with which {@link AnimatableEffect}s are registered. To be able to use an
  * effect in the Animator, it must first be registered with this class. All
  * registered effects are displayed by the {@link EffectDialog}. This class is
  * also used for effect deserialization.
@@ -46,9 +46,9 @@ public enum EffectRegistry implements AnimatableFactory
 	 */
 	instance;
 
-	private final Map<String, Class<? extends Effect>> elementToEffectMap =
-			new HashMap<String, Class<? extends Effect>>();
-	private final SortedSet<Class<? extends Effect>> effects = new TreeSet<Class<? extends Effect>>(
+	private final Map<String, Class<? extends AnimatableEffect>> elementToEffectMap =
+			new HashMap<String, Class<? extends AnimatableEffect>>();
+	private final SortedSet<Class<? extends AnimatableEffect>> effects = new TreeSet<Class<? extends AnimatableEffect>>(
 			new EffectComparator());
 
 	private EffectRegistry()
@@ -58,12 +58,12 @@ public enum EffectRegistry implements AnimatableFactory
 	}
 
 	/**
-	 * Simple {@link Comparator} that sorts {@link Effect}s by name.
+	 * Simple {@link Comparator} that sorts {@link AnimatableEffect}s by name.
 	 */
-	private class EffectComparator implements Comparator<Class<? extends Effect>>
+	private class EffectComparator implements Comparator<Class<? extends AnimatableEffect>>
 	{
 		@Override
-		public int compare(Class<? extends Effect> o1, Class<? extends Effect> o2)
+		public int compare(Class<? extends AnimatableEffect> o1, Class<? extends AnimatableEffect> o2)
 		{
 			if (o1 == o2)
 				return 0;
@@ -78,7 +78,7 @@ public enum EffectRegistry implements AnimatableFactory
 	/**
 	 * @return The list of effects registered, sorted by name.
 	 */
-	public SortedSet<Class<? extends Effect>> getEffects()
+	public SortedSet<Class<? extends AnimatableEffect>> getEffects()
 	{
 		return Collections.unmodifiableSortedSet(effects);
 	}
@@ -89,9 +89,9 @@ public enum EffectRegistry implements AnimatableFactory
 	 * @param effect
 	 *            Effect to register
 	 */
-	public void registerEffect(Class<? extends Effect> effect)
+	public void registerEffect(Class<? extends AnimatableEffect> effect)
 	{
-		Effect effectInstance = AnimatableInstanciator.instantiate(effect);
+		AnimatableEffect effectInstance = AnimatableInstanciator.instantiate(effect);
 		effects.add(effect);
 		elementToEffectMap
 				.put(effectInstance.getXmlElementName(AnimationFileVersion.VERSION020.getConstants()), effect);
@@ -104,9 +104,9 @@ public enum EffectRegistry implements AnimatableFactory
 	 *            Effect class to get the default name for
 	 * @return Default name of the given effect
 	 */
-	public String getEffectName(Class<? extends Effect> effect)
+	public String getEffectName(Class<? extends AnimatableEffect> effect)
 	{
-		Effect effectInstance = AnimatableInstanciator.instantiate(effect);
+		AnimatableEffect effectInstance = AnimatableInstanciator.instantiate(effect);
 		String name = effectInstance.getName();
 		if (name == null)
 		{
@@ -122,7 +122,7 @@ public enum EffectRegistry implements AnimatableFactory
 	@Override
 	public Animatable fromXml(Element element, AnimationFileVersion version, AVList context)
 	{
-		Class<? extends Effect> effectClass = elementToEffectMap.get(element.getNodeName());
+		Class<? extends AnimatableEffect> effectClass = elementToEffectMap.get(element.getNodeName());
 		if (effectClass == null)
 		{
 			return null;

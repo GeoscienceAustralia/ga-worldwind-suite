@@ -35,13 +35,13 @@ import au.gov.ga.worldwind.common.util.Validate;
 
 /**
  * A {@link Parameter} which controls the focus distance of the
- * {@link DepthOfFieldEffect}. Everything at this depth is in focus.
+ * {@link DepthOfFieldAnimatableEffect}. Everything at this depth is in focus.
  * 
  * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
 public class DepthOfFieldFocusParameter extends EffectParameterBase
 {
-	public DepthOfFieldFocusParameter(String name, Animation animation, DepthOfFieldEffect effect)
+	public DepthOfFieldFocusParameter(String name, Animation animation, DepthOfFieldAnimatableEffect effect)
 	{
 		super(name, animation, effect);
 	}
@@ -67,7 +67,7 @@ public class DepthOfFieldFocusParameter extends EffectParameterBase
 	@Override
 	protected void doApplyValue(double value)
 	{
-		((DepthOfFieldEffect) getEffect()).setFocus(value);
+		((DepthOfFieldAnimatableEffect) getEffect()).getEffect().setFocus(value);
 	}
 
 	@Override
@@ -91,7 +91,7 @@ public class DepthOfFieldFocusParameter extends EffectParameterBase
 			Element parameterElement, AnimationFileVersion version, AVList context)
 	{
 		AnimationIOConstants constants = version.getConstants();
-		DepthOfFieldEffect parameterEffect = (DepthOfFieldEffect) context.getValue(constants.getCurrentEffectKey());
+		DepthOfFieldAnimatableEffect parameterEffect = (DepthOfFieldAnimatableEffect) context.getValue(constants.getCurrentEffectKey());
 		Validate.notNull(parameterEffect,
 				"No effect found in the context. Expected one under the key '" + constants.getCurrentEffectKey() + "'.");
 

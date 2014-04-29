@@ -33,13 +33,13 @@ import au.gov.ga.worldwind.common.util.Validate;
 
 /**
  * A {@link Parameter} which controls the far limit of the
- * {@link DepthOfFieldEffect}. Everything beyond this depth is fully blurred.
+ * {@link DepthOfFieldAnimatableEffect}. Everything beyond this depth is fully blurred.
  * 
  * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
 public class DepthOfFieldFarParameter extends EffectParameterBase
 {
-	public DepthOfFieldFarParameter(String name, Animation animation, DepthOfFieldEffect effect)
+	public DepthOfFieldFarParameter(String name, Animation animation, DepthOfFieldAnimatableEffect effect)
 	{
 		super(name, animation, effect);
 	}
@@ -65,7 +65,7 @@ public class DepthOfFieldFarParameter extends EffectParameterBase
 	@Override
 	protected void doApplyValue(double value)
 	{
-		((DepthOfFieldEffect) getEffect()).setFar(value);
+		((DepthOfFieldAnimatableEffect) getEffect()).getEffect().setFar(value);
 	}
 
 	@Override
@@ -86,7 +86,7 @@ public class DepthOfFieldFarParameter extends EffectParameterBase
 			Element parameterElement, AnimationFileVersion version, AVList context)
 	{
 		AnimationIOConstants constants = version.getConstants();
-		DepthOfFieldEffect parameterEffect = (DepthOfFieldEffect) context.getValue(constants.getCurrentEffectKey());
+		DepthOfFieldAnimatableEffect parameterEffect = (DepthOfFieldAnimatableEffect) context.getValue(constants.getCurrentEffectKey());
 		Validate.notNull(parameterEffect,
 				"No effect found in the context. Expected one under the key '" + constants.getCurrentEffectKey() + "'.");
 

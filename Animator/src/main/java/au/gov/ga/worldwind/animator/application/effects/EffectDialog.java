@@ -39,7 +39,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 /**
- * A {@link JDialog} that displays a list of {@link Effect}s, allowing the user
+ * A {@link JDialog} that displays a list of {@link AnimatableEffect}s, allowing the user
  * to select an effect to add to the current animation.
  * 
  * @author Michael de Hoog (michael.dehoog@ga.gov.au)
@@ -54,7 +54,7 @@ public class EffectDialog extends JDialog
 	 *            Dialog's parent
 	 * @return The effect class selected, or null if the user cancelled.
 	 */
-	public static Class<? extends Effect> collectEffect(Frame parent)
+	public static Class<? extends AnimatableEffect> collectEffect(Frame parent)
 	{
 		EffectDialog dialog = new EffectDialog(parent);
 		dialog.setVisible(true);
@@ -94,8 +94,8 @@ public class EffectDialog extends JDialog
 		int spacing = 5;
 
 		DefaultListModel model = new DefaultListModel();
-		SortedSet<Class<? extends Effect>> effects = EffectRegistry.instance.getEffects();
-		for (Class<? extends Effect> effect : effects)
+		SortedSet<Class<? extends AnimatableEffect>> effects = EffectRegistry.instance.getEffects();
+		for (Class<? extends AnimatableEffect> effect : effects)
 		{
 			model.addElement(new EffectListElement(effect));
 		}
@@ -157,7 +157,7 @@ public class EffectDialog extends JDialog
 		return response;
 	}
 
-	public Class<? extends Effect> getEffect()
+	public Class<? extends AnimatableEffect> getEffect()
 	{
 		Object selected = effectList.getSelectedValue();
 		if (selected != null && selected instanceof EffectListElement)
@@ -169,9 +169,9 @@ public class EffectDialog extends JDialog
 
 	private class EffectListElement
 	{
-		public final Class<? extends Effect> effect;
+		public final Class<? extends AnimatableEffect> effect;
 
-		public EffectListElement(Class<? extends Effect> effect)
+		public EffectListElement(Class<? extends AnimatableEffect> effect)
 		{
 			this.effect = effect;
 		}

@@ -23,21 +23,19 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import javax.media.opengl.GL2;
-
 import au.gov.ga.worldwind.animator.animation.AnimatableBase;
 import au.gov.ga.worldwind.animator.animation.Animation;
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
-import au.gov.ga.worldwind.common.render.FrameBuffer;
+import au.gov.ga.worldwind.common.effects.Effect;
 import au.gov.ga.worldwind.common.util.Validate;
 
 /**
- * Abstract base implementation of the {@link Effect} interface. Most
- * {@link Effect} implementations should use this as their base class.
+ * Abstract base implementation of the {@link AnimatableEffect} interface. Most
+ * {@link AnimatableEffect} implementations should use this as their base class.
  * 
  * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
-public abstract class EffectBase extends AnimatableBase implements Effect
+public abstract class AnimatableEffectBase<E extends Effect> extends AnimatableBase implements AnimatableEffect
 {
 	/**
 	 * The animatable parameters used by this effect.
@@ -45,19 +43,26 @@ public abstract class EffectBase extends AnimatableBase implements Effect
 	protected final List<Parameter> parameters = new ArrayList<Parameter>();
 
 	/**
-	 * The frame buffer to draw to for this effect.
+	 * Actual effect implementation
 	 */
-	protected final FrameBuffer frameBuffer = new FrameBuffer(1, true);
+	protected final E effect;
 
-	public EffectBase(String name, Animation animation)
+	public AnimatableEffectBase(String name, Animation animation, E effect)
 	{
 		super(name, animation);
+		this.effect = effect;
 	}
 
-	protected EffectBase()
+	protected AnimatableEffectBase(E effect)
 	{
 		super();
+		this.effect = effect;
 		setName(getDefaultName());
+	}
+
+	public E getEffect()
+	{
+		return effect;
 	}
 
 	@Override
@@ -93,67 +98,24 @@ public abstract class EffectBase extends AnimatableBase implements Effect
 	@Override
 	public final void bindFrameBuffer(DrawContext dc, Dimension dimensions)
 	{
-		GL2 gl = dc.getGL().getGL2();
-
-		//this will create the framebuffer if it doesn't exist
-		frameBuffer.resize(gl, dimensions);
-		resizeExtraFrameBuffers(dc, dimensions);
-		frameBuffer.bind(gl);
-	}
-
-	/**
-	 * If this effect requires any extra frame buffers, resize them here.
-	 * 
-	 * @param dc
-	 *            Draw context
-	 * @param dimensions
-	 *            Render dimensions
-	 */
-	protected void resizeExtraFrameBuffers(DrawContext dc, Dimension dimensions)
-	{
+		effect.bindFrameBuffer(dc, dimensions);
 	}
 
 	@Override
 	public final void unbindFrameBuffer(DrawContext dc, Dimension dimensions)
 	{
-		frameBuffer.unbind(dc.getGL().getGL2());
+		effect.unbindFrameBuffer(dc, dimensions);
 	}
 
 	@Override
 	public final void drawFrameBufferWithEffect(DrawContext dc, Dimension dimensions)
 	{
-		drawFrameBufferWithEffect(dc, dimensions, frameBuffer);
+		effect.drawFrameBufferWithEffect(dc, dimensions);
 	}
 
 	@Override
 	public final void releaseResources(DrawContext dc)
 	{
-		frameBuffer.deleteIfCreated(dc.getGL().getGL2());
-		releaseEffect(dc);
+		effect.releaseResources(dc);
 	}
-
-	/**
-	 * Called after the scene is rendered, and possibly after another
-	 * {@link Effect}'s frame buffer has been bound. The effect should render
-	 * it's framebuffer using it's effect shader here.
-	 * 
-	 * @param dc
-	 *            Draw context
-	 * @param dimensions
-	 *            Dimensions of the viewport (includes render scale during
-	 *            rendering)
-	 * @param frameBuffer
-	 *            {@link FrameBuffer} containing the scene to apply the effect
-	 *            to.
-	 */
-	protected abstract void drawFrameBufferWithEffect(DrawContext dc, Dimension dimensions, FrameBuffer frameBuffer);
-
-	/**
-	 * Release any resources associated with this effect. This is called every
-	 * frame if the effect is disabled.
-	 * 
-	 * @param dc
-	 *            Draw context
-	 */
-	protected abstract void releaseEffect(DrawContext dc);
 }

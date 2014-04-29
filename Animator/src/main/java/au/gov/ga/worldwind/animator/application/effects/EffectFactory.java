@@ -20,7 +20,7 @@ import java.lang.reflect.Constructor;
 import au.gov.ga.worldwind.animator.animation.Animation;
 
 /**
- * Simple helper class for instanciating new {@link Effect} instances.
+ * Simple helper class for instanciating new {@link AnimatableEffect} instances.
  * 
  * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
@@ -36,13 +36,13 @@ public class EffectFactory
 	 * @return New Effect instance
 	 */
 	@SuppressWarnings("unchecked")
-	public static <E extends Effect> E createEffect(Class<E> c, Animation animation)
+	public static <E extends AnimatableEffect> E createEffect(Class<E> c, Animation animation)
 	{
 		try
 		{
 			Constructor<E> constructor = c.getDeclaredConstructor();
 			constructor.setAccessible(true);
-			Effect effectInstance = constructor.newInstance();
+			AnimatableEffect effectInstance = constructor.newInstance();
 			return (E) effectInstance.createWithAnimation(animation);
 		}
 		catch (Exception e)

@@ -15,8 +15,8 @@
  ******************************************************************************/
 package au.gov.ga.worldwind.animator.application.effects;
 
-import au.gov.ga.worldwind.animator.application.effects.depthoffield.DepthOfFieldEffect;
-import au.gov.ga.worldwind.animator.application.effects.edge.EdgeDetectionEffect;
+import au.gov.ga.worldwind.animator.application.effects.depthoffield.DepthOfFieldAnimatableEffect;
+import au.gov.ga.worldwind.animator.application.effects.edge.EdgeDetectionAnimatableEffect;
 
 /**
  * Helper class that simply registers the known built-in effects with the
@@ -28,7 +28,7 @@ public class BuiltInEffects
 {
 	public static void registerBuiltInEffects()
 	{
-		EffectRegistry.instance.registerEffect(DepthOfFieldEffect.class);
-		EffectRegistry.instance.registerEffect(EdgeDetectionEffect.class);
+		EffectRegistry.instance.registerEffect(DepthOfFieldAnimatableEffect.class);
+		EffectRegistry.instance.registerEffect(EdgeDetectionAnimatableEffect.class);
 	}
 }

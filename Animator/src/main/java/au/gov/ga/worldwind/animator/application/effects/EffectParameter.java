@@ -18,19 +18,19 @@ package au.gov.ga.worldwind.animator.application.effects;
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 
 /**
- * An interface for parameters that control properties of an {@link Effect}.
+ * An interface for parameters that control properties of an {@link AnimatableEffect}.
  * 
  * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
 public interface EffectParameter extends Parameter
 {
 	/**
-	 * @return The {@link Effect} this parameter is associated with
+	 * @return The {@link AnimatableEffect} this parameter is associated with
 	 */
-	Effect getEffect();
+	AnimatableEffect getEffect();
 	
 	/**
-	 * Apply this parameter's state to it's associated {@link Effect} for the current frame
+	 * Apply this parameter's state to it's associated {@link AnimatableEffect} for the current frame
 	 */
 	void apply();
 }

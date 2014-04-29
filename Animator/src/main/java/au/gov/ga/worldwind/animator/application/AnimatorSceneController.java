@@ -18,18 +18,18 @@ package au.gov.ga.worldwind.animator.application;
 import gov.nasa.worldwind.render.DrawContext;
 
 import java.awt.Dimension;
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.media.opengl.GL2;
 
 import au.gov.ga.worldwind.animator.animation.Animation;
-import au.gov.ga.worldwind.animator.application.effects.Effect;
+import au.gov.ga.worldwind.animator.application.effects.AnimatableEffect;
 import au.gov.ga.worldwind.animator.application.render.OffscreenRenderer;
+import au.gov.ga.worldwind.common.effects.Effect;
 import au.gov.ga.worldwind.common.render.ExtendedSceneController;
 
 /**
- * A custom scene controller that supports {@link Effect}s.
+ * A custom scene controller that supports {@link AnimatableEffect}s.
  * 
  * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
@@ -52,66 +52,15 @@ public class AnimatorSceneController extends ExtendedSceneController
 	}
 	
 	@Override
-	public void draw(DrawContext dc)
+	protected Dimension getDrawDimensions()
 	{
-		//The draw call is the lowest level rendering call for the SceneController,
-		//so we still have depth information at this level, which is needed for DoF.
-		Dimension dimensions =
-				renderDimensions != null ? renderDimensions : new Dimension(dc.getDrawableWidth(),
-						dc.getDrawableHeight());
-
-		//retrieve the list of effects, put them in a new list
-		List<Effect> effects = new ArrayList<Effect>(animation.getEffects());
-
-		//remove any disabled effects
-		for (int i = effects.size() - 1; i >= 0; i--)
-		{
-			Effect effect = effects.get(i);
-			if (!effect.isEnabled())
-			{
-				effect.releaseResources(dc);
-				effects.remove(i);
-			}
-		}
-
-		//if there's no enabled effects, draw normally
-		if (effects.isEmpty())
-		{
-			super.draw(dc);
-			return;
-		}
-
-		Effect firstEffect = effects.get(0);
-		Effect lastEffect = effects.get(effects.size() - 1);
-
-		try
-		{
-			firstEffect.bindFrameBuffer(dc, dimensions);
-			this.clearFrame(dc);
-			//draw the actual scene onto the first effect's frame buffer:
-			super.draw(dc);
-		}
-		finally
-		{
-			firstEffect.unbindFrameBuffer(dc, dimensions);
-		}
-
-		for (int i = 1; i < effects.size(); i++)
-		{
-			try
-			{
-				effects.get(i).bindFrameBuffer(dc, dimensions);
-				this.clearFrame(dc);
-				//draw the previous effect's frame buffer onto the current frame buffer:
-				effects.get(i - 1).drawFrameBufferWithEffect(dc, dimensions);
-			}
-			finally
-			{
-				effects.get(i).unbindFrameBuffer(dc, dimensions);
-			}
-		}
-
-		lastEffect.drawFrameBufferWithEffect(dc, dimensions); //draw the final effect's frame buffer onto the final buffer
+		return renderDimensions != null ? renderDimensions : super.getDrawDimensions();
+	}
+	
+	@Override
+	public List<? extends Effect> getEffects()
+	{
+		return animation.getEffects();
 	}
 
 	/**

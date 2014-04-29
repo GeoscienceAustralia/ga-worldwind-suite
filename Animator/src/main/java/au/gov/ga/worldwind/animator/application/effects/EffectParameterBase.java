@@ -28,7 +28,7 @@ import au.gov.ga.worldwind.common.util.Validate;
 public abstract class EffectParameterBase extends ParameterBase implements EffectParameter
 {
 	/** The effect this parameter is associated with */
-	private Effect effect;
+	private AnimatableEffect effect;
 
 	/**
 	 * @param name
@@ -38,7 +38,7 @@ public abstract class EffectParameterBase extends ParameterBase implements Effec
 	 * @param effect
 	 *            The effect associated with this parameter
 	 */
-	public EffectParameterBase(String name, Animation animation, Effect effect)
+	public EffectParameterBase(String name, Animation animation, AnimatableEffect effect)
 	{
 		super(name, animation);
 		Validate.notNull(effect, "An effect is required");
@@ -54,12 +54,12 @@ public abstract class EffectParameterBase extends ParameterBase implements Effec
 	}
 
 	@Override
-	public Effect getEffect()
+	public AnimatableEffect getEffect()
 	{
 		return effect;
 	}
 
-	protected void setEffect(Effect effect)
+	protected void setEffect(AnimatableEffect effect)
 	{
 		this.effect = effect;
 	}
