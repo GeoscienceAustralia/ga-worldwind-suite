@@ -58,7 +58,7 @@ public class AnimatorSceneController extends ExtendedSceneController
 	}
 	
 	@Override
-	public List<? extends Effect> getEffects()
+	public List<? extends Effect> getDrawEffects()
 	{
 		return animation.getEffects();
 	}
