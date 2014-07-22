@@ -518,6 +518,8 @@
 		 * otherwise if the L/T/F parameters are valid and blankError is true, return blank matching F
 		 * otherwise return 404
 		 */
+		
+		response.addHeader("Access-Control-Allow-Origin", "*");
 
 		//get the parameters from the request
 		String X = request.getParameter("X"); //col
