@@ -38,11 +38,11 @@ public class TransformStarsLayer extends ProjectionStarsLayer
 		boolean loaded = false;
 		if (dc.getView() instanceof IDelegateView)
 		{
-			IDelegateView transform = (IDelegateView) dc.getView();
+			IDelegateView view = (IDelegateView) dc.getView();
 			//near is the distance from the origin
-			double near = transform.getEyePoint().getLength3();
+			double near = view.getEyePoint().getLength3();
 			double far = this.radius + near;
-			Matrix projection = transform.computeProjection(near, far);
+			Matrix projection = view.computeProjection(near, far);
 
 			if (projection != null)
 			{
@@ -60,6 +60,24 @@ public class TransformStarsLayer extends ProjectionStarsLayer
 		if (!loaded)
 		{
 			super.applyDrawProjection(dc, ogsh);
+		}
+	}
+
+	@Override
+	public void doRender(DrawContext dc)
+	{
+		//disable fog for stars
+		GL2 gl = dc.getGL().getGL2();
+		OGLStackHandler ogsh = new OGLStackHandler();
+		try
+		{
+			ogsh.pushAttrib(gl, GL2.GL_FOG_BIT);
+			gl.glDisable(GL2.GL_FOG);
+			super.doRender(dc);
+		}
+		finally
+		{
+			ogsh.pop(gl);
 		}
 	}
 }
