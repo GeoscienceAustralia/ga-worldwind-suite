@@ -52,6 +52,10 @@ public class BaseOrbitView extends AbstractView implements OrbitView
 	protected final BaseOrbitViewCollisionSupport collisionSupport = new BaseOrbitViewCollisionSupport();
 	protected boolean resolvingCollisions;
 
+	protected Position appliedEyePosition;
+	protected Vec4 appliedEyePoint;
+	protected Position unsetEyePosition;
+
 	public BaseOrbitView()
 	{
 		this.state = createViewState();
@@ -135,30 +139,50 @@ public class BaseOrbitView extends AbstractView implements OrbitView
 	@Override
 	public Position getEyePosition()
 	{
-		return state.getEye(globe);
+		if (appliedEyePosition != null)
+		{
+			return appliedEyePosition;
+		}
+		return getCurrentEyePosition();
 	}
 
 	@Override
 	public Vec4 getEyePoint()
 	{
-		return state.getEyePoint(globe);
+		if (appliedEyePoint != null)
+		{
+			return appliedEyePoint;
+		}
+		return getCurrentEyePoint();
 	}
 
 	@Override
 	public Vec4 getUpVector()
 	{
+		if (globe == null)
+		{
+			return Vec4.ZERO;
+		}
 		return state.getUp(globe);
 	}
 
 	@Override
 	public Vec4 getForwardVector()
 	{
+		if (globe == null)
+		{
+			return Vec4.ZERO;
+		}
 		return state.getForward(globe);
 	}
 
 	@Override
 	public Vec4 getCenterPoint()
 	{
+		if (globe == null)
+		{
+			return Vec4.ZERO;
+		}
 		return state.getCenterPoint(globe);
 	}
 
@@ -179,12 +203,24 @@ public class BaseOrbitView extends AbstractView implements OrbitView
 	@Override
 	public Vec4 getCurrentEyePoint()
 	{
+		if (globe == null)
+		{
+			return Vec4.ZERO;
+		}
 		return state.getEyePoint(globe);
 	}
 
 	@Override
 	public Position getCurrentEyePosition()
 	{
+		if (globe == null)
+		{
+			if (unsetEyePosition != null)
+			{
+				return unsetEyePosition;
+			}
+			return Position.ZERO;
+		}
 		return state.getEye(globe);
 	}
 
@@ -198,6 +234,12 @@ public class BaseOrbitView extends AbstractView implements OrbitView
 	@Override
 	public void setEyePosition(Position eyePosition)
 	{
+		if (globe == null)
+		{
+			unsetEyePosition = eyePosition;
+			return;
+		}
+		unsetEyePosition = null;
 		state.setEye(eyePosition, globe);
 		resolveCollisionsWithPitch();
 		markOutOfFocus();
@@ -358,7 +400,7 @@ public class BaseOrbitView extends AbstractView implements OrbitView
 		Vec4 viewportCenterPoint = this.globe.computePointFromPosition(viewportExaggerated);
 
 		//find a point along the forward vector so the view doesn't appear to change, only the distance from the center point
-		Vec4 eyePoint = getEyePoint();
+		Vec4 eyePoint = getCurrentEyePoint();
 		Vec4 forward = getForwardVector();
 		double distance = eyePoint.distanceTo3(viewportCenterPoint);
 		Vec4 newCenterPoint = Vec4.fromLine3(eyePoint, distance, forward);
@@ -370,18 +412,6 @@ public class BaseOrbitView extends AbstractView implements OrbitView
 	public void stopMovementOnCenter()
 	{
 		firePropertyChange(CENTER_STOPPED, null, null);
-	}
-
-	@Override
-	protected double computeFarClipDistance()
-	{
-		return Math.max(globe.getDiameter(), super.computeFarClipDistance());
-	}
-
-	@Override
-	protected double computeNearClipDistance()
-	{
-		return Math.min(getZoom(), super.computeNearClipDistance());
 	}
 
 	@Override
@@ -412,6 +442,11 @@ public class BaseOrbitView extends AbstractView implements OrbitView
 		this.dc = dc;
 		this.globe = this.dc.getGlobe();
 
+		if (unsetEyePosition != null)
+		{
+			setEyePosition(unsetEyePosition);
+		}
+
 		beforeComputeMatrices();
 
 		//========== modelview matrix state ==========//
@@ -439,7 +474,7 @@ public class BaseOrbitView extends AbstractView implements OrbitView
 		this.farClipDistance = this.computeFarClipDistance();
 
 		// Compute the current projection matrix.
-		this.projection = computeProjection(this.nearClipDistance, this.farClipDistance);
+		this.projection = computeProjection(this.fieldOfView, this.nearClipDistance, this.farClipDistance);
 
 		// Compute the current frustum.
 		this.frustum = computeFrustum(this.nearClipDistance, this.farClipDistance);
@@ -454,6 +489,8 @@ public class BaseOrbitView extends AbstractView implements OrbitView
 	{
 		// Establish frame-specific values.
 		this.horizonDistance = this.computeHorizonDistance();
+		this.appliedEyePosition = getCurrentEyePosition();
+		this.appliedEyePoint = getCurrentEyePoint();
 
 		// Clear cached computations.
 		this.lastFrustumInModelCoords = null;
@@ -472,14 +509,18 @@ public class BaseOrbitView extends AbstractView implements OrbitView
 
 	protected Matrix computeModelView()
 	{
+		if (globe == null)
+		{
+			return Matrix.IDENTITY;
+		}
 		return state.getTransform(globe);
 	}
 
-	protected Matrix computeProjection(double nearDistance, double farDistance)
+	protected Matrix computeProjection(Angle horizontalFieldOfView, double nearDistance, double farDistance)
 	{
 		double viewportWidth = this.viewport.width <= 0.0 ? 1.0 : this.viewport.width;
 		double viewportHeight = this.viewport.height <= 0.0 ? 1.0 : this.viewport.height;
-		return Matrix.fromPerspective(this.fieldOfView, viewportWidth, viewportHeight, nearDistance, farDistance);
+		return Matrix.fromPerspective(horizontalFieldOfView, viewportWidth, viewportHeight, nearDistance, farDistance);
 	}
 
 	protected Frustum computeFrustum(double nearDistance, double farDistance)

@@ -31,9 +31,7 @@ import javax.media.opengl.GL2;
 import au.gov.ga.worldwind.common.view.orbit.BaseOrbitView;
 
 /**
- * {@link OrbitView} extension that allows the user to optionally modify the
- * center of rotation point, instead of keeping the center point fixed to the
- * earth's surface, which is the default.
+ * {@link OrbitView} implementation of {@link ITargetView}.
  * <p/>
  * Also draws an optional axis marker whenever the view changes to indicate the
  * current center of rotation.
@@ -43,6 +41,11 @@ import au.gov.ga.worldwind.common.view.orbit.BaseOrbitView;
 public class TargetOrbitView extends BaseOrbitView implements ITargetView
 {
 	protected boolean targetMode = false;
+	protected boolean prioritizeFarClipping = true;
+
+	protected static final double MINIMUM_NEAR_DISTANCE = 20;
+	protected static final double MAXIMUM_FAR_NEAR_RATIO = 10000;
+	protected static final double MAXIMUM_NEAR_FAR_RATIO = 100000;
 
 	protected boolean nonTargetModeDetectCollisions = true;
 	protected boolean targetModeDetectCollisions = false;
@@ -108,6 +111,18 @@ public class TargetOrbitView extends BaseOrbitView implements ITargetView
 	public void setDrawAxisMarker(boolean drawAxisMarker)
 	{
 		this.drawAxisMarker = drawAxisMarker;
+	}
+
+	@Override
+	public boolean isPrioritizeFarClipping()
+	{
+		return prioritizeFarClipping;
+	}
+
+	@Override
+	public void setPrioritizeFarClipping(boolean prioritizeFarClipping)
+	{
+		this.prioritizeFarClipping = prioritizeFarClipping;
 	}
 
 	@Override
@@ -195,5 +210,30 @@ public class TargetOrbitView extends BaseOrbitView implements ITargetView
 			model = model.divide3(model.w);
 			mousePosition = globe.computePositionFromPoint(model);
 		}
+	}
+
+	@Override
+	protected double computeNearClipDistance()
+	{
+		double near = Math.max(super.computeNearClipDistance(), MINIMUM_NEAR_DISTANCE);
+		if (prioritizeFarClipping)
+		{
+			double far = computeFarClipDistance();
+			return Math.max(near, far / MAXIMUM_FAR_NEAR_RATIO);
+		}
+		return near;
+	}
+
+	@Override
+	protected double computeFarClipDistance()
+	{
+		double elevation = getCurrentEyePosition().elevation;
+		double far = elevation + globe.getDiameter();
+		if (!prioritizeFarClipping)
+		{
+			double near = computeNearClipDistance();
+			return Math.min(far, near * MAXIMUM_NEAR_FAR_RATIO);
+		}
+		return far;
 	}
 }

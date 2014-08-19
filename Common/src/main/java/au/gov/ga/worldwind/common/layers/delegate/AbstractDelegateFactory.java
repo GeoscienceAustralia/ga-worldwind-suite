@@ -25,8 +25,12 @@ import java.util.Map;
 import org.w3c.dom.Element;
 
 import au.gov.ga.worldwind.common.layers.delegate.reader.MaskImageReaderDelegate;
+import au.gov.ga.worldwind.common.layers.delegate.render.AltitudeFadeRenderDelegate;
+import au.gov.ga.worldwind.common.layers.delegate.render.BlendingRenderDelegate;
+import au.gov.ga.worldwind.common.layers.delegate.render.DepthMaskRenderDelegate;
 import au.gov.ga.worldwind.common.layers.delegate.render.ElevationOffsetRenderDelegate;
 import au.gov.ga.worldwind.common.layers.delegate.render.IgnoreElevationRenderDelegate;
+import au.gov.ga.worldwind.common.layers.delegate.render.ShaderRenderDelegate;
 import au.gov.ga.worldwind.common.layers.delegate.retriever.HttpRetrieverFactoryDelegate;
 import au.gov.ga.worldwind.common.layers.delegate.retriever.PassThroughZipRetrieverFactoryDelegate;
 import au.gov.ga.worldwind.common.layers.delegate.transformer.ColorLimitTransformerDelegate;
@@ -62,9 +66,13 @@ public abstract class AbstractDelegateFactory implements IDelegateFactory
 		registerDelegate(ResizeTransformerDelegate.class);
 		registerDelegate(ColorLimitTransformerDelegate.class);
 		registerDelegate(FilterTransformerDelegate.class);
-		
+
 		registerDelegate(ElevationOffsetRenderDelegate.class);
 		registerDelegate(IgnoreElevationRenderDelegate.class);
+		registerDelegate(DepthMaskRenderDelegate.class);
+		registerDelegate(BlendingRenderDelegate.class);
+		registerDelegate(AltitudeFadeRenderDelegate.class);
+		registerDelegate(ShaderRenderDelegate.class);
 	}
 
 	@Override
