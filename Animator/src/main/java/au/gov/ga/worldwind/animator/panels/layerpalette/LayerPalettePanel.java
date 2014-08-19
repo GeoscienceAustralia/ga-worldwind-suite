@@ -21,6 +21,7 @@ import static au.gov.ga.worldwind.common.util.message.MessageSourceAccessor.getM
 
 import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -108,6 +109,7 @@ public class LayerPalettePanel extends CollapsiblePanelBase implements AnimatorC
 		initialiseFileChooser();
 		initialiseToolbar();
 		packComponents();
+		setPreferredSize(new Dimension(0, 50));
 	}
 	
 	private void initialiseLayerList()

@@ -756,6 +756,10 @@ public class Animator
 		animationBrowserPanel = new AnimationBrowserPanel(getCurrentAnimation());
 		objectPropertiesPanel = new ObjectPropertiesPanel();
 		layerPalettePanel = new LayerPalettePanel(getCurrentAnimation());
+		
+		animationBrowserPanel.setWeight(2.0f);
+		objectPropertiesPanel.setWeight(0.0f);
+		layerPalettePanel.setWeight(1.0f);
 
 		List<AnimatorCollapsiblePanel> collapsiblePanels = new ArrayList<AnimatorCollapsiblePanel>(3);
 		collapsiblePanels.add(animationBrowserPanel);

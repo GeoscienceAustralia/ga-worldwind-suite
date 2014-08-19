@@ -19,6 +19,7 @@ import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstant
 import static au.gov.ga.worldwind.common.util.message.MessageSourceAccessor.getMessage;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -100,6 +101,7 @@ public class AnimationBrowserPanel extends CollapsiblePanelBase implements Anima
 		initialiseActions();
 		initialiseToolbar();
 		packComponents();
+		setPreferredSize(new Dimension(0, 50));
 	}
 
 	/**
