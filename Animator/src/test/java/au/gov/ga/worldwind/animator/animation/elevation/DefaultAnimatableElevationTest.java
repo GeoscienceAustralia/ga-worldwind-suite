@@ -85,7 +85,7 @@ public class DefaultAnimatableElevationTest
 	@Test
 	public void testToXml() throws Exception
 	{
-		addElevationModel("test1", "file://marl/sandpit/symbolic-links/world-wind/current/dataset/standard/layers/earth_elevation_model.xml");
+		addElevationModel("test1", "file://sun-web-common/sandpit/symbolic-links/world-wind/current/dataset/standard/layers/earth_elevation_model.xml");
 		
 		addExaggerator(1.0, 0.0);
 		addExaggerator(2.0, 100.0);
@@ -180,7 +180,7 @@ public class DefaultAnimatableElevationTest
 	{
 		assertEquals(1, result.getElevationModelIdentifiers().size());
 		assertEquals("test1", result.getElevationModelIdentifiers().get(0).getName());
-		assertEquals("file://marl/sandpit/symbolic-links/world-wind/current/dataset/standard/layers/earth_elevation_model.xml", result.getElevationModelIdentifiers().get(0).getLocation());
+		assertEquals("file://sun-web-common/sandpit/symbolic-links/world-wind/current/dataset/standard/layers/earth_elevation_model.xml", result.getElevationModelIdentifiers().get(0).getLocation());
 	}
 
 	private void addElevationModel(String name, String location)

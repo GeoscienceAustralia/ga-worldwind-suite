@@ -36,7 +36,7 @@
                     <parameter defaultValue="0.0" enabled="true" name="Render Camera - Lookat Elevation"/>
                 </lookAtElevation>
             </camera>
-            <layer enabled="true" name="Layer1" url="file://marl/sandpit/symbolic-links/world-wind/current/dataset/standard/layers/sky.xml">
+            <layer enabled="true" name="Layer1" url="file://sun-web-common/sandpit/symbolic-links/world-wind/current/dataset/standard/layers/sky.xml">
                 <opacity>
                     <parameter defaultValue="1.0" enabled="true" name="Opacity">
                         <parameterValue frame="1" inPercent="0.4" inValue="1.0" locked="true" outPercent="0.4" outValue="1.0" type="BEZIER" value="1.0"/>
@@ -47,7 +47,7 @@
                     </parameter>
                 </opacity>
             </layer>
-            <layer enabled="true" name="Layer2" url="file://marl/sandpit/symbolic-links/world-wind/current/dataset/standard/layers/blue_marble.xml">
+            <layer enabled="true" name="Layer2" url="file://sun-web-common/sandpit/symbolic-links/world-wind/current/dataset/standard/layers/blue_marble.xml">
                 <opacity>
                     <parameter defaultValue="1.0" enabled="true" name="Opacity">
                         <parameterValue frame="0" inPercent="0.4" inValue="1.0" locked="true" outPercent="0.4" outValue="1.0" type="BEZIER" value="1.0"/>
@@ -56,7 +56,7 @@
                     </parameter>
                 </opacity>
             </layer>
-            <layer enabled="true" name="Layer3" url="file://marl/sandpit/symbolic-links/world-wind/current/dataset/standard/layers/landsat.xml">
+            <layer enabled="true" name="Layer3" url="file://sun-web-common/sandpit/symbolic-links/world-wind/current/dataset/standard/layers/landsat.xml">
                 <opacity>
                     <parameter defaultValue="1.0" enabled="true" name="Opacity">
                         <parameterValue frame="0" type="LINEAR" value="0.5"/>

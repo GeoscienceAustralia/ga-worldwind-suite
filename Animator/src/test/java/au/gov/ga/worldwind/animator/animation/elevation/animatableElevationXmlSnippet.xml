@@ -2,7 +2,7 @@
 <animatableObjects>
     <elevation enabled="true" name="Elevation">
         <models>
-            <model name="test1" url="file://marl/sandpit/symbolic-links/world-wind/current/dataset/standard/layers/earth_elevation_model.xml"/>
+            <model name="test1" url="file://sun-web-common/sandpit/symbolic-links/world-wind/current/dataset/standard/layers/earth_elevation_model.xml"/>
         </models>
         <exaggerator boundary="0.0">
             <parameter defaultValue="1.0" enabled="true" name="Exaggeration">
