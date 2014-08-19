@@ -74,12 +74,6 @@ public abstract class AnimationTreeRenderer extends JPanel implements TreeCellRe
 	private void initialiseLabel()
 	{
 		label = new DefaultTreeCellRenderer();
-		label.setTextNonSelectionColor(Color.black);
-		label.setTextSelectionColor(Color.black);
-		Color backgroundSelection = label.getBackgroundSelectionColor();
-		HSLColor hsl = new HSLColor(backgroundSelection);
-		label.setBackgroundSelectionColor(hsl.adjustTone(80));
-		label.setBorderSelectionColor(null);
 	}
 	
 	@Override
