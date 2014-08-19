@@ -212,5 +212,10 @@ public class AnimationMessageConstants extends CommonMessageConstants
 	public static String getClipSectorTitleKey() { return "animator.gui.menu.clipsector.title"; }
 	public static String getClipSectorLabelKey() { return "animator.gui.menu.clipsector.label"; }
 	public static String getClearClipLabelKey() { return "animator.gui.menu.clearclip.label"; }
-	
+	public static String getAddSunPositionLabelKey() { return "animator.gui.menu.addsunposition.label"; }
+	public static String getSunPositionAnimatableNameKey() { return "animator.sunposition.name"; }
+	public static String getSunPositionTypeParameterNameKey() { return "animator.sunposition.type.name"; }
+	public static String getSunPositionLongitudeParameterNameKey() { return "animator.sunposition.longitude.name"; }
+	public static String getSunPositionLatitudeParameterNameKey() { return "animator.sunposition.latitude.name"; }
+	public static String getSunPositionTimeParameterNameKey() { return "animator.sunposition.time.name"; }
 }

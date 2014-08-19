@@ -19,8 +19,11 @@ import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstant
 import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getAddElevationModelLabelKey;
 import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getAddExaggeratorLabelKey;
 import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getAddKeyMenuLabelKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getAddSunPositionLabelKey;
 import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getAnimateClippingLabelKey;
 import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getAutoKeyMenuLabelKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getClearClipLabelKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getClipSectorLabelKey;
 import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getDeleteKeyMenuLabelKey;
 import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getDynamicStereoMenuLabelKey;
 import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getExitMenuLabelKey;
@@ -60,8 +63,6 @@ import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstant
 import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getSmoothEyeSpeedMenuLabelKey;
 import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getStereoCameraMenuLabelKey;
 import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getUseZoomScalingMenuLabelKey;
-import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getClipSectorLabelKey;
-import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getClearClipLabelKey;
 import static au.gov.ga.worldwind.common.util.message.MessageSourceAccessor.getMessage;
 
 import java.awt.event.ActionEvent;
@@ -117,6 +118,7 @@ public class AnimatorActionFactory
 	private BasicAction addElevationModelAction;
 	private BasicAction addExaggeratorAction;
 	private BasicAction addEffectAction;
+	private BasicAction addSunPositionAction;
 	private BasicAction clipSectorAction;
 	private BasicAction clearClipAction;
 	private BasicAction setProxyAction;
@@ -516,6 +518,16 @@ public class AnimatorActionFactory
 			}
 		});
 		
+		addSunPositionAction = new BasicAction(getMessage(getAddSunPositionLabelKey()), null);
+		addSunPositionAction.addActionListener(new ActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				targetApplication.addSunPositionAnimatable();
+			}
+		});
+		
 		clipSectorAction = new BasicAction(getMessage(getClipSectorLabelKey()), Icons.cut.getIcon());
 		clipSectorAction.addActionListener(new ActionListener()
 		{
@@ -859,6 +871,11 @@ public class AnimatorActionFactory
 		return addEffectAction;
 	}
 	
+	public BasicAction getAddSunPositionAction()
+	{
+		return addSunPositionAction;
+	}
+
 	public BasicAction getSetProxyAction()
 	{
 		return setProxyAction;

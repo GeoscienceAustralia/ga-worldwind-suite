@@ -98,6 +98,11 @@ public interface AnimationIOConstants
 	String getDepthOfFieldFarElementName();
 	String getDepthOfFieldFocusElementName();
 	String getEdgeDetectionEffectElementName();
+	String getSunPositionElementName();
+	String getSunPositionTypeElementName();
+	String getSunPositionLatitudeElementName();
+	String getSunPositionLongitudeElementName();
+	String getSunPositionTimeElementName();
 
 	/**
 	 * Common constants that don't change across versions
@@ -167,6 +172,11 @@ public interface AnimationIOConstants
 		public String getDepthOfFieldFarElementName() {return null;}
 		public String getDepthOfFieldFocusElementName() {return null;}
 		public String getEdgeDetectionEffectElementName() {return null;}
+		public String getSunPositionElementName() {return null;}
+		public String getSunPositionTypeElementName() {return null;}
+		public String getSunPositionLatitudeElementName() {return null;}
+		public String getSunPositionLongitudeElementName() {return null;}
+		public String getSunPositionTimeElementName() {return null;}
 	}
 	
 	/**
@@ -232,6 +242,11 @@ public interface AnimationIOConstants
 		public String getDepthOfFieldFarElementName() {return "far";}
 		public String getDepthOfFieldFocusElementName() {return "focus";}
 		public String getEdgeDetectionEffectElementName() {return "edgeeffect";}
+		public String getSunPositionElementName() {return "sunPosition";}
+		public String getSunPositionTypeElementName() {return "type";}
+		public String getSunPositionLatitudeElementName() {return "latitude";}
+		public String getSunPositionLongitudeElementName() {return "longitude";}
+		public String getSunPositionTimeElementName() {return "time";}
 	}
 	
 	/**

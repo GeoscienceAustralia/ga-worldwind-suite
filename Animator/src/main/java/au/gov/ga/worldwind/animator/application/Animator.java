@@ -126,6 +126,7 @@ import au.gov.ga.worldwind.animator.animation.io.XmlAnimationWriter;
 import au.gov.ga.worldwind.animator.animation.layer.AnimatableLayer;
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterValue;
+import au.gov.ga.worldwind.animator.animation.sun.SunPositionAnimatable;
 import au.gov.ga.worldwind.animator.application.debug.AnimationEventLogger;
 import au.gov.ga.worldwind.animator.application.effects.BuiltInEffects;
 import au.gov.ga.worldwind.animator.application.effects.AnimatableEffect;
@@ -865,6 +866,7 @@ public class Animator
 		actionFactory.getDynamicStereoAction().addToMenu(menu);
 		menu.addSeparator();
 		menu.add(actionFactory.getAddEffectAction());
+		menu.add(actionFactory.getAddSunPositionAction());
 		menu.addSeparator();
 		menu.add(actionFactory.getClipSectorAction());
 		menu.add(actionFactory.getClearClipAction());
@@ -1871,6 +1873,11 @@ public class Animator
 		{
 			JOptionPane.showMessageDialog(frame, e.getLocalizedMessage(), "", JOptionPane.ERROR_MESSAGE);
 		}
+	}
+	
+	void addSunPositionAnimatable()
+	{
+		animation.addAnimatableObject(new SunPositionAnimatable(null, animation));
 	}
 
 	void moveToPreviousFrame()
