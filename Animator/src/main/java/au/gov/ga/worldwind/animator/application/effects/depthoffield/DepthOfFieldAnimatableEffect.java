@@ -76,14 +76,14 @@ public class DepthOfFieldAnimatableEffect extends AnimatableEffectBase<DepthOfFi
 			focusParameter = new DepthOfFieldFocusParameter(null, animation, this);
 			nearParameter = new DepthOfFieldNearParameter(null, animation, this);
 			farParameter = new DepthOfFieldFarParameter(null, animation, this);
+			
+			focusParameter.setArmed(false);
+			focusParameter.setEnabled(false);
+			nearParameter.setArmed(false);
+			nearParameter.setEnabled(false);
+			farParameter.setArmed(false);
+			farParameter.setEnabled(false);
 		}
-
-		focusParameter.setArmed(false);
-		focusParameter.setEnabled(false);
-		nearParameter.setArmed(false);
-		nearParameter.setEnabled(false);
-		farParameter.setArmed(false);
-		farParameter.setEnabled(false);
 
 		parameters.clear();
 		parameters.add(focusParameter);
