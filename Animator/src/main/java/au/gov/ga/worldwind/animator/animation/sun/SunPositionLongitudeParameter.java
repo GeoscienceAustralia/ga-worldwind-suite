@@ -74,7 +74,7 @@ public class SunPositionLongitudeParameter extends SunPositionParameterBase
 	protected ParameterBase createParameterFromXml(String name, Animation animation, Element element,
 			Element parameterElement, AnimationFileVersion version, AVList context)
 	{
-		return new SunPositionLongitudeParameter();
+		return new SunPositionLongitudeParameter(name, animation);
 	}
 
 	@Override

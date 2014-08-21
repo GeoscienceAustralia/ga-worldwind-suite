@@ -77,7 +77,7 @@ public class SunPositionTimeParameter extends SunPositionParameterBase
 	protected ParameterBase createParameterFromXml(String name, Animation animation, Element element,
 			Element parameterElement, AnimationFileVersion version, AVList context)
 	{
-		return new SunPositionTimeParameter();
+		return new SunPositionTimeParameter(name, animation);
 	}
 
 	@Override

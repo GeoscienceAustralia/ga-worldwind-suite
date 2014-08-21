@@ -27,6 +27,7 @@ import au.gov.ga.worldwind.animator.animation.camera.StereoCameraImpl;
 import au.gov.ga.worldwind.animator.animation.elevation.DefaultAnimatableElevation;
 import au.gov.ga.worldwind.animator.animation.io.AnimationFileVersion;
 import au.gov.ga.worldwind.animator.animation.layer.DefaultAnimatableLayer;
+import au.gov.ga.worldwind.animator.animation.sun.SunPositionAnimatable;
 
 /**
  * A default implementation of AnimatableFactory that contains the Animatables
@@ -55,6 +56,8 @@ public class DefaultAnimatableFactory implements AnimatableFactory
 				AnimatableInstanciator.instantiate(DefaultAnimatableLayer.class));
 		factoryMap.put(AnimationFileVersion.VERSION020.getConstants().getAnimatableElevationElementName(),
 				AnimatableInstanciator.instantiate(DefaultAnimatableElevation.class));
+		factoryMap.put(AnimationFileVersion.VERSION020.getConstants().getSunPositionElementName(),
+				AnimatableInstanciator.instantiate(SunPositionAnimatable.class));
 	}
 
 	@Override

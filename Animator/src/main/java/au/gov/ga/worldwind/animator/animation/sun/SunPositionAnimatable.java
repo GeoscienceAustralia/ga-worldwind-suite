@@ -69,16 +69,16 @@ public class SunPositionAnimatable extends AnimatableBase
 			latitudeParameter = new SunPositionLatitudeParameter(null, animation);
 			longitudeParameter = new SunPositionLongitudeParameter(null, animation);
 			timeParameter = new SunPositionTimeParameter(null, animation);
+			
+			typeParameter.setArmed(false);
+			typeParameter.setEnabled(false);
+			latitudeParameter.setArmed(false);
+			latitudeParameter.setEnabled(false);
+			longitudeParameter.setArmed(false);
+			longitudeParameter.setEnabled(false);
+			timeParameter.setArmed(false);
+			timeParameter.setEnabled(false);
 		}
-
-		typeParameter.setArmed(false);
-		typeParameter.setEnabled(false);
-		latitudeParameter.setArmed(false);
-		latitudeParameter.setEnabled(false);
-		longitudeParameter.setArmed(false);
-		longitudeParameter.setEnabled(false);
-		timeParameter.setArmed(false);
-		timeParameter.setEnabled(false);
 
 		parameters.clear();
 		parameters.add(typeParameter);
