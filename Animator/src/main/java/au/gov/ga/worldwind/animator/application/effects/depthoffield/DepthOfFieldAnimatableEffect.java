@@ -43,6 +43,8 @@ import au.gov.ga.worldwind.common.effects.depthoffield.DepthOfFieldEffect;
  */
 public class DepthOfFieldAnimatableEffect extends AnimatableEffectBase<DepthOfFieldEffect>
 {
+	private static final long serialVersionUID = 6012300547921515165L;
+	
 	private Parameter focusParameter;
 	private Parameter nearParameter;
 	private Parameter farParameter;
