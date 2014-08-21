@@ -362,7 +362,7 @@ public class Settings
 	private static void loadProxy(Element rootElement)
 	{
 		Proxy proxy = new Proxy();
-		if (XMLUtil.getElement(rootElement, "//proxy", null) == null)
+		if (XMLUtil.getElement(rootElement, "//proxy", null) != null)
 		{
 			proxy.setEnabled(XMLUtil.getBoolean(rootElement, "//proxy/enabled", true));
 			proxy.setUseSystem(XMLUtil.getBoolean(rootElement, "//proxy/useSystem", true));
