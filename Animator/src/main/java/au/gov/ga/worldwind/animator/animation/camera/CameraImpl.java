@@ -167,11 +167,11 @@ public class CameraImpl extends AnimatableBase implements Camera
 
 		View view = animation.getView();
 		view.stopMovement();
-		view.setOrientation(eye, center);
 		if (this.roll.isEnabled())
 		{
 			view.setRoll(roll);
 		}
+		view.setOrientation(eye, center);
 
 		if (clippingParametersActivated)
 		{
@@ -518,10 +518,15 @@ public class CameraImpl extends AnimatableBase implements Camera
 						WWXML.getElement(element, constants.getCameraLookatElevationElementName(), xpath), version,
 						context);
 
-		camera.roll =
-				new RollParameter().fromXml(
-						WWXML.getElement(element, constants.getCameraRollElementName(), xpath), version,
-						context);
+		Element rollElement = WWXML.getElement(element, constants.getCameraRollElementName(), xpath);
+		if(rollElement != null)
+		{
+			camera.roll = new RollParameter().fromXml(rollElement, version, context);
+		}
+		else
+		{
+			camera.roll = new RollParameter(camera.getAnimation());
+		}
 
 		// Near and far clipping are optional.
 		Element nearClipElement = WWXML.getElement(element, constants.getCameraNearClipElementName(), xpath);
