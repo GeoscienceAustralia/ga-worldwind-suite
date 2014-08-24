@@ -23,10 +23,12 @@ import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstant
 import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getCameraLookatLonNameKey;
 import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getCameraLookatZoomNameKey;
 import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getCameraNearClipNameKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getCameraRollNameKey;
 import static au.gov.ga.worldwind.common.util.message.MessageSourceAccessor.getMessageOrDefault;
 import gov.nasa.worldwind.View;
 import gov.nasa.worldwind.WorldWindow;
 import gov.nasa.worldwind.avlist.AVList;
+import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.geom.Vec4;
 import gov.nasa.worldwind.globes.Globe;
@@ -467,6 +469,58 @@ abstract class CameraParameter extends ParameterBase
 		{
 			// TODO Auto-generated method stub
 			return new LookatElevationParameter(name, animation);
+		}
+	}
+	
+	@SuppressWarnings("serial")
+	@EditableParameter(units = "deg")
+	static class RollParameter extends CameraParameter
+	{
+		public RollParameter(String name, Animation animation)
+		{
+			super(name, animation);
+		}
+
+		public RollParameter(Animation animation)
+		{
+			this(null, animation);
+		}
+
+		RollParameter()
+		{
+			super();
+		}
+
+		@Override
+		protected String getDefaultName()
+		{
+			return getMessageOrDefault(getCameraRollNameKey(), DEFAULT_PARAMETER_NAME);
+		}
+
+		@Override
+		public ParameterValue getCurrentValue()
+		{
+			double value = getView().getRoll().degrees;
+			return ParameterValueFactory.createParameterValue(this, value, animation.getCurrentFrame());
+		}
+
+		@Override
+		protected void doApplyValue(double value)
+		{
+			getView().setRoll(Angle.fromDegrees(value));
+		}
+
+		@Override
+		protected String getXmlElementName(AnimationIOConstants constants)
+		{
+			return constants.getCameraRollElementName();
+		}
+
+		@Override
+		protected ParameterBase createParameterFromXml(String name, Animation animation, Element element,
+				Element parameterElement, AnimationFileVersion version, AVList context)
+		{
+			return new RollParameter(name, animation);
 		}
 	}
 

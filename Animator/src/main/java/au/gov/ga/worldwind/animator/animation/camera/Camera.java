@@ -63,6 +63,11 @@ public interface Camera extends Animatable
 	 *         'look-at' point
 	 */
 	Parameter getLookAtElevation();
+	
+	/**
+	 * @return The parameter that represents the roll of the camera
+	 */
+	Parameter getRoll();
 
 	/**
 	 * @return Whether the camera clipping parameters are active or not

@@ -19,6 +19,7 @@ import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstant
 import static au.gov.ga.worldwind.common.util.message.MessageSourceAccessor.getMessageOrDefault;
 import gov.nasa.worldwind.View;
 import gov.nasa.worldwind.avlist.AVList;
+import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.util.WWXML;
 
@@ -44,6 +45,7 @@ import au.gov.ga.worldwind.animator.animation.camera.CameraParameter.LookatEleva
 import au.gov.ga.worldwind.animator.animation.camera.CameraParameter.LookatLatParameter;
 import au.gov.ga.worldwind.animator.animation.camera.CameraParameter.LookatLonParameter;
 import au.gov.ga.worldwind.animator.animation.camera.CameraParameter.NearClipParameter;
+import au.gov.ga.worldwind.animator.animation.camera.CameraParameter.RollParameter;
 import au.gov.ga.worldwind.animator.animation.io.AnimationFileVersion;
 import au.gov.ga.worldwind.animator.animation.io.AnimationIOConstants;
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
@@ -71,6 +73,8 @@ public class CameraImpl extends AnimatableBase implements Camera
 	private Parameter lookAtLat;
 	private Parameter lookAtLon;
 	private Parameter lookAtElevation;
+
+	private Parameter roll;
 
 	private boolean clippingParametersActivated = false;
 	private Parameter nearClip;
@@ -100,7 +104,7 @@ public class CameraImpl extends AnimatableBase implements Camera
 	protected CameraImpl()
 	{
 	}
-	
+
 	@Override
 	protected String getDefaultName()
 	{
@@ -121,6 +125,8 @@ public class CameraImpl extends AnimatableBase implements Camera
 		lookAtLat = new LookatLatParameter(animation);
 		lookAtLon = new LookatLonParameter(animation);
 		lookAtElevation = new LookatElevationParameter(animation);
+
+		roll = new RollParameter(animation);
 
 		if (clippingParametersActivated)
 		{
@@ -157,10 +163,15 @@ public class CameraImpl extends AnimatableBase implements Camera
 		int frame = getAnimation().getCurrentFrame();
 		Position eye = getEyePositionAtFrame(frame);
 		Position center = getLookatPositionAtFrame(frame);
+		Angle roll = Angle.fromDegrees(this.roll.getValueAtFrame(frame).getValue());
 
 		View view = animation.getView();
 		view.stopMovement();
 		view.setOrientation(eye, center);
+		if (this.roll.isEnabled())
+		{
+			view.setRoll(roll);
+		}
 
 		if (clippingParametersActivated)
 		{
@@ -253,6 +264,12 @@ public class CameraImpl extends AnimatableBase implements Camera
 	}
 
 	@Override
+	public Parameter getRoll()
+	{
+		return roll;
+	}
+
+	@Override
 	public boolean isClippingParametersActive()
 	{
 		return clippingParametersActivated;
@@ -330,6 +347,7 @@ public class CameraImpl extends AnimatableBase implements Camera
 			parameters.add(lookAtLat);
 			parameters.add(lookAtLon);
 			parameters.add(lookAtElevation);
+			parameters.add(roll);
 			if (clippingParametersActivated)
 			{
 				parameters.add(nearClip);
@@ -443,6 +461,7 @@ public class CameraImpl extends AnimatableBase implements Camera
 		this.lookAtLat = camera.getLookAtLat();
 		this.lookAtLon = camera.getLookAtLon();
 		this.lookAtElevation = camera.getLookAtElevation();
+		this.roll = camera.getRoll();
 		this.clippingParametersActivated = camera.isClippingParametersActive();
 		this.nearClip = camera.getNearClip();
 		this.farClip = camera.getFarClip();
@@ -497,6 +516,11 @@ public class CameraImpl extends AnimatableBase implements Camera
 		camera.lookAtElevation =
 				new LookatElevationParameter().fromXml(
 						WWXML.getElement(element, constants.getCameraLookatElevationElementName(), xpath), version,
+						context);
+
+		camera.roll =
+				new RollParameter().fromXml(
+						WWXML.getElement(element, constants.getCameraRollElementName(), xpath), version,
 						context);
 
 		// Near and far clipping are optional.

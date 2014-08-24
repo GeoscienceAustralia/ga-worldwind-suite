@@ -62,6 +62,7 @@ public interface AnimationIOConstants
 	String getCameraLookatLatElementName();
 	String getCameraLookatLonElementName();
 	String getCameraLookatElevationElementName();
+	String getCameraRollElementName();
 	String getCameraFocalLengthElementName();
 	String getCameraEyeSeparationElementName();
 	String getCameraDynamicStereoElementName();
@@ -136,6 +137,7 @@ public interface AnimationIOConstants
 		public String getCameraLookatLatElementName(){return null;}
 		public String getCameraLookatLonElementName(){return null;}
 		public String getCameraLookatElevationElementName(){return null;}
+		public String getCameraRollElementName(){return null;}
 		public String getCameraFocalLengthElementName() {return null;}
 		public String getCameraEyeSeparationElementName() {return null;}
 		public String getCameraDynamicStereoElementName() {return null;}
@@ -204,6 +206,7 @@ public interface AnimationIOConstants
 		public String getCameraLookatLatElementName() {return "lookAtLat";}
 		public String getCameraLookatLonElementName() {return "lookAtLon";}
 		public String getCameraLookatElevationElementName() {return "lookAtElevation";}
+		public String getCameraRollElementName() {return "roll";}
 		public String getCameraFocalLengthElementName() {return "focalLength";}
 		public String getCameraEyeSeparationElementName() {return "eyeSeparation";}
 		public String getCameraDynamicStereoElementName() {return "dynamicStereo";}
