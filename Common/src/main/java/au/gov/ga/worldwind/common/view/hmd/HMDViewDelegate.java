@@ -284,4 +284,14 @@ public abstract class HMDViewDelegate implements IHMDViewDelegate
 			gl.glPopAttrib();
 		}
 	}
+
+	public boolean isRenderEyes()
+	{
+		return renderEyes;
+	}
+
+	public Eye getEye()
+	{
+		return eye;
+	}
 }
