@@ -15,13 +15,11 @@
  ******************************************************************************/
 package au.gov.ga.worldwind.tiler.shapefile;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
+import java.io.IOException;
 
-import com.vividsolutions.jump.feature.AttributeType;
-import com.vividsolutions.jump.feature.Feature;
-import com.vividsolutions.jump.feature.FeatureSchema;
+import org.opengis.feature.Feature;
+import org.opengis.feature.simple.SimpleFeature;
+import org.opengis.feature.simple.SimpleFeatureType;
 
 /**
  * Helper class for temporarily storing shapefile shape attributes.
@@ -30,37 +28,37 @@ import com.vividsolutions.jump.feature.FeatureSchema;
  */
 public class Attributes
 {
-	private final Map<String, Object> attributeMap = new HashMap<String, Object>();
+	private final Object[] values;
+
+	public Attributes(SimpleFeatureType schema)
+	{
+		values = new Object[schema.getAttributeCount() - 1];
+	}
 
 	/**
 	 * Load the attributes from the given {@link Feature} into this object.
 	 * 
-	 * @param source
-	 * @param destinationSchema
+	 * @param row
+	 * @throws IOException
 	 */
-	public void loadAttributes(Feature source, FeatureSchema destinationSchema)
+	public void loadAttributes(SimpleFeature feature) throws IOException
 	{
-		for (int i = 0; i < destinationSchema.getAttributeCount(); i++)
+		for (int i = 0; i < values.length; i++)
 		{
-			if (destinationSchema.getAttributeType(i) != AttributeType.GEOMETRY)
-			{
-				String name = destinationSchema.getAttributeName(i);
-				Object attribute = source.getAttribute(name);
-				attributeMap.put(name, attribute);
-			}
+			values[i] = feature.getAttribute(i + 1);
 		}
 	}
 
 	/**
 	 * Save the attributes from this object into the given {@link Feature}.
 	 * 
-	 * @param destination
+	 * @param feature
 	 */
-	public void saveAttributes(Feature destination)
+	public void saveAttributes(SimpleFeature feature)
 	{
-		for (Entry<String, Object> entry : attributeMap.entrySet())
+		for (int i = 0; i < values.length; i++)
 		{
-			destination.setAttribute(entry.getKey(), entry.getValue());
+			feature.setAttribute(i + 1, values[i]);
 		}
 	}
 }

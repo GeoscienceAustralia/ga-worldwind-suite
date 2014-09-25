@@ -31,13 +31,23 @@ import java.util.logging.Level;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import org.geotools.data.FeatureWriter;
+import org.geotools.data.Transaction;
+import org.geotools.data.shapefile.ShapefileDataStore;
+import org.geotools.data.shapefile.ShapefileDataStoreFactory;
+import org.geotools.data.simple.SimpleFeatureIterator;
+import org.geotools.data.store.ContentFeatureCollection;
+import org.geotools.data.store.ContentFeatureSource;
+import org.geotools.geometry.jts.ReferencedEnvelope;
+import org.opengis.feature.simple.SimpleFeature;
+import org.opengis.feature.simple.SimpleFeatureType;
+
 import au.gov.ga.worldwind.tiler.util.LatLon;
 import au.gov.ga.worldwind.tiler.util.ProgressReporter;
 import au.gov.ga.worldwind.tiler.util.Sector;
 import au.gov.ga.worldwind.tiler.util.Util;
 
 import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LineString;
@@ -45,11 +55,6 @@ import com.vividsolutions.jts.geom.LinearRing;
 import com.vividsolutions.jts.geom.MultiLineString;
 import com.vividsolutions.jts.geom.MultiPolygon;
 import com.vividsolutions.jts.geom.Polygon;
-import com.vividsolutions.jump.feature.Feature;
-import com.vividsolutions.jump.feature.FeatureCollection;
-import com.vividsolutions.jump.feature.FeatureSchema;
-import com.vividsolutions.jump.io.DriverProperties;
-import com.vividsolutions.jump.io.ShapefileWriter;
 
 /**
  * Class used to tile shapefiles.
@@ -76,19 +81,21 @@ public class ShapefileTiler
 	 */
 	public static void tile(File input, File output, int level, double lzts, LatLon origin, ProgressReporter progress)
 	{
-		ShapefileReader reader = null;
+		ShapefileDataStore dataStore = null;
 		try
 		{
 			progress.getLogger().info("Parsing " + input);
 
-			reader = new ShapefileReader(input);
-			reader.open();
-			Envelope envelope = reader.getBounds();
-			Sector sector = new Sector(envelope.getMinY(), envelope.getMinX(), envelope.getMaxY(), envelope.getMaxX());
+			ShapefileDataStoreFactory factory = new ShapefileDataStoreFactory();
+			dataStore = (ShapefileDataStore) factory.createDataStore(input.toURI().toURL());
+			ContentFeatureSource featureSource = dataStore.getFeatureSource();
+			ContentFeatureCollection featureCollection = featureSource.getFeatures();
+			SimpleFeatureType schema = dataStore.getSchema();
 
-			//TODO replace this schema with a customisable one, so users can select a subset of attributes
-			FeatureSchema schema = reader.getSchema();
+			GeometryFactory geometryFactory = new GeometryFactory();
 
+			ReferencedEnvelope bounds = featureSource.getBounds();
+			Sector sector = new Sector(bounds.getMinY(), bounds.getMinX(), bounds.getMaxY(), bounds.getMaxX());
 
 			double tilesizedegrees = Math.pow(0.5, level) * lzts;
 			int minX = Util.getTileX(sector.getMinLongitude() + 1e-10, origin, level, lzts);
@@ -121,59 +128,70 @@ public class ShapefileTiler
 			Boolean lastPolygon = null;
 
 			progress.getLogger().info("Reading records");
-			Feature feature;
 			int shapeId = 0;
-			while ((feature = reader.read()) != null)
+			SimpleFeatureIterator features = featureCollection.features();
+			try
 			{
-				if (progress.isCancelled())
-					return;
+				while (features.hasNext())
+				{
+					if (progress.isCancelled())
+						return;
 
-				Geometry geometry = feature.getGeometry();
-				boolean polygon = geometry instanceof MultiPolygon || geometry instanceof Polygon;
+					SimpleFeature feature = features.next();
+					Object geometry = feature.getDefaultGeometry();
+					boolean polygon = geometry instanceof MultiPolygon || geometry instanceof Polygon;
 
-				anyPolygons |= polygon;
-				if (lastPolygon != null && polygon != lastPolygon.booleanValue())
-				{
-					progress.getLogger().warning("Polygons mixed with non-polygons");
-				}
-				lastPolygon = polygon;
+					anyPolygons |= polygon;
+					if (lastPolygon != null && polygon != lastPolygon.booleanValue())
+					{
+						progress.getLogger().warning("Polygons mixed with non-polygons");
+					}
+					lastPolygon = polygon;
 
-				Attributes attributes = new Attributes();
-				attributes.loadAttributes(feature, schema);
+					Attributes attributes = new Attributes(schema);
+					attributes.loadAttributes(feature);
 
-				if (geometry instanceof MultiPolygon)
-				{
-					MultiPolygon mp = (MultiPolygon) geometry;
-					shapeId = addMultiPolygon(shapeId, mp, attributes, tiles, level, lzts, origin, min, size, progress);
+					if (geometry instanceof MultiPolygon)
+					{
+						MultiPolygon mp = (MultiPolygon) geometry;
+						shapeId =
+								addMultiPolygon(shapeId, mp, attributes, tiles, level, lzts, origin, min, size,
+										progress);
+					}
+					else if (geometry instanceof Polygon)
+					{
+						Polygon p = (Polygon) geometry;
+						shapeId = addPolygon(shapeId, p, attributes, tiles, level, lzts, origin, min, size, progress);
+					}
+					else if (geometry instanceof LinearRing)
+					{
+						LinearRing lr = (LinearRing) geometry;
+						shapeId =
+								addLinearRing(shapeId, lr, attributes, tiles, level, lzts, origin, min, size, true,
+										progress);
+					}
+					else if (geometry instanceof MultiLineString)
+					{
+						MultiLineString mls = (MultiLineString) geometry;
+						shapeId =
+								addMultiLineString(shapeId, mls, attributes, tiles, level, lzts, origin, min, size,
+										progress);
+					}
+					else if (geometry instanceof LineString)
+					{
+						LineString ls = (LineString) geometry;
+						shapeId =
+								addLineString(shapeId, ls, attributes, tiles, level, lzts, origin, min, size, progress);
+					}
+					else
+					{
+						progress.getLogger().severe("Unsupported shape type: " + geometry);
+					}
 				}
-				else if (geometry instanceof Polygon)
-				{
-					Polygon p = (Polygon) geometry;
-					shapeId = addPolygon(shapeId, p, attributes, tiles, level, lzts, origin, min, size, progress);
-				}
-				else if (geometry instanceof LinearRing)
-				{
-					LinearRing lr = (LinearRing) geometry;
-					shapeId =
-							addLinearRing(shapeId, lr, attributes, tiles, level, lzts, origin, min, size, true,
-									progress);
-				}
-				else if (geometry instanceof MultiLineString)
-				{
-					MultiLineString mls = (MultiLineString) geometry;
-					shapeId =
-							addMultiLineString(shapeId, mls, attributes, tiles, level, lzts, origin, min, size,
-									progress);
-				}
-				else if (geometry instanceof LineString)
-				{
-					LineString ls = (LineString) geometry;
-					shapeId = addLineString(shapeId, ls, attributes, tiles, level, lzts, origin, min, size, progress);
-				}
-				else
-				{
-					progress.getLogger().severe("Unsupported shape type: " + geometry);
-				}
+			}
+			finally
+			{
+				features.close();
 			}
 
 			progress.getLogger().info("Saving tiles");
@@ -197,7 +215,7 @@ public class ShapefileTiler
 
 				File dst = new File(rowDir, Util.paddedInt(tile.row, 4) + "_" + Util.paddedInt(tile.col, 4) + ".zip");
 
-				saveShapefileZip(tile, reader.getFactory(), schema, dst, anyPolygons, progress);
+				saveShapefileZip(tile, schema, geometryFactory, dst, anyPolygons, progress);
 			}
 
 			progress.done();
@@ -209,24 +227,21 @@ public class ShapefileTiler
 		}
 		finally
 		{
-			try
-			{
-				if (reader != null)
-					reader.close();
-			}
-			catch (IOException e)
-			{
-				e.printStackTrace();
-			}
+			if (dataStore != null)
+				dataStore.dispose();
 		}
 	}
 
-	protected static void saveShapefileZip(ShapefileTile tile, GeometryFactory factory, FeatureSchema schema,
+	protected static void saveShapefileZip(ShapefileTile tile, SimpleFeatureType schema, GeometryFactory factory,
 			File file, boolean polygon, ProgressReporter progress) throws IOException
 	{
 		if (file.exists())
 		{
 			progress.getLogger().warning(file + " already exists");
+			return;
+		}
+		if (tile.recordCount() <= 0)
+		{
 			return;
 		}
 
@@ -235,78 +250,78 @@ public class ShapefileTiler
 			throw new IllegalArgumentException("Filename does not have an extension");
 
 		final String filenameNoExt = file.getName().substring(0, indexOfDot);
-		File shapefile = new File(file.getParentFile(), filenameNoExt + ".shp");
+		File shpFile = new File(file.getParentFile(), filenameNoExt + ".shp");
 
-		FeatureCollection fc = tile.createRecords(factory, schema, polygon);
-		if (fc != null && !fc.isEmpty())
+		boolean deleteZippedFiles = false;
+		if (shpFile.exists())
 		{
-			boolean deleteZippedFiles = false;
-			if (shapefile.exists())
-			{
-				progress.getLogger().warning(shapefile + " already exists");
-			}
-			else
-			{
-				ShapefileWriter writer = new ShapefileWriter();
-				try
-				{
-					writer.write(fc, new DriverProperties(shapefile.getAbsolutePath()));
-				}
-				catch (Exception e)
-				{
-					throw new IOException(e);
-				}
-				deleteZippedFiles = true;
-			}
-
-			//list all filenames with the same prefix (different extensions)
-			File[] files = file.getParentFile().listFiles(new FilenameFilter()
-			{
-				@Override
-				public boolean accept(File dir, String name)
-				{
-					return name.toLowerCase().startsWith(filenameNoExt);
-				}
-			});
-
-			//zip all files into the one zip file
-			ZipOutputStream out = null;
+			progress.getLogger().warning(shpFile + " already exists");
+		}
+		else
+		{
+			ShapefileDataStore store = new ShapefileDataStore(shpFile.toURI().toURL());
+			store.createSchema(schema);
+			FeatureWriter<SimpleFeatureType, SimpleFeature> featureWriter =
+					store.getFeatureWriter(store.getTypeNames()[0], Transaction.AUTO_COMMIT);
 			try
 			{
-				byte[] buf = new byte[1024];
-				out = new ZipOutputStream(new FileOutputStream(file));
-				for (File f : files)
-				{
-					FileInputStream in = null;
-					try
-					{
-						in = new FileInputStream(f);
-						out.putNextEntry(new ZipEntry(f.getName()));
-						int len;
-						while ((len = in.read(buf)) > 0)
-							out.write(buf, 0, len);
-						out.closeEntry();
-					}
-					finally
-					{
-						if (in != null)
-							in.close();
-					}
-				}
+				tile.writeFeatures(featureWriter, schema, factory, polygon);
 			}
 			finally
 			{
-				if (out != null)
-					out.close();
+				featureWriter.close();
 			}
 
-			if (deleteZippedFiles)
+			deleteZippedFiles = true;
+		}
+
+		//list all filenames with the same prefix (different extensions)
+		File[] files = file.getParentFile().listFiles(new FilenameFilter()
+		{
+			@Override
+			public boolean accept(File dir, String name)
 			{
-				//delete all the files that we just zipped
-				for (File f : files)
+				return name.toLowerCase().startsWith(filenameNoExt);
+			}
+		});
+
+		//zip all files into the one zip file
+		ZipOutputStream out = null;
+		try
+		{
+			byte[] buf = new byte[1024];
+			out = new ZipOutputStream(new FileOutputStream(file));
+			for (File f : files)
+			{
+				FileInputStream in = null;
+				try
 				{
-					f.delete();
+					in = new FileInputStream(f);
+					out.putNextEntry(new ZipEntry(f.getName()));
+					int len;
+					while ((len = in.read(buf)) > 0)
+						out.write(buf, 0, len);
+					out.closeEntry();
 				}
+				finally
+				{
+					if (in != null)
+						in.close();
+				}
+			}
+		}
+		finally
+		{
+			if (out != null)
+				out.close();
+		}
+
+		if (deleteZippedFiles)
+		{
+			//delete all the files that we just zipped
+			for (File f : files)
+			{
+				f.delete();
 			}
 		}
 	}

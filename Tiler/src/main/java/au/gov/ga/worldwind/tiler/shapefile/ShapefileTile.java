@@ -15,11 +15,17 @@
  ******************************************************************************/
 package au.gov.ga.worldwind.tiler.shapefile;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.geotools.data.FeatureWriter;
+import org.geotools.feature.FeatureCollection;
+import org.opengis.feature.simple.SimpleFeature;
+import org.opengis.feature.simple.SimpleFeatureType;
 
 import au.gov.ga.worldwind.tiler.util.ProgressReporter;
 import au.gov.ga.worldwind.tiler.util.Sector;
@@ -29,11 +35,6 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LinearRing;
-import com.vividsolutions.jump.feature.BasicFeature;
-import com.vividsolutions.jump.feature.Feature;
-import com.vividsolutions.jump.feature.FeatureCollection;
-import com.vividsolutions.jump.feature.FeatureDataset;
-import com.vividsolutions.jump.feature.FeatureSchema;
 
 /**
  * A subtile of a shapefile which contains all the geometry of a shapefile
@@ -442,6 +443,14 @@ public class ShapefileTile
 	}
 
 	/**
+	 * @return Number of records/geometries in this tile
+	 */
+	public int recordCount()
+	{
+		return records.size();
+	}
+
+	/**
 	 * Create Shapefile records for this tile.
 	 * 
 	 * @param factory
@@ -451,10 +460,11 @@ public class ShapefileTile
 	 *            linestrings are created.
 	 * @return {@link FeatureCollection} containing all the records in this
 	 *         tile.
+	 * @throws IOException
 	 */
-	public FeatureCollection createRecords(GeometryFactory factory, FeatureSchema schema, boolean polygon)
+	public void writeFeatures(FeatureWriter<SimpleFeatureType, SimpleFeature> featureWriter, SimpleFeatureType schema,
+			GeometryFactory factory, boolean polygon) throws IOException
 	{
-		FeatureCollection fc = new FeatureDataset(schema);
 		for (TileRecord p : records)
 		{
 			Geometry geometry;
@@ -466,12 +476,12 @@ public class ShapefileTile
 
 				LinearRing shell = factory.createLinearRing(coordinates);
 				LinearRing[] holes = new LinearRing[p.holes.size()];
-				for (int i = 0; i < p.holes.size(); i++)
+				for (int j = 0; j < p.holes.size(); j++)
 				{
-					TileRecord h = p.holes.get(i);
+					TileRecord h = p.holes.get(j);
 					Coordinate[] holeCoordinates = h.coordinates.toArray(new Coordinate[h.coordinates.size()]);
 					LinearRing hole = factory.createLinearRing(holeCoordinates);
-					holes[i] = hole;
+					holes[j] = hole;
 				}
 				geometry = factory.createPolygon(shell, holes);
 			}
@@ -481,12 +491,10 @@ public class ShapefileTile
 				geometry = factory.createLineString(coordinates);
 			}
 
-			Feature feature = new BasicFeature(schema);
-			feature.setGeometry(geometry);
+			SimpleFeature feature = featureWriter.next();
+			feature.setDefaultGeometry(geometry);
 			p.attributes.saveAttributes(feature);
-
-			fc.add(feature);
+			featureWriter.write();
 		}
-		return fc;
 	}
 }
