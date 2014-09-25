@@ -55,12 +55,13 @@ public class ShapefileTile
 	public final Coordinate maxmin;
 	private final Coordinate[] clockwise;
 
-	private List<TileRecord> records = new ArrayList<TileRecord>();
+	private final List<TileRecord> records = new ArrayList<TileRecord>();
 	private TileRecord current = null;
 	private int startPointsIndex = 0;
 	private boolean noEntryShapeExists = false;
 	private boolean filled = false;
 	private Attributes filledAttributes;
+	private final List<TileRecord> filledHoles = new ArrayList<TileRecord>();
 
 	public ShapefileTile(Sector sector, int col, int row)
 	{
@@ -140,11 +141,14 @@ public class ShapefileTile
 	 */
 	public void addHole(List<Coordinate> points, Attributes attributes)
 	{
-		if (current == null)
+		if (current == null && !filled)
 			throw new IllegalStateException("Cannot add hole to " + this + ", as it has no current shape");
 
 		TileRecord hole = new TileRecord(-1, false, attributes, points);
-		current.holes.add(hole);
+		if (current != null)
+			current.holes.add(hole);
+		else
+			filledHoles.add(hole);
 	}
 
 	/**
@@ -357,6 +361,7 @@ public class ShapefileTile
 			current = next;
 		}
 
+		TileRecord exitRecord = null;
 		for (int i = 0; i < entries.size(); i++)
 		{
 			EntryExit exit = exits.get(i);
@@ -364,7 +369,7 @@ public class ShapefileTile
 
 			//join curves from exit to entry
 
-			TileRecord exitRecord = pointMap.remove(exit);
+			exitRecord = pointMap.remove(exit);
 			TileRecord entryRecord = pointMap.remove(entry);
 
 			//add any required sector corner points clockwise from exit to entry
@@ -378,6 +383,8 @@ public class ShapefileTile
 			{
 				//add all points from entry points to the start of the exit points
 				exitRecord.coordinates.addAll(entryRecord.coordinates);
+				//copy any holes in the record 
+				exitRecord.holes.addAll(entryRecord.holes);
 				//remove the entry points from the points list
 				records.remove(entryRecord);
 
@@ -388,6 +395,10 @@ public class ShapefileTile
 				reverseExitMap.put(exitRecord, entrysExit);
 			}
 		}
+
+		//because this is not a completely filled tile (due to the existance of an entry/exit),
+		//we need to add the holes that were added before there were any entries/exits
+		exitRecord.holes.addAll(filledHoles);
 	}
 
 	/**
@@ -395,12 +406,14 @@ public class ShapefileTile
 	 */
 	protected void fillSector()
 	{
-		TileRecord current = new TileRecord(-1, false, filledAttributes);
-		records.add(current);
-		current.exited = false;
+		TileRecord record = new TileRecord(-1, false, filledAttributes);
+		records.add(record);
+		record.exited = false;
 
 		for (Coordinate c : clockwise)
-			current.coordinates.add(c);
+			record.coordinates.add(c);
+
+		record.holes.addAll(filledHoles);
 	}
 
 	/**
