@@ -436,22 +436,24 @@ public class ShapefileTiler
 				{
 					//get the fractional position of the points within their corresponding tile's
 					//sector, in the range -0.5 to 0.5
-					float x1 = (float) (lastTile.longitudeFract(lastCoordinate) - 0.5);
-					float y1 = (float) (lastTile.latitudeFract(lastCoordinate) - 0.5);
-					float x2 = (float) (tile.longitudeFract(coordinate) - 0.5);
-					float y2 = (float) (tile.latitudeFract(coordinate) - 0.5);
+					double x1 = lastTile.longitudeFract(lastCoordinate) - 0.5;
+					double y1 = lastTile.latitudeFract(lastCoordinate) - 0.5;
+					double x2 = tile.longitudeFract(coordinate) - 0.5;
+					double y2 = tile.latitudeFract(coordinate) - 0.5;
 
 					//create a list of possible tiles that may be affected by the line between the two tiles
-					List<Point> line = linePoints(lastTile.col + x1, lastTile.row + y1, tile.col + x2, tile.row + y2);
+					List<Point> line = linePoints(
+							(lastTile.col - min.x) + x1, (lastTile.row - min.y) + y1,
+							(tile.col - min.x) + x2, (tile.row - min.y) + y2);
 
 					ShapefileTile lastCrossTile = lastTile;
 					for (int j = 1; j < line.size() - 1; j++)
 					{
 						Point p = line.get(j);
-						p.x = Util.clamp(p.x, min.x, min.x + size.width - 1);
-						p.y = Util.clamp(p.y, min.y, min.y + size.height - 1);
+						p.x = Util.clamp(p.x, 0, size.width - 1);
+						p.y = Util.clamp(p.y, 0, size.height - 1);
 
-						int crossTileIndex = (p.y - min.y) * size.width + (p.x - min.x);
+						int crossTileIndex = p.y * size.width + p.x;
 						//ignore first and last
 						if (crossTileIndex == tileIndex || crossTileIndex == lastTileIndex)
 							continue;
@@ -643,7 +645,7 @@ public class ShapefileTiler
 		}
 	}
 
-	protected static List<java.awt.Point> linePoints(float x1, float y1, float x2, float y2)
+	protected static List<java.awt.Point> linePoints(double x1, double y1, double x2, double y2)
 	{
 		List<java.awt.Point> points = new ArrayList<java.awt.Point>();
 
@@ -651,7 +653,7 @@ public class ShapefileTiler
 		if (steep)
 		{
 			//swap x/y variables
-			float temp = x1;
+			double temp = x1;
 			x1 = y1;
 			y1 = temp;
 			temp = x2;
@@ -662,7 +664,7 @@ public class ShapefileTiler
 		if (swap)
 		{
 			//swap p1/p2 points
-			float temp = x1;
+			double temp = x1;
 			x1 = x2;
 			x2 = temp;
 			temp = y1;
@@ -670,14 +672,14 @@ public class ShapefileTiler
 			y2 = temp;
 		}
 
-		int y1i = Math.round(y1);
-		int y2i = Math.round(y2);
+		int y1i = (int) Math.round(y1);
+		int y2i = (int) Math.round(y2);
 		if (y1i == y2i)
 		{
 			//handle special horizontal/vertical line case
 
-			int x1i = Math.round(x1);
-			int x2i = Math.round(x2);
+			int x1i = (int) Math.round(x1);
+			int x2i = (int) Math.round(x2);
 			for (int x = x1i; x <= x2i; x++)
 			{
 				points.add(steep ? new java.awt.Point(y1i, x) : new java.awt.Point(x, y1i));
@@ -685,17 +687,17 @@ public class ShapefileTiler
 		}
 		else
 		{
-			float dx = x2 - x1;
-			float dy = y2 - y1;
-			float gradient = dy / dx;
-			float intery = y1;
-			int startX = Math.round(x1);
-			int endX = Math.round(x2);
-			float centerDiff = (startX - x1) * gradient;
+			double dx = x2 - x1;
+			double dy = y2 - y1;
+			double gradient = dy / dx;
+			double intery = y1;
+			int startX = (int) Math.round(x1);
+			int endX = (int) Math.round(x2);
+			double centerDiff = (startX - x1) * gradient;
 
 			for (int x = startX; x <= endX; x++)
 			{
-				int y = Math.round(intery);
+				int y = (int) Math.round(intery);
 				int add = (intery + centerDiff - y < 0) ? -1 : 1;
 				boolean first = add > 0 ^ gradient < 0;
 
