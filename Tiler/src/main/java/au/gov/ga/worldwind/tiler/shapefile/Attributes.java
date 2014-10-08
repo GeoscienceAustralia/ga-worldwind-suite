@@ -28,7 +28,7 @@ import org.opengis.feature.simple.SimpleFeatureType;
  */
 public class Attributes
 {
-	private final Object[] values;
+	protected final Object[] values;
 
 	public Attributes(SimpleFeatureType schema)
 	{
