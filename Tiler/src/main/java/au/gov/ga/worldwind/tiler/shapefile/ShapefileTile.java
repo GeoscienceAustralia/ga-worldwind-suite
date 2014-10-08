@@ -62,6 +62,7 @@ public class ShapefileTile
 	private boolean filled = false;
 	private Attributes filledAttributes;
 	private final List<TileRecord> filledHoles = new ArrayList<TileRecord>();
+	private Boolean filledNoHoles = null;
 
 	public ShapefileTile(Sector sector, int col, int row)
 	{
@@ -154,7 +155,7 @@ public class ShapefileTile
 	/**
 	 * Polygons must either be fully contained in the tile, or both enter AND
 	 * exit. If a pointset enters but not exits, there MUST be another pointset
-	 * that exits but not enters. Join these two pointsets (they will share a
+	 * that exits but not enters. Join these two pointsets (they will share an
 	 * end point).
 	 * 
 	 * @param progress
@@ -414,6 +415,7 @@ public class ShapefileTile
 			record.coordinates.add(c);
 
 		record.holes.addAll(filledHoles);
+		filledNoHoles = filledHoles.isEmpty();
 	}
 
 	/**
@@ -509,5 +511,20 @@ public class ShapefileTile
 			p.attributes.saveAttributes(feature);
 			featureWriter.write();
 		}
+	}
+
+	public boolean isFilled()
+	{
+		if (filledNoHoles == null)
+		{
+			double sectorArea = sector.getDeltaLatitude() * sector.getDeltaLongitude();
+			double polygonArea = 0;
+			for (TileRecord record : records)
+			{
+				polygonArea += record.area();
+			}
+			filledNoHoles = polygonArea >= sectorArea - 1e-10;
+		}
+		return filledNoHoles;
 	}
 }

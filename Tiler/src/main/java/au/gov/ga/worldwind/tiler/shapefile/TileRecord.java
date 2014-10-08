@@ -69,4 +69,21 @@ public class TileRecord
 		this.attributes = attributes;
 		this.coordinates = coordinates;
 	}
+
+	public double area()
+	{
+		double area = 0;
+		Coordinate lastCoordinate = coordinates.get(coordinates.size() - 1);
+		for (Coordinate coordinate : coordinates)
+		{
+			area += (lastCoordinate.x + coordinate.x) * (lastCoordinate.y - coordinate.y);
+			lastCoordinate = coordinate;
+		}
+		area /= 2;
+		for (TileRecord hole : holes)
+		{
+			area += hole.area();
+		}
+		return area;
+	}
 }
