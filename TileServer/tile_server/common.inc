@@ -23,8 +23,9 @@
 	 * @author Michael de Hoog
 	 */
 
-	private static final String sandpitRootPath = "/web/html/test_root/docs/resources/images/world-wind/tiles-sandpit"; //sandpit
-	private static final String productionRootPath = "/public/http/www/docs/resources/images/world-wind/tiles"; //production
+	private static final String devRootPath = "/nas/web/data/dev/gis_data/world-wind/tiles";
+	private static final String testRootPath = "/nas/web/data/test/gis_data/world-wind/tiles";
+	private static final String prodRootPath = "/nas/web/data/prod/gis_data/world-wind/tiles";
 
 	private static final Map<String, String> extensions = new HashMap<String, String>();
 	private static final Map<String, String> contentTypes = new HashMap<String, String>();
@@ -536,7 +537,7 @@
 		
 		//determine the root path of the tiles
 		boolean sandpit = request.getServerPort() == 8500;
-		String rootPath = sandpit ? sandpitRootPath : productionRootPath;
+		String rootPath = sandpit ? devRootPath : prodRootPath;
 
 		//calculate tile directory and filename
 		String rowDirectory = paddedInt(Y, 4);
