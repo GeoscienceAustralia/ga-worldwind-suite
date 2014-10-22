@@ -259,17 +259,25 @@ public class ShapefileTiler
 		}
 		else
 		{
-			ShapefileDataStore store = new ShapefileDataStore(shpFile.toURI().toURL());
-			store.createSchema(schema);
-			FeatureWriter<SimpleFeatureType, SimpleFeature> featureWriter =
-					store.getFeatureWriter(store.getTypeNames()[0], Transaction.AUTO_COMMIT);
+			ShapefileDataStore store = null;
 			try
 			{
-				tile.writeFeatures(featureWriter, schema, factory, polygon);
+				store = new ShapefileDataStore(shpFile.toURI().toURL());
+				store.createSchema(schema);
+				FeatureWriter<SimpleFeatureType, SimpleFeature> featureWriter =
+						store.getFeatureWriter(store.getTypeNames()[0], Transaction.AUTO_COMMIT);
+				try
+				{
+					tile.writeFeatures(featureWriter, schema, factory, polygon);
+				}
+				finally
+				{
+					featureWriter.close();
+				}
 			}
 			finally
 			{
-				featureWriter.close();
+				store.dispose();
 			}
 
 			deleteZippedFiles = true;
@@ -404,7 +412,6 @@ public class ShapefileTiler
 		int lastTileIndex = -1;
 
 		List<ShapefileTile> tilesAffected = new ArrayList<ShapefileTile>();
-
 		for (int i = 0; i < lineString.getNumPoints(); i++)
 		{
 			Coordinate coordinate = lineString.getCoordinateN(i);
@@ -414,17 +421,15 @@ public class ShapefileTiler
 
 			//limit tile x/y on the edges
 			//(eg lon=180 will resolve to x=11 at level 0 lzts 36, but should be x=10)
-			x = Util.clamp(x, min.x, min.x + size.width - 1);
-			y = Util.clamp(y, min.y, min.y + size.height - 1);
+			int x0 = Util.clamp(x - min.x, 0, size.width - 1);
+			int y0 = Util.clamp(y - min.y, 0, size.height - 1);
 
-			int x0 = x - min.x;
-			int y0 = y - min.y;
 			int tileIndex = y0 * size.width + x0;
 			ShapefileTile tile = tiles[tileIndex];
 
 			if (!tile.contains(coordinate))
 			{
-				progress.getLogger().warning(coordinate + " outside bounds");
+				progress.getLogger().warning(coordinate + " outside bounds " + tile.sector());
 
 				//move coordinate within the tile's bounds
 				coordinate = tile.limitCoordinateWithinTile(coordinate);
