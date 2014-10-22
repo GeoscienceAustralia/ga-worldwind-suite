@@ -69,7 +69,7 @@ public class EntryExit implements Comparable<EntryExit>
 			throw new NullPointerException();
 
 		if (coordinate.equals(o.coordinate))
-			return 0;
+			return -Boolean.compare(entry, o.entry);
 
 		double tX = coordinate.x - tileCentroid.x;
 		double tY = coordinate.y - tileCentroid.y;
