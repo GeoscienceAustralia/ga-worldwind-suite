@@ -97,6 +97,10 @@ public class ShapefileTiler
 			ReferencedEnvelope bounds = featureSource.getBounds();
 			Sector sector = new Sector(bounds.getMinY(), bounds.getMinX(), bounds.getMaxY(), bounds.getMaxX());
 
+			//TEMP
+			//sector = new Sector(85, -180, 90, 180);
+			//TEMP
+
 			double tilesizedegrees = Math.pow(0.5, level) * lzts;
 			int minX = Util.getTileX(sector.getMinLongitude() + 1e-10, origin, level, lzts);
 			int maxX = Util.getTileX(sector.getMaxLongitude() - 1e-10, origin, level, lzts);
@@ -120,12 +124,21 @@ public class ShapefileTiler
 					Sector ts = new Sector(lat1, lon1, lat2, lon2);
 
 					ShapefileTile tile = new ShapefileTile(ts, x, y);
+					//TEMP
+					//Attributes attributes = new Attributes(schema);
+					//attributes.values[0] = -1;
+					//tile.markFilled(attributes);
+					//TEMP
 					tiles[y0 * size.width + x0] = tile;
 				}
 			}
 
 			boolean anyPolygons = false;
 			Boolean lastPolygon = null;
+
+			//TEMP
+			//anyPolygons = true;
+			//TEMP
 
 			progress.getLogger().info("Reading records");
 			int shapeId = 0;
