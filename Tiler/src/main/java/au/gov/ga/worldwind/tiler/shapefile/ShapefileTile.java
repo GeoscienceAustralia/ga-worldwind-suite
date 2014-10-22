@@ -234,6 +234,18 @@ public class ShapefileTile
 	}
 
 	/**
+	 * Does this tile's sector contain the given latitude/longitude?
+	 * 
+	 * @param x
+	 * @param y
+	 * @return True if lat/lon is inside this tile's sector
+	 */
+	public boolean contains(double latitude, double longitude)
+	{
+		return sector.containsPoint(latitude, longitude);
+	}
+
+	/**
 	 * Limit the given coordinate's latitude/longitude to be within this tile's
 	 * sector.
 	 * 
@@ -265,6 +277,14 @@ public class ShapefileTile
 	}
 
 	/**
+	 * @return Tile's sector
+	 */
+	public Sector sector()
+	{
+		return sector;
+	}
+
+	/**
 	 * Fraction of the given coordinate's latitude within the tile's sector's
 	 * latitude span
 	 * 
@@ -292,8 +312,12 @@ public class ShapefileTile
 	 * Join any exits to their neighbouring entries, moving clockwise around the
 	 * sector. If an exit is on a different side to it's corresponding entry,
 	 * add the sector corner points between the two points when joining.
+	 * 
+	 * @param minimumArea
+	 *            Remove any polygons with area less than this minimum, 0 for no
+	 *            removal
 	 */
-	public void completePolygons()
+	public void completePolygons(double minimumArea)
 	{
 		Map<EntryExit, TileRecord> pointMap = new HashMap<EntryExit, TileRecord>();
 		Map<TileRecord, EntryExit> reverseExitMap = new HashMap<TileRecord, EntryExit>();
@@ -301,6 +325,19 @@ public class ShapefileTile
 		List<EntryExit> entryExits = new ArrayList<EntryExit>();
 		List<EntryExit> entries = new ArrayList<EntryExit>();
 		List<EntryExit> exits = new ArrayList<EntryExit>();
+
+		//remove any entry/exit records that have a negligible area
+		if (minimumArea > 0)
+		{
+			for (int i = 0; i < records.size(); i++)
+			{
+				TileRecord r = records.get(i);
+				if (r.entered && r.exited && Math.abs(r.area()) < minimumArea)
+				{
+					records.remove(i--);
+				}
+			}
+		}
 
 		for (TileRecord r : records)
 		{

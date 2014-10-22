@@ -205,8 +205,9 @@ public class ShapefileTiler
 				amount++;
 				progress.progress(amount / (double) tiles.length);
 
+				double minimumArea = 0; //1e-8;
 				if (anyPolygons)
-					tile.completePolygons();
+					tile.completePolygons(minimumArea);
 
 				File rowDir = new File(output, String.valueOf(level));
 				rowDir = new File(rowDir, Util.paddedInt(tile.row, 4));
