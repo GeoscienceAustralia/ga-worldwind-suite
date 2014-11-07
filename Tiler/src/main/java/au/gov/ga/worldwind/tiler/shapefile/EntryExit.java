@@ -69,7 +69,7 @@ public class EntryExit implements Comparable<EntryExit>
 			throw new NullPointerException();
 
 		if (coordinate.equals(o.coordinate))
-			return -Boolean.compare(entry, o.entry);
+			return -compare(entry, o.entry);
 
 		double tX = coordinate.x - tileCentroid.x;
 		double tY = coordinate.y - tileCentroid.y;
@@ -81,6 +81,16 @@ public class EntryExit implements Comparable<EntryExit>
 		double oa = -Math.atan2(oY, oX);
 
 		return ta < oa ? -1 : ta == oa ? 0 : 1;
+	}
+
+	/**
+	 * Compare two booleans, copied from
+	 * {@link Boolean#compare(boolean, boolean)} due to this function only being
+	 * added in Java 1.7.
+	 */
+	private static int compare(boolean x, boolean y)
+	{
+		return (x == y) ? 0 : (x ? 1 : -1);
 	}
 
 	@Override
