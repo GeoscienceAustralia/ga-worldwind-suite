@@ -33,7 +33,7 @@ import java.util.LinkedList;
  */
 public class AnimatorViewUtils
 {
-	protected static final double MINIMUM_NEAR_DISTANCE = 2;
+	protected static final double MINIMUM_NEAR_DISTANCE = 1;
     protected static final double MINIMUM_FAR_DISTANCE = 100;
 	
     /**
