@@ -15,13 +15,17 @@
  ******************************************************************************/
 package au.gov.ga.worldwind.animator.view;
 
+import gov.nasa.worldwind.geom.Angle;
+import gov.nasa.worldwind.geom.Matrix;
 import gov.nasa.worldwind.geom.Position;
+import gov.nasa.worldwind.geom.Quaternion;
+import gov.nasa.worldwind.geom.Vec4;
 import au.gov.ga.worldwind.common.view.delegate.DelegateOrbitView;
 import au.gov.ga.worldwind.common.view.stereo.StereoViewDelegate;
 
 /**
- * {@link StereoViewDelegate} subclass that provides support for configuration of
- * the clipping far/near distances.
+ * {@link StereoViewDelegate} subclass that provides support for configuration
+ * of the clipping far/near distances.
  * 
  * @author James Navin (james.navin@ga.gov.au)
  */
@@ -29,6 +33,64 @@ public class AnimatorView extends DelegateOrbitView implements ClipConfigurableV
 {
 	private boolean autoNearClip = true;
 	private boolean autoFarClip = true;
+
+	private Quaternion headRotation = Quaternion.IDENTITY;
+	private Vec4 headPosition = Vec4.ZERO;
+	private boolean rotated = false;
+
+	public AnimatorView()
+	{
+		setTargetMode(true);
+		setPrioritizeFarClipping(false);
+	}
+	
+	@Override
+	public void setHeading(Angle heading)
+	{
+		super.setHeading(heading);
+		System.out.println(heading);
+	}
+
+	public Quaternion getHeadRotation()
+	{
+		return headRotation;
+	}
+
+	public void setHeadRotation(Quaternion headRotation)
+	{
+		this.headRotation = headRotation;
+	}
+
+	public Vec4 getHeadPosition()
+	{
+		return headPosition;
+	}
+
+	public void setHeadPosition(Vec4 headPosition)
+	{
+		this.headPosition = headPosition;
+	}
+
+	@Override
+	public Matrix computeModelView()
+	{
+		Matrix modelView = super.computeModelView();
+		if (!rotated)
+		{
+			rotated = true;
+			Matrix positionM = Matrix.fromTranslation(headPosition.multiply3(-1));
+			Matrix rotationM = Matrix.fromQuaternion(headRotation.getInverse());
+			modelView = rotationM.multiply(positionM.multiply(modelView));
+		}
+		return modelView;
+	}
+
+	@Override
+	protected void doApply(gov.nasa.worldwind.render.DrawContext dc)
+	{
+		rotated = false;
+		super.doApply(dc);
+	}
 
 	@Override
 	protected double computeNearDistance(Position eyePosition)

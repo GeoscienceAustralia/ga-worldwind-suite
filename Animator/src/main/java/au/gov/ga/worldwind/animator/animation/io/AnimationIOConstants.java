@@ -104,6 +104,14 @@ public interface AnimationIOConstants
 	String getSunPositionLatitudeElementName();
 	String getSunPositionLongitudeElementName();
 	String getSunPositionTimeElementName();
+	String getHeadElementName();
+	String getHeadRotationXElementName();
+	String getHeadRotationYElementName();
+	String getHeadRotationZElementName();
+	String getHeadRotationWElementName();
+	String getHeadPositionXElementName();
+	String getHeadPositionYElementName();
+	String getHeadPositionZElementName();
 
 	/**
 	 * Common constants that don't change across versions
@@ -179,6 +187,14 @@ public interface AnimationIOConstants
 		public String getSunPositionLatitudeElementName() {return null;}
 		public String getSunPositionLongitudeElementName() {return null;}
 		public String getSunPositionTimeElementName() {return null;}
+		public String getHeadElementName() {return null;}
+		public String getHeadRotationXElementName() {return null;}
+		public String getHeadRotationYElementName() {return null;}
+		public String getHeadRotationZElementName() {return null;}
+		public String getHeadRotationWElementName() {return null;}
+		public String getHeadPositionXElementName() {return null;}
+		public String getHeadPositionYElementName() {return null;}
+		public String getHeadPositionZElementName() {return null;}
 	}
 	
 	/**
@@ -250,6 +266,14 @@ public interface AnimationIOConstants
 		public String getSunPositionLatitudeElementName() {return "latitude";}
 		public String getSunPositionLongitudeElementName() {return "longitude";}
 		public String getSunPositionTimeElementName() {return "time";}
+		public String getHeadElementName() {return "head";}
+		public String getHeadRotationXElementName() {return "rotationX";}
+		public String getHeadRotationYElementName() {return "rotationY";}
+		public String getHeadRotationZElementName() {return "rotationZ";}
+		public String getHeadRotationWElementName() {return "rotationW";}
+		public String getHeadPositionXElementName() {return "positionX";}
+		public String getHeadPositionYElementName() {return "positionY";}
+		public String getHeadPositionZElementName() {return "positionZ";}
 	}
 	
 	/**

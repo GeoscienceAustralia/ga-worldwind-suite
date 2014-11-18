@@ -23,6 +23,7 @@ import java.util.Map;
 import org.w3c.dom.Element;
 
 import au.gov.ga.worldwind.animator.animation.camera.CameraImpl;
+import au.gov.ga.worldwind.animator.animation.camera.HeadImpl;
 import au.gov.ga.worldwind.animator.animation.camera.StereoCameraImpl;
 import au.gov.ga.worldwind.animator.animation.elevation.DefaultAnimatableElevation;
 import au.gov.ga.worldwind.animator.animation.io.AnimationFileVersion;
@@ -58,6 +59,8 @@ public class DefaultAnimatableFactory implements AnimatableFactory
 				AnimatableInstanciator.instantiate(DefaultAnimatableElevation.class));
 		factoryMap.put(AnimationFileVersion.VERSION020.getConstants().getSunPositionElementName(),
 				AnimatableInstanciator.instantiate(SunPositionAnimatableImpl.class));
+		factoryMap.put(AnimationFileVersion.VERSION020.getConstants().getHeadElementName(),
+				AnimatableInstanciator.instantiate(HeadImpl.class));
 	}
 
 	@Override

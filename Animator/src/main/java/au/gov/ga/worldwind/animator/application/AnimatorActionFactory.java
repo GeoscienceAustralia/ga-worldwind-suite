@@ -18,6 +18,7 @@ package au.gov.ga.worldwind.animator.application;
 import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getAddEffectLabelKey;
 import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getAddElevationModelLabelKey;
 import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getAddExaggeratorLabelKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getAddHeadLabelKey;
 import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getAddKeyMenuLabelKey;
 import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getAddSunPositionLabelKey;
 import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getAnimateClippingLabelKey;
@@ -119,6 +120,7 @@ public class AnimatorActionFactory
 	private BasicAction addExaggeratorAction;
 	private BasicAction addEffectAction;
 	private BasicAction addSunPositionAction;
+	private BasicAction addHeadAction;
 	private BasicAction clipSectorAction;
 	private BasicAction clearClipAction;
 	private BasicAction setProxyAction;
@@ -528,6 +530,16 @@ public class AnimatorActionFactory
 			}
 		});
 		
+		addHeadAction = new BasicAction(getMessage(getAddHeadLabelKey()), null);
+		addHeadAction.addActionListener(new ActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				targetApplication.addHeadAnimatable();
+			}
+		}); 
+		
 		clipSectorAction = new BasicAction(getMessage(getClipSectorLabelKey()), Icons.cut.getIcon());
 		clipSectorAction.addActionListener(new ActionListener()
 		{
@@ -874,6 +886,11 @@ public class AnimatorActionFactory
 	public BasicAction getAddSunPositionAction()
 	{
 		return addSunPositionAction;
+	}
+
+	public BasicAction getAddHeadAction()
+	{
+		return addHeadAction;
 	}
 
 	public BasicAction getSetProxyAction()

@@ -219,4 +219,13 @@ public class AnimationMessageConstants extends CommonMessageConstants
 	public static String getSunPositionLongitudeParameterNameKey() { return "animator.sunposition.longitude.name"; }
 	public static String getSunPositionLatitudeParameterNameKey() { return "animator.sunposition.latitude.name"; }
 	public static String getSunPositionTimeParameterNameKey() { return "animator.sunposition.time.name"; }
+	public static String getAddHeadLabelKey() { return "animator.gui.menu.addhead.label"; }
+	public static String getHeadAnimatableNameKey() { return "animator.head.name"; }
+	public static String getHeadRotationXParameterNameKey() { return "animator.head.rotationx.name"; }
+	public static String getHeadRotationYParameterNameKey() { return "animator.head.rotationy.name"; }
+	public static String getHeadRotationZParameterNameKey() { return "animator.head.rotationz.name"; }
+	public static String getHeadRotationWParameterNameKey() { return "animator.head.rotationw.name"; }
+	public static String getHeadPositionXParameterNameKey() { return "animator.head.positionx.name"; }
+	public static String getHeadPositionYParameterNameKey() { return "animator.head.positiony.name"; }
+	public static String getHeadPositionZParameterNameKey() { return "animator.head.positionz.name"; }
 }
