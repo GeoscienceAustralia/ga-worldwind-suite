@@ -47,7 +47,8 @@ public abstract class AbstractCameraPositionPath implements Renderable
 	private DoubleBuffer pathColourFrontBuffer;
 	private DoubleBuffer pathColourBackBuffer;
 	private Object pathBufferLock = new Object();
-	private Vec4 pathReferenceCenter;
+	private Vec4 pathReferenceCenterFront;
+	private Vec4 pathReferenceCenterBack;
 
 	/** The animation whose camera path is to be displayed on this layer */
 	private Animation animation;
@@ -105,9 +106,9 @@ public abstract class AbstractCameraPositionPath implements Renderable
 		{
 			synchronized (pathBufferLock)
 			{
-				if (pathReferenceCenter != null)
+				if (pathReferenceCenterFront != null)
 				{
-					dc.getView().pushReferenceCenter(dc, pathReferenceCenter);
+					dc.getView().pushReferenceCenter(dc, pathReferenceCenterFront);
 					popRefCenter = true;
 				}
 
@@ -184,7 +185,7 @@ public abstract class AbstractCameraPositionPath implements Renderable
 	 */
 	private void populatePathBuffers()
 	{
-		pathReferenceCenter = null;
+		pathReferenceCenterBack = null;
 
 		int firstFrame = animation.getFrameOfFirstKeyFrame();
 		int lastFrame = animation.getFrameOfLastKeyFrame();
@@ -204,13 +205,13 @@ public abstract class AbstractCameraPositionPath implements Renderable
 
 			// Populate the vertex buffer
 			Vec4 eyeVector = animation.getView().getGlobe().computePointFromPosition(currentPathPosition);
-			if (pathReferenceCenter == null)
+			if (pathReferenceCenterBack == null)
 			{
-				pathReferenceCenter = eyeVector; // Choose the first point in the path to be the reference point
+				pathReferenceCenterBack = eyeVector; // Choose the first point in the path to be the reference point
 			}
-			pathVertexBackBuffer.put(eyeVector.x - pathReferenceCenter.x);
-			pathVertexBackBuffer.put(eyeVector.y - pathReferenceCenter.y);
-			pathVertexBackBuffer.put(eyeVector.z - pathReferenceCenter.z);
+			pathVertexBackBuffer.put(eyeVector.x - pathReferenceCenterBack.x);
+			pathVertexBackBuffer.put(eyeVector.y - pathReferenceCenterBack.y);
+			pathVertexBackBuffer.put(eyeVector.z - pathReferenceCenterBack.z);
 
 			// Populate the delta array
 			if (previousPathPosition != null)
@@ -296,6 +297,8 @@ public abstract class AbstractCameraPositionPath implements Renderable
 			pathColourFrontBuffer = pathColourBackBuffer;
 			pathColourBackBuffer = tmp;
 			pathColourFrontBuffer.rewind();
+			
+			pathReferenceCenterFront = pathReferenceCenterBack;
 		}
 	}
 
