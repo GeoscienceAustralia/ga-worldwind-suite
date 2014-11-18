@@ -452,9 +452,9 @@ public class WorldWindAnimationImpl extends PropagatingChangeableEventListener i
 
 	protected void clearAnimatableObjects()
 	{
-		for (Animatable object : animatableObjects)
+		for (int i = animatableObjects.size() - 1; i>= 0; i--)
 		{
-			removeAnimatableObject(object);
+			removeAnimatableObject(animatableObjects.get(i));
 		}
 	}
 
