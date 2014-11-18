@@ -204,6 +204,7 @@ public class ImmediateRetrievalService implements RetrievalService
 
 		RetrievalTask task = new RetrievalTask(retriever);
 		task.run(); //run the task
+		Logging.logger().info("Running retrieval immediately: " + retriever.getName());
 		return task;
 	}
 
