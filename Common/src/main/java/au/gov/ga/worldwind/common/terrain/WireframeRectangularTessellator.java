@@ -232,7 +232,7 @@ public class WireframeRectangularTessellator extends RectangularTessellatorAcces
 	{
 		//mark the tile's vertices as rebuilt
 		((RowColRectTile) tile).rebuiltVertices = true;
-		return super.buildVerts(dc, tile, false);
+		return super.buildVerts(dc, tile, makeSkirts);
 	}
 
 	@Override
