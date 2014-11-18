@@ -532,7 +532,7 @@ abstract class CameraParameter extends ParameterBase
 		public FieldOfViewParameter(String name, Animation animation)
 		{
 			super(name, animation);
-			setDefaultValue(animation.getView().getFieldOfView().degrees);
+			setDefaultValue(45);
 		}
 
 		public FieldOfViewParameter(Animation animation)

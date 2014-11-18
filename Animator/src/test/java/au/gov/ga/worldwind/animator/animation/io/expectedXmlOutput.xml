@@ -42,6 +42,9 @@
                 <roll>
                     <parameter defaultValue="0.0" enabled="true" name="Render Camera - Param"/>
                 </roll>
+                <fieldOfView>
+                    <parameter defaultValue="45.0" enabled="true" name="Render Camera - Param"/>
+                </fieldOfView>
             </camera>
             <elevation enabled="true" name="Elevation">
                 <models/>
