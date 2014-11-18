@@ -33,14 +33,15 @@ import au.gov.ga.worldwind.animator.animation.parameter.ParameterValueFactory;
 import au.gov.ga.worldwind.common.sun.SunPositionService;
 
 /**
+ * Time parameter of the {@link SunPositionAnimatable}.
  * 
  * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
-@EditableParameter(units="ms since 1970")
+@EditableParameter(units = "ms since 1970")
 public class SunPositionTimeParameter extends SunPositionParameterBase
 {
 	private static final long serialVersionUID = -3213662401953360974L;
-	
+
 	SunPositionTimeParameter()
 	{
 		super();

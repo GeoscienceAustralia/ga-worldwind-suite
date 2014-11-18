@@ -32,6 +32,7 @@ import au.gov.ga.worldwind.animator.animation.parameter.ParameterValueFactory;
 import au.gov.ga.worldwind.common.sun.SunPositionService;
 
 /**
+ * Latitude parameter of the {@link SunPositionAnimatable}.
  * 
  * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
@@ -39,7 +40,7 @@ import au.gov.ga.worldwind.common.sun.SunPositionService;
 public class SunPositionLatitudeParameter extends SunPositionParameterBase
 {
 	private static final long serialVersionUID = 2596594405242447479L;
-	
+
 	SunPositionLatitudeParameter()
 	{
 		super();

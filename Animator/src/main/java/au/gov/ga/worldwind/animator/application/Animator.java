@@ -126,10 +126,10 @@ import au.gov.ga.worldwind.animator.animation.io.XmlAnimationWriter;
 import au.gov.ga.worldwind.animator.animation.layer.AnimatableLayer;
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterValue;
-import au.gov.ga.worldwind.animator.animation.sun.SunPositionAnimatable;
+import au.gov.ga.worldwind.animator.animation.sun.SunPositionAnimatableImpl;
 import au.gov.ga.worldwind.animator.application.debug.AnimationEventLogger;
-import au.gov.ga.worldwind.animator.application.effects.BuiltInEffects;
 import au.gov.ga.worldwind.animator.application.effects.AnimatableEffect;
+import au.gov.ga.worldwind.animator.application.effects.BuiltInEffects;
 import au.gov.ga.worldwind.animator.application.effects.EffectDialog;
 import au.gov.ga.worldwind.animator.application.effects.EffectFactory;
 import au.gov.ga.worldwind.animator.application.render.AnimationRenderer;
@@ -1881,7 +1881,7 @@ public class Animator
 	
 	void addSunPositionAnimatable()
 	{
-		animation.addAnimatableObject(new SunPositionAnimatable(null, animation));
+		animation.addAnimatableObject(new SunPositionAnimatableImpl(null, animation));
 	}
 
 	void moveToPreviousFrame()

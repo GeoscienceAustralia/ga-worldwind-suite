@@ -32,6 +32,7 @@ import au.gov.ga.worldwind.common.sun.SunPositionService;
 import au.gov.ga.worldwind.common.util.Util;
 
 /**
+ * Type parameter of the {@link SunPositionAnimatable}.
  * 
  * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
@@ -39,7 +40,7 @@ import au.gov.ga.worldwind.common.util.Util;
 public class SunPositionTypeParameter extends SunPositionParameterBase
 {
 	private static final long serialVersionUID = -1523627692815409214L;
-	
+
 	SunPositionTypeParameter()
 	{
 		super();

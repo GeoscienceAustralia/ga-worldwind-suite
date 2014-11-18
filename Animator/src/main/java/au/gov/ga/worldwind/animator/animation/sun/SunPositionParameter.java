@@ -18,6 +18,7 @@ package au.gov.ga.worldwind.animator.animation.sun;
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
 
 /**
+ * Parameter used by the {@link SunPositionAnimatable}.
  * 
  * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */

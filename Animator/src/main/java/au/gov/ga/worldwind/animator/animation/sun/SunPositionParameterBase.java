@@ -20,13 +20,14 @@ import au.gov.ga.worldwind.animator.animation.parameter.ParameterBase;
 import au.gov.ga.worldwind.animator.animation.parameter.ParameterValue;
 
 /**
+ * Abstract base class of parameters used by the {@link SunPositionAnimatable}.
  * 
  * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
 public abstract class SunPositionParameterBase extends ParameterBase implements SunPositionParameter
 {
 	private static final long serialVersionUID = 9176617713299468924L;
-	
+
 	protected SunPositionParameterBase()
 	{
 		super();

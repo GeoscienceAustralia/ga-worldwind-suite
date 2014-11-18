@@ -15,125 +15,38 @@
  ******************************************************************************/
 package au.gov.ga.worldwind.animator.animation.sun;
 
-import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getSunPositionAnimatableNameKey;
-import static au.gov.ga.worldwind.common.util.message.MessageSourceAccessor.getMessage;
-import gov.nasa.worldwind.avlist.AVList;
-import gov.nasa.worldwind.util.WWXML;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
-import javax.xml.xpath.XPath;
-
-import org.w3c.dom.Element;
-
-import au.gov.ga.worldwind.animator.animation.AnimatableBase;
-import au.gov.ga.worldwind.animator.animation.Animation;
-import au.gov.ga.worldwind.animator.animation.io.AnimationFileVersion;
-import au.gov.ga.worldwind.animator.animation.io.AnimationIOConstants;
+import au.gov.ga.worldwind.animator.animation.Animatable;
 import au.gov.ga.worldwind.animator.animation.parameter.Parameter;
+import au.gov.ga.worldwind.common.sun.SunPositionService;
 
 /**
+ * {@link Animatable} implementation for the position of the sun.
  * 
  * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
-public class SunPositionAnimatable extends AnimatableBase
+public interface SunPositionAnimatable extends Animatable
 {
-	private static final long serialVersionUID = 4496802797920181732L;
+	/**
+	 * @return Sun position type parameter (see
+	 *         {@link SunPositionService.SunPositionType})
+	 */
+	Parameter getType();
 
-	private final List<Parameter> parameters = new ArrayList<Parameter>();
+	/**
+	 * @return Sun latitude position parameter (if type ==
+	 *         {@link SunPositionService.SunPositionType#Constant})
+	 */
+	Parameter getLatitude();
 
-	private Parameter typeParameter;
-	private Parameter latitudeParameter;
-	private Parameter longitudeParameter;
-	private Parameter timeParameter;
+	/**
+	 * @return Sun longitude position parameter (if type ==
+	 *         {@link SunPositionService.SunPositionType#Constant})
+	 */
+	Parameter getLongitude();
 
-
-	public SunPositionAnimatable(String name, Animation animation)
-	{
-		super(name, animation);
-		initializeParameters();
-	}
-
-	@SuppressWarnings("unused")
-	private SunPositionAnimatable()
-	{
-	}
-
-	protected void initializeParameters()
-	{
-		if (typeParameter == null || latitudeParameter == null || longitudeParameter == null || timeParameter == null)
-		{
-			typeParameter = new SunPositionTypeParameter(null, animation);
-			latitudeParameter = new SunPositionLatitudeParameter(null, animation);
-			longitudeParameter = new SunPositionLongitudeParameter(null, animation);
-			timeParameter = new SunPositionTimeParameter(null, animation);
-			
-			typeParameter.setArmed(false);
-			typeParameter.setEnabled(false);
-			latitudeParameter.setArmed(false);
-			latitudeParameter.setEnabled(false);
-			longitudeParameter.setArmed(false);
-			longitudeParameter.setEnabled(false);
-			timeParameter.setArmed(false);
-			timeParameter.setEnabled(false);
-		}
-
-		parameters.clear();
-		parameters.add(typeParameter);
-		parameters.add(latitudeParameter);
-		parameters.add(longitudeParameter);
-		parameters.add(timeParameter);
-	}
-
-	@Override
-	public Collection<Parameter> getParameters()
-	{
-		return parameters;
-	}
-
-	@Override
-	protected void doApply()
-	{
-		for (Parameter parameter : parameters)
-		{
-			((SunPositionParameter) parameter).apply();
-		}
-	}
-
-	@Override
-	protected String getXmlElementName(AnimationIOConstants constants)
-	{
-		return constants.getSunPositionElementName();
-	}
-
-	@Override
-	protected AnimatableBase createAnimatableFromXml(String name, Animation animation, boolean enabled,
-			Element element, AnimationFileVersion version, AVList context)
-	{
-		AnimationIOConstants constants = version.getConstants();
-		XPath xpath = WWXML.makeXPath();
-
-		SunPositionAnimatable animatable = new SunPositionAnimatable(name, animation);
-
-		animatable.typeParameter = new SunPositionTypeParameter().fromXml(WWXML.getElement(element,
-				constants.getSunPositionTypeElementName(), xpath), version, context);
-		animatable.latitudeParameter = new SunPositionLatitudeParameter().fromXml(WWXML.getElement(element,
-				constants.getSunPositionLatitudeElementName(), xpath), version, context);
-		animatable.longitudeParameter = new SunPositionLongitudeParameter().fromXml(WWXML.getElement(element,
-				constants.getSunPositionLongitudeElementName(), xpath), version, context);
-		animatable.timeParameter = new SunPositionTimeParameter().fromXml(WWXML.getElement(element,
-				constants.getSunPositionTimeElementName(), xpath), version, context);
-
-		animatable.initializeParameters();
-
-		return animatable;
-	}
-
-	@Override
-	protected String getDefaultName()
-	{
-		return getMessage(getSunPositionAnimatableNameKey());
-	}
+	/**
+	 * @return Sun time parameter (if type ==
+	 *         {@link SunPositionService.SunPositionType#SpecificTime})
+	 */
+	Parameter getTime();
 }

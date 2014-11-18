@@ -32,6 +32,7 @@ import au.gov.ga.worldwind.animator.animation.parameter.ParameterValueFactory;
 import au.gov.ga.worldwind.common.sun.SunPositionService;
 
 /**
+ * Longitude parameter of the {@link SunPositionAnimatable}.
  * 
  * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
