@@ -416,13 +416,13 @@ public class BasicBezierParameterValue extends BasicParameterValue implements Be
 			case VERSION020:
 			{
 				BasicBezierParameterValue result = new BasicBezierParameterValue();
-				result.setValue(WWXML.getDouble(element, ATTRIBUTE_PATH_PREFIX + constants.getParameterValueAttributeValue(), null));
-				result.setFrame(WWXML.getInteger(element, ATTRIBUTE_PATH_PREFIX + constants.getParameterValueAttributeFrame(), null));
-				result.setInValue(WWXML.getDouble(element, ATTRIBUTE_PATH_PREFIX + constants.getBezierValueAttributeInValue(), null));
-				result.setInPercent(WWXML.getDouble(element, ATTRIBUTE_PATH_PREFIX + constants.getBezierValueAttributeInPercent(), null));
-				result.setOutValue(WWXML.getDouble(element, ATTRIBUTE_PATH_PREFIX + constants.getBezierValueAttributeOutValue(), null));
-				result.setOutPercent(WWXML.getDouble(element, ATTRIBUTE_PATH_PREFIX + constants.getBezierValueAttributeOutPercent(), null));
-				result.setLocked(WWXML.getBoolean(element, ATTRIBUTE_PATH_PREFIX + constants.getBezierValueAttributeLocked(), null));
+				result.setValue(Double.parseDouble(element.getAttribute(constants.getParameterValueAttributeValue())));
+				result.setFrame(Integer.parseInt(element.getAttribute(constants.getParameterValueAttributeFrame())));
+				result.setInValue(Double.parseDouble(element.getAttribute(constants.getBezierValueAttributeInValue())));
+				result.setInPercent(Double.parseDouble(element.getAttribute(constants.getBezierValueAttributeInPercent())));
+				result.setOutValue(Double.parseDouble(element.getAttribute(constants.getBezierValueAttributeOutValue())));
+				result.setOutPercent(Double.parseDouble(element.getAttribute(constants.getBezierValueAttributeOutPercent())));
+				result.setLocked(Boolean.parseBoolean(element.getAttribute(constants.getBezierValueAttributeLocked())));
 				
 				result.setOwner((Parameter)context.getValue(constants.getParameterValueOwnerKey()));
 				

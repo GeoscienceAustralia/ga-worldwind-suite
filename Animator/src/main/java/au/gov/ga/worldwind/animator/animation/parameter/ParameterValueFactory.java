@@ -186,7 +186,7 @@ public class ParameterValueFactory
 	 */
 	public static ParameterValue fromXml(Element element, AnimationFileVersion version, AVList context)
 	{
-		ParameterValueType type = ParameterValueType.valueOf(WWXML.getText(element, XmlSerializable.ATTRIBUTE_PATH_PREFIX + version.getConstants().getParameterValueAttributeType()));
+		ParameterValueType type = ParameterValueType.valueOf(element.getAttribute(version.getConstants().getParameterValueAttributeType()));
 		switch (type)
 		{
 			case LINEAR:

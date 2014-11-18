@@ -205,8 +205,8 @@ public class BasicParameterValue extends ChangeableBase implements ParameterValu
 			case VERSION020:
 			{
 				BasicParameterValue result = new BasicParameterValue();
-				result.setValue(WWXML.getDouble(element, ATTRIBUTE_PATH_PREFIX + constants.getParameterValueAttributeValue(), null));
-				result.setFrame(WWXML.getInteger(element, ATTRIBUTE_PATH_PREFIX + constants.getParameterValueAttributeFrame(), null));
+				result.setValue(Double.parseDouble(element.getAttribute(constants.getParameterValueAttributeValue())));
+				result.setFrame(Integer.parseInt(element.getAttribute(constants.getParameterValueAttributeFrame())));
 				
 				result.setOwner((Parameter)context.getValue(constants.getParameterValueOwnerKey()));
 				
