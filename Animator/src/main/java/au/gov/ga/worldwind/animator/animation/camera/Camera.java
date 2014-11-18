@@ -63,45 +63,54 @@ public interface Camera extends Animatable
 	 *         'look-at' point
 	 */
 	Parameter getLookAtElevation();
-	
+
 	/**
 	 * @return The parameter that represents the roll of the camera
 	 */
 	Parameter getRoll();
 
 	/**
+	 * @return The parameter that represents the field-of-view of the camera
+	 */
+	Parameter getFieldOfView();
+
+	/**
 	 * @return Whether the camera clipping parameters are active or not
 	 */
 	boolean isClippingParametersActive();
-	
+
 	/**
 	 * Sets the clipping parameters to be active or not.
 	 * <p/>
-	 * If the status changes, this can result in key frame parameters being removed
-	 * entirely from the animation.
+	 * If the status changes, this can result in key frame parameters being
+	 * removed entirely from the animation.
 	 */
 	void setClippingParametersActive(boolean active);
-	
+
 	/**
-	 * @return The parameter that represents the near clipping distance of the camera
+	 * @return The parameter that represents the near clipping distance of the
+	 *         camera
 	 */
 	Parameter getNearClip();
-	
+
 	/**
-	 * @return The parameter that represents the near clipping distance of the camera
+	 * @return The parameter that represents the near clipping distance of the
+	 *         camera
 	 */
 	Parameter getFarClip();
-	
+
 	/**
-	 * @return The eye position of the camera in the provided frame range (inclusive)
+	 * @return The eye position of the camera in the provided frame range
+	 *         (inclusive)
 	 */
 	Position[] getEyePositionsBetweenFrames(int startFrame, int endFrame);
 
 	/**
-	 * @return The lookat position of the camera in the provided frame range (inclusive)
+	 * @return The lookat position of the camera in the provided frame range
+	 *         (inclusive)
 	 */
 	Position[] getLookatPositionsBetweenFrames(int startFrame, int endFrame);
-	
+
 	/**
 	 * Return the eye position of the camera at the provided frame
 	 * 

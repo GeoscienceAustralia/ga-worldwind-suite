@@ -41,6 +41,7 @@ import au.gov.ga.worldwind.animator.animation.camera.CameraParameter.EyeElevatio
 import au.gov.ga.worldwind.animator.animation.camera.CameraParameter.EyeLatParameter;
 import au.gov.ga.worldwind.animator.animation.camera.CameraParameter.EyeLonParameter;
 import au.gov.ga.worldwind.animator.animation.camera.CameraParameter.FarClipParameter;
+import au.gov.ga.worldwind.animator.animation.camera.CameraParameter.FieldOfViewParameter;
 import au.gov.ga.worldwind.animator.animation.camera.CameraParameter.LookatElevationParameter;
 import au.gov.ga.worldwind.animator.animation.camera.CameraParameter.LookatLatParameter;
 import au.gov.ga.worldwind.animator.animation.camera.CameraParameter.LookatLonParameter;
@@ -75,6 +76,7 @@ public class CameraImpl extends AnimatableBase implements Camera
 	private Parameter lookAtElevation;
 
 	private Parameter roll;
+	private Parameter fieldOfView;
 
 	private boolean clippingParametersActivated = false;
 	private Parameter nearClip;
@@ -127,6 +129,7 @@ public class CameraImpl extends AnimatableBase implements Camera
 		lookAtElevation = new LookatElevationParameter(animation);
 
 		roll = new RollParameter(animation);
+		fieldOfView = new FieldOfViewParameter(animation);
 
 		if (clippingParametersActivated)
 		{
@@ -164,12 +167,17 @@ public class CameraImpl extends AnimatableBase implements Camera
 		Position eye = getEyePositionAtFrame(frame);
 		Position center = getLookatPositionAtFrame(frame);
 		Angle roll = Angle.fromDegrees(this.roll.getValueAtFrame(frame).getValue());
+		Angle fieldOfView = Angle.fromDegrees(this.fieldOfView.getValueAtFrame(frame).getValue());
 
 		View view = animation.getView();
 		view.stopMovement();
 		if (this.roll.isEnabled())
 		{
 			view.setRoll(roll);
+		}
+		if (this.fieldOfView.isEnabled())
+		{
+			view.setFieldOfView(fieldOfView);
 		}
 		view.setOrientation(eye, center);
 
@@ -270,6 +278,12 @@ public class CameraImpl extends AnimatableBase implements Camera
 	}
 
 	@Override
+	public Parameter getFieldOfView()
+	{
+		return fieldOfView;
+	}
+
+	@Override
 	public boolean isClippingParametersActive()
 	{
 		return clippingParametersActivated;
@@ -348,6 +362,7 @@ public class CameraImpl extends AnimatableBase implements Camera
 			parameters.add(lookAtLon);
 			parameters.add(lookAtElevation);
 			parameters.add(roll);
+			parameters.add(fieldOfView);
 			if (clippingParametersActivated)
 			{
 				parameters.add(nearClip);
@@ -462,6 +477,7 @@ public class CameraImpl extends AnimatableBase implements Camera
 		this.lookAtLon = camera.getLookAtLon();
 		this.lookAtElevation = camera.getLookAtElevation();
 		this.roll = camera.getRoll();
+		this.fieldOfView = camera.getFieldOfView();
 		this.clippingParametersActivated = camera.isClippingParametersActive();
 		this.nearClip = camera.getNearClip();
 		this.farClip = camera.getFarClip();
@@ -519,13 +535,23 @@ public class CameraImpl extends AnimatableBase implements Camera
 						context);
 
 		Element rollElement = WWXML.getElement(element, constants.getCameraRollElementName(), xpath);
-		if(rollElement != null)
+		if (rollElement != null)
 		{
 			camera.roll = new RollParameter().fromXml(rollElement, version, context);
 		}
 		else
 		{
 			camera.roll = new RollParameter(camera.getAnimation());
+		}
+
+		Element fieldOfViewElement = WWXML.getElement(element, constants.getCameraFieldOfViewElementName(), xpath);
+		if (fieldOfViewElement != null)
+		{
+			camera.fieldOfView = new FieldOfViewParameter().fromXml(fieldOfViewElement, version, context);
+		}
+		else
+		{
+			camera.fieldOfView = new FieldOfViewParameter(camera.getAnimation());
 		}
 
 		// Near and far clipping are optional.

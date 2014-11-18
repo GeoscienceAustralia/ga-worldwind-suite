@@ -19,6 +19,7 @@ import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstant
 import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getCameraEyeLonNameKey;
 import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getCameraEyeZoomNameKey;
 import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getCameraFarClipNameKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getCameraFieldOfViewNameKey;
 import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getCameraLookatLatNameKey;
 import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getCameraLookatLonNameKey;
 import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getCameraLookatZoomNameKey;
@@ -471,7 +472,7 @@ abstract class CameraParameter extends ParameterBase
 			return new LookatElevationParameter(name, animation);
 		}
 	}
-	
+
 	@SuppressWarnings("serial")
 	@EditableParameter(units = "deg")
 	static class RollParameter extends CameraParameter
@@ -521,6 +522,59 @@ abstract class CameraParameter extends ParameterBase
 				Element parameterElement, AnimationFileVersion version, AVList context)
 		{
 			return new RollParameter(name, animation);
+		}
+	}
+
+	@SuppressWarnings("serial")
+	@EditableParameter(units = "deg", minValue = 1, maxValue = 180)
+	static class FieldOfViewParameter extends CameraParameter
+	{
+		public FieldOfViewParameter(String name, Animation animation)
+		{
+			super(name, animation);
+			setDefaultValue(animation.getView().getFieldOfView().degrees);
+		}
+
+		public FieldOfViewParameter(Animation animation)
+		{
+			this(null, animation);
+		}
+
+		FieldOfViewParameter()
+		{
+			super();
+		}
+
+		@Override
+		protected String getDefaultName()
+		{
+			return getMessageOrDefault(getCameraFieldOfViewNameKey(), DEFAULT_PARAMETER_NAME);
+		}
+
+		@Override
+		public ParameterValue getCurrentValue()
+		{
+			double value = getView().getFieldOfView().degrees;
+			return ParameterValueFactory.createParameterValue(this, value, animation.getCurrentFrame());
+		}
+
+		@Override
+		protected void doApplyValue(double value)
+		{
+			getView().setFieldOfView(Angle.fromDegrees(value));
+		}
+
+		@Override
+		protected String getXmlElementName(AnimationIOConstants constants)
+		{
+			return constants.getCameraFieldOfViewElementName();
+		}
+
+		@Override
+		protected ParameterBase createParameterFromXml(String name, Animation animation, Element element,
+				Element parameterElement, AnimationFileVersion version, AVList context)
+		{
+			return new FieldOfViewParameter(name, animation);
 		}
 	}
 
