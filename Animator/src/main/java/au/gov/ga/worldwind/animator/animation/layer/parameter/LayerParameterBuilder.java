@@ -17,7 +17,6 @@ package au.gov.ga.worldwind.animator.animation.layer.parameter;
 
 import gov.nasa.worldwind.layers.FogLayer;
 import gov.nasa.worldwind.layers.Layer;
-import gov.nasa.worldwind.layers.TiledImageLayer;
 import au.gov.ga.worldwind.animator.animation.Animation;
 
 /**
@@ -36,7 +35,7 @@ public interface LayerParameterBuilder
 	@SuppressWarnings("unchecked")
 	public static LayerParameterBuilder[] BUILDERS = {
 		
-		new SimpleLayerParameterBuilder(LayerOpacityParameter.class, TiledImageLayer.class)
+		new SimpleLayerParameterBuilder(LayerOpacityParameter.class, Layer.class)
 		{
 			@Override
 			protected LayerParameter doCreateParameter(Animation animation, Layer targetLayer)
