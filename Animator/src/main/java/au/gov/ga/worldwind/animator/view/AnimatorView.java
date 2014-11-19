@@ -40,7 +40,6 @@ public class AnimatorView extends DelegateOrbitView implements ClipConfigurableV
 
 	public AnimatorView()
 	{
-		setTargetMode(true);
 		setPrioritizeFarClipping(false);
 	}
 	

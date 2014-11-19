@@ -63,6 +63,7 @@ import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstant
 import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getShowWireframeMenuLabelKey;
 import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getSmoothEyeSpeedMenuLabelKey;
 import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getStereoCameraMenuLabelKey;
+import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getTargetModeMenuLabelKey;
 import static au.gov.ga.worldwind.animator.util.message.AnimationMessageConstants.getUseZoomScalingMenuLabelKey;
 import static au.gov.ga.worldwind.common.util.message.MessageSourceAccessor.getMessage;
 
@@ -76,6 +77,7 @@ import javax.swing.KeyStroke;
 import au.gov.ga.worldwind.animator.application.debug.DebugWriter;
 import au.gov.ga.worldwind.animator.application.settings.Settings;
 import au.gov.ga.worldwind.animator.util.Icons;
+import au.gov.ga.worldwind.animator.view.AnimatorView;
 import au.gov.ga.worldwind.common.ui.BasicAction;
 import au.gov.ga.worldwind.common.ui.SelectableAction;
 import au.gov.ga.worldwind.common.util.Validate;
@@ -109,6 +111,7 @@ public class AnimatorActionFactory
 	private BasicAction scaleAnimationAction;
 	private BasicAction smoothEyeSpeedAction;
 	private SelectableAction showWireframeAction;
+	private SelectableAction targetModeAction;
 	private BasicAction previewAction;
 	private BasicAction previewX2Action;
 	private BasicAction previewX10Action;
@@ -397,6 +400,18 @@ public class AnimatorActionFactory
 			public void actionPerformed(ActionEvent e)
 			{
 				targetApplication.showWireframe(showWireframeAction.isSelected());
+			}
+		});
+		
+		// Target mode
+		targetModeAction = new SelectableAction(getMessage(getTargetModeMenuLabelKey()), null,
+				((AnimatorView) targetApplication.getCurrentAnimation().getWorldWindow().getView()).isTargetMode());
+		targetModeAction.addActionListener(new ActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				targetApplication.targetMode(targetModeAction.isSelected());
 			}
 		});
 		
@@ -976,6 +991,11 @@ public class AnimatorActionFactory
 	public SelectableAction getShowWireframeAction()
 	{
 		return showWireframeAction;
+	}
+
+	public SelectableAction getTargetModeAction()
+	{
+		return targetModeAction;
 	}
 
 	public BasicAction getClipSectorAction()

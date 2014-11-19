@@ -160,6 +160,7 @@ import au.gov.ga.worldwind.animator.ui.frameslider.FrameSlider;
 import au.gov.ga.worldwind.animator.ui.parametereditor.ParameterEditor;
 import au.gov.ga.worldwind.animator.util.ExaggerationAwareStatusBar;
 import au.gov.ga.worldwind.animator.util.ExceptionLogger;
+import au.gov.ga.worldwind.animator.view.AnimatorView;
 import au.gov.ga.worldwind.animator.view.ClipConfigurableView;
 import au.gov.ga.worldwind.common.render.ExtendedSceneController;
 import au.gov.ga.worldwind.common.ui.FileFilters;
@@ -865,6 +866,7 @@ public class Animator
 		actionFactory.getShowRuleOfThirdsAction().addToMenu(menu);
 		menu.addSeparator();
 		actionFactory.getShowWireframeAction().addToMenu(menu);
+		actionFactory.getTargetModeAction().addToMenu(menu);
 		menu.addSeparator();
 		actionFactory.getAnimateClippingAction().addToMenu(menu);
 		actionFactory.getStereoCameraAction().addToMenu(menu);
@@ -2203,6 +2205,11 @@ public class Animator
 	void showWireframe(boolean show)
 	{
 		getCurrentAnimation().getWorldWindow().getModel().setShowWireframeInterior(show);
+	}
+	
+	void targetMode(boolean enable)
+	{
+		((AnimatorView) getCurrentAnimation().getWorldWindow().getView()).setTargetMode(enable);
 	}
 
 	void clipSector()
