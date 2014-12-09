@@ -22,7 +22,6 @@ import gov.nasa.worldwind.geom.Sector;
 import gov.nasa.worldwind.geom.Vec4;
 import gov.nasa.worldwind.render.DrawContext;
 import gov.nasa.worldwind.terrain.RectangularTessellator;
-import gov.nasa.worldwind.terrain.RectangularTessellatorAccessible;
 import gov.nasa.worldwind.terrain.SectorGeometry;
 import gov.nasa.worldwind.terrain.SectorGeometryList;
 import gov.nasa.worldwind.util.Logging;
@@ -49,7 +48,7 @@ import javax.media.opengl.GL2;
  * 
  * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
-public class WireframeRectangularTessellator extends RectangularTessellatorAccessible
+public class WireframeRectangularTessellator extends RectangularTessellator
 {
 	private boolean wireframeDepthTesting = true;
 	private boolean backfaceCulling = false;
@@ -377,6 +376,7 @@ public class WireframeRectangularTessellator extends RectangularTessellatorAcces
 				{
 					gl.glBindBuffer(GL2.GL_ARRAY_BUFFER, vboIds[0]);
 					gl.glBufferData(GL2.GL_ARRAY_BUFFER, vertices.limit() * 4, vertices.rewind(), GL2.GL_DYNAMIC_DRAW);
+					gl.glBindBuffer(GL2.GL_ARRAY_BUFFER, 0);
 				}
 			}
 			finally
