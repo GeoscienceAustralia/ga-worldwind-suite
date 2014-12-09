@@ -24,7 +24,6 @@ import au.gov.ga.worldwind.animator.animation.Animation;
 import au.gov.ga.worldwind.animator.animation.RenderParameters;
 import au.gov.ga.worldwind.common.util.DaemonThreadFactory;
 import au.gov.ga.worldwind.common.view.target.ITargetView;
-import au.gov.ga.worldwind.common.view.target.TargetOrbitView;
 
 /**
  * A base class for animation renderers
@@ -58,13 +57,13 @@ public abstract class AnimationRendererBase implements AnimationRenderer
 	}
 	
 	@Override
-	public final void render(final Animation animation, final RenderParameters renderParams)
+	public final Thread render(final Animation animation, final RenderParameters renderParams)
 	{
 		resetRenderFlags();
 		if (animation == null || !animation.hasKeyFrames() || 
 				!renderParams.isFrameRangeSet() || renderParams.getEndFrame() < renderParams.getStartFrame())
 		{
-			return;
+			return null;
 		}
 		
 		Runnable renderTask = new Runnable()
@@ -78,7 +77,7 @@ public abstract class AnimationRendererBase implements AnimationRenderer
 
 		Thread renderThread = DaemonThreadFactory.newThread(renderTask, "Animator render thread");
 		renderThread.start();
-		
+		return renderThread;
 	}
 	
 	protected void renderOnThread(Animation animation, RenderParameters renderParams)

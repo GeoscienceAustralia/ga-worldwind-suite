@@ -38,8 +38,10 @@ public interface AnimationRenderer
 	
 	/**
 	 * Render the provided animation using the settings in the provided {@link RenderParameters}.
+	 *
+	 * @return Render thread
 	 */
-	void render(Animation animation, RenderParameters renderParams);
+	Thread render(Animation animation, RenderParameters renderParams);
 	
 	/**
 	 * @return Whether the rendering is complete yet
