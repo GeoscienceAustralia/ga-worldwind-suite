@@ -16,21 +16,21 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="@string/ve1x" />
-
+        
         <Button
             android:id="@+id/veButton2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="@string/ve2x" />
-
+        
         <Button
             android:id="@+id/veButton5"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="@string/ve5x" />
-
+        
         <Button
             android:id="@+id/veButton10"
             android:layout_width="fill_parent"
