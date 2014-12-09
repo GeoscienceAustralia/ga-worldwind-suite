@@ -35,7 +35,7 @@ import javax.swing.JRadioButton;
 import au.gov.ga.worldwind.common.util.Icons;
 import au.gov.ga.worldwind.common.view.delegate.IDelegateView;
 import au.gov.ga.worldwind.common.view.delegate.IViewDelegate;
-import au.gov.ga.worldwind.common.view.hmd.oculus.OculusViewDelegate;
+import au.gov.ga.worldwind.common.view.oculus.RiftViewDistortionDelegate;
 import au.gov.ga.worldwind.common.view.stereo.IStereoViewDelegate;
 import au.gov.ga.worldwind.common.view.stereo.StereoViewDelegate;
 import au.gov.ga.worldwind.common.view.target.ITargetView;
@@ -55,6 +55,7 @@ public class ViewPanel extends AbstractThemePanel
 	private JRadioButton orbitRadio;
 	private JRadioButton oculusRadio;
 	private JCheckBox targetCheck;
+	private JCheckBox farCheck;
 
 	public ViewPanel()
 	{
@@ -103,6 +104,16 @@ public class ViewPanel extends AbstractThemePanel
 		c.gridwidth = 2;
 		c.anchor = GridBagConstraints.WEST;
 		panel.add(targetCheck, c);
+		
+		farCheck = new JCheckBox("Prioritize far-clipping");
+		farCheck.setSelected(true);
+		farCheck.addActionListener(al);
+		c = new GridBagConstraints();
+		c.gridx = 0;
+		c.gridy = 2;
+		c.gridwidth = 2;
+		c.anchor = GridBagConstraints.WEST;
+		panel.add(farCheck, c);
 	}
 
 	@Override
@@ -141,7 +152,7 @@ public class ViewPanel extends AbstractThemePanel
 			{
 				orbitRadio.setSelected(true);
 			}
-			else if (delegate instanceof OculusViewDelegate)
+			else if (delegate instanceof RiftViewDistortionDelegate)
 			{
 				oculusRadio.setSelected(true);
 			}
@@ -168,15 +179,16 @@ public class ViewPanel extends AbstractThemePanel
 		{
 			delegate = new StereoViewDelegate();
 		}
-		else if (oculusRadio.isSelected() && !(oldDelegate instanceof OculusViewDelegate))
+		else if (oculusRadio.isSelected() && !(oldDelegate instanceof RiftViewDistortionDelegate))
 		{
-			delegate = new OculusViewDelegate();
+			delegate = new RiftViewDistortionDelegate();
 		}
 
 		if (view instanceof ITargetView)
 		{
 			ITargetView target = (ITargetView) view;
 			target.setTargetMode(!targetCheck.isSelected());
+			target.setPrioritizeFarClipping(farCheck.isSelected());
 		}
 
 		if (delegate == null)

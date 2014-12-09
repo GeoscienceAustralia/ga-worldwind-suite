@@ -29,11 +29,6 @@
 			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="Common/lib/package/native/windows-amd64"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="lib/package/JRift.jar" sourcepath="lib/src/JRift.zip">
-		<attributes>
-			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="Common/lib/package/native/windows-amd64"/>
-		</attributes>
-	</classpathentry>
 	<classpathentry kind="lib" path="lib/package/SixenseJava.jar" sourcepath="lib/src/SixenseJava.zip"/>
 	<classpathentry exported="true" kind="lib" path="lib/include/gluegen-rt.jar" sourcepath="lib/src/gluegen-java-src.zip">
 		<attributes>
@@ -45,5 +40,12 @@
 			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="Common/lib/include"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="lib" path="lib/package/jovr-0.4.3.1-SNAPSHOT.jar" sourcepath="lib/src/jovr-0.4.3.1-SNAPSHOT-src.zip">
+		<attributes>
+			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="Common/lib/package/native/macosx-universal"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="lib/package/jna-4.1.0.jar"/>
+	<classpathentry kind="lib" path="lib/package/guava-17.0.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
