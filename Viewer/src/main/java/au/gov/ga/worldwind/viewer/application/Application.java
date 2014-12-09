@@ -397,6 +397,7 @@ public class Application
 	private BasicAction wmsBrowserAction;
 
 	private WmsBrowser wmsBrowser;
+	private final List<QuitListener> quitListeners = new ArrayList<QuitListener>();
 
 	private Application(Theme theme, boolean showSplashScreen, boolean useNewt)
 	{
@@ -1499,6 +1500,18 @@ public class Application
 
 	protected void quit(boolean systemExit)
 	{
+		for (QuitListener listener : quitListeners)
+		{
+			if (!listener.shouldQuit())
+			{
+				return;
+			}
+		}
+		for (QuitListener listener : quitListeners)
+		{
+			listener.willQuit();
+		}
+		
 		saveSplitLocation();
 		Settings.get().saveThemeProperties(theme);
 		Settings.get().save();
@@ -1513,6 +1526,16 @@ public class Application
 		{
 			System.exit(0);
 		}
+	}
+	
+	public void addQuitListener(QuitListener listener)
+	{
+		quitListeners.add(listener);
+	}
+	
+	public void removeQuitListener(QuitListener listener)
+	{
+		quitListeners.remove(listener);
 	}
 
 	private void saveSplitLocation()
@@ -1594,5 +1617,11 @@ public class Application
 	public JFrame getFrame()
 	{
 		return frame;
+	}
+	
+	public static interface QuitListener
+	{
+		boolean shouldQuit();
+		void willQuit();
 	}
 }
