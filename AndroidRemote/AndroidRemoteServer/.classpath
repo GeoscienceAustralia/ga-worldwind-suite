@@ -5,6 +5,7 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/AndroidRemoteShared"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/Viewer"/>
 	<classpathentry kind="lib" path="lib/bluecove-2.1.1-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="lib/bluecove-bluez-2.1.1-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="lib/bluecove-gpl-2.1.1-SNAPSHOT.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
