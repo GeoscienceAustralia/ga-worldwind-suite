@@ -6,7 +6,6 @@ import gov.nasa.worldwind.awt.ViewInputAttributes.ActionAttributes;
 import gov.nasa.worldwind.awt.ViewInputAttributes.DeviceAttributes;
 import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.geom.Position;
-import gov.nasa.worldwind.view.orbit.FlyToOrbitViewAnimator;
 import gov.nasa.worldwind.view.orbit.OrbitView;
 
 import java.util.HashMap;
@@ -18,14 +17,17 @@ import au.gov.ga.worldwind.androidremote.server.ServerCommunicator;
 import au.gov.ga.worldwind.androidremote.shared.Communicator.State;
 import au.gov.ga.worldwind.androidremote.shared.CommunicatorListener;
 import au.gov.ga.worldwind.androidremote.shared.Message;
+import au.gov.ga.worldwind.androidremote.shared.messages.LocationMessage;
 import au.gov.ga.worldwind.androidremote.shared.messages.ShakeMessage;
 import au.gov.ga.worldwind.androidremote.shared.messages.finger.DownMessage;
 import au.gov.ga.worldwind.androidremote.shared.messages.finger.Finger;
 import au.gov.ga.worldwind.androidremote.shared.messages.finger.FingerMessage;
 import au.gov.ga.worldwind.androidremote.shared.messages.finger.MoveMessage;
 import au.gov.ga.worldwind.androidremote.shared.messages.finger.UpMessage;
+import au.gov.ga.worldwind.common.exaggeration.VerticalExaggerationService;
 import au.gov.ga.worldwind.common.input.IOrbitInputProvider;
 import au.gov.ga.worldwind.common.input.IProviderOrbitViewInputHandler;
+import au.gov.ga.worldwind.common.view.orbit.FlyToOrbitViewAnimator;
 
 public class AndroidInputProvider implements CommunicatorListener, IOrbitInputProvider
 {
@@ -83,6 +85,8 @@ public class AndroidInputProvider implements CommunicatorListener, IOrbitInputPr
 	private Finger doubleGestureLastFinger;
 	private DoubleState gestureDoubleState = DoubleState.NONE;
 
+	private Position location = null;
+
 	private IProviderOrbitViewInputHandler inputHandler;
 
 	public AndroidInputProvider()
@@ -121,6 +125,33 @@ public class AndroidInputProvider implements CommunicatorListener, IOrbitInputPr
 				inputHandler.onResetHeadingPitchRoll(resetAttributes);
 			}
 		}
+		else if (message instanceof LocationMessage)
+		{
+			LocationMessage location = (LocationMessage) message;
+			this.location = Position.fromDegrees(location.latitude, location.longitude, location.altitude + 5);
+			updateLocation();
+		}
+	}
+
+	private void updateLocation()
+	{
+		if (location == null || inputHandler == null)
+		{
+			return;
+		}
+		
+		//LocationLogger.logLocation(location);
+
+		//put center position on surface
+		double elevation = inputHandler.getView().getGlobe().getElevation(location.latitude, location.longitude);
+		Position centerPosition = new Position(location, elevation * VerticalExaggerationService.INSTANCE.get() + 2);
+
+		inputHandler.stopAnimators();
+		inputHandler.getView().setCenterPosition(centerPosition);
+		inputHandler.getView().setZoom(1);
+		inputHandler.getView().setPitch(Angle.POS90);
+		//inputHandler.getView().setHeading(locationHeading);
+		inputHandler.markViewChanged();
 	}
 
 	public DoubleState getBeginDoubleState(DoubleFingerDelta delta)

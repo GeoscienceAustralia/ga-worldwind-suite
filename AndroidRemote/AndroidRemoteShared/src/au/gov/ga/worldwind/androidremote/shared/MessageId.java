@@ -22,6 +22,7 @@ import au.gov.ga.worldwind.androidremote.shared.messages.EnableRemoteViewMessage
 import au.gov.ga.worldwind.androidremote.shared.messages.ExitMessage;
 import au.gov.ga.worldwind.androidremote.shared.messages.FlyHomeMessage;
 import au.gov.ga.worldwind.androidremote.shared.messages.IpAddressesMessage;
+import au.gov.ga.worldwind.androidremote.shared.messages.LocationMessage;
 import au.gov.ga.worldwind.androidremote.shared.messages.RemoteViewMessage;
 import au.gov.ga.worldwind.androidremote.shared.messages.ShakeMessage;
 import au.gov.ga.worldwind.androidremote.shared.messages.finger.DownMessage;
@@ -64,6 +65,8 @@ public enum MessageId
 	PLAY_PLACES(PlayPlacesMessage.class),
 	PLACES_PLAYING(PlacesPlayingMessage.class),
 	FLY_HOME(FlyHomeMessage.class),
+	
+	LOCATION(LocationMessage.class),
 
 	EXIT(ExitMessage.class);
 

@@ -44,6 +44,7 @@ import au.gov.ga.worldwind.common.ui.BasicAction;
 import au.gov.ga.worldwind.common.ui.HtmlViewer;
 import au.gov.ga.worldwind.common.util.Icons;
 import au.gov.ga.worldwind.viewer.application.Application;
+import au.gov.ga.worldwind.viewer.application.Application.QuitListener;
 import au.gov.ga.worldwind.viewer.panels.dataset.DatasetPanel;
 import au.gov.ga.worldwind.viewer.panels.layers.LayersPanel;
 import au.gov.ga.worldwind.viewer.panels.places.PlacesPanel;
@@ -62,6 +63,22 @@ public class Server
 		final AndroidInputProvider inputProvider = new AndroidInputProvider();
 		OrbitInputProviderManager.getInstance().addProvider(inputProvider);
 		final Application application = Application.startWithArgs(args);
+
+		application.addQuitListener(new QuitListener()
+		{
+			@Override
+			public boolean shouldQuit()
+			{
+				return true;
+			}
+
+			@Override
+			public void willQuit()
+			{
+				//LocationLogger.close();
+				//RiftLogger.close();
+			}
+		});
 
 		Theme theme = application.getTheme();
 		DatasetPanel datasetPanel = theme.getDatasetPanel();

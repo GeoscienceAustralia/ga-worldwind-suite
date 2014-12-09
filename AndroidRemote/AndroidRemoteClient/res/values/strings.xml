@@ -47,5 +47,6 @@
     <string name="delete">Delete</string>
     <string name="fly_home">Fly home</string>
     <string name="help">Help</string>
+    <string name="send_location">Enable location</string>
 
 </resources>

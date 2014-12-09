@@ -219,6 +219,30 @@ public class MessageIO
 	}
 
 	/**
+	 * Convert the next 8 bytes in a ByteBuffer to a double.
+	 * 
+	 * @param buffer
+	 * @return Double read from buffer.
+	 */
+	public static double bytesToDouble(ByteBuffer buffer)
+	{
+		return buffer.getDouble();
+	}
+
+	/**
+	 * Store a float in a ByteBuffer.
+	 * 
+	 * @param d
+	 *            Double to store.
+	 * @param buffer
+	 *            Buffer to write to.
+	 */
+	public static void doubleToBytes(double d, ByteBuffer buffer)
+	{
+		buffer.putDouble(d);
+	}
+
+	/**
 	 * Read <code>length</code> bytes from a ByteBuffer, and convert them to a
 	 * string using the given charset.
 	 * 

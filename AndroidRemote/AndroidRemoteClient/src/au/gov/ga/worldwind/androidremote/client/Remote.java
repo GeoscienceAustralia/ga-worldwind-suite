@@ -26,6 +26,9 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
@@ -52,6 +55,7 @@ import au.gov.ga.worldwind.androidremote.shared.Message;
 import au.gov.ga.worldwind.androidremote.shared.messages.ExitMessage;
 import au.gov.ga.worldwind.androidremote.shared.messages.FlyHomeMessage;
 import au.gov.ga.worldwind.androidremote.shared.messages.IpAddressesMessage;
+import au.gov.ga.worldwind.androidremote.shared.messages.LocationMessage;
 import au.gov.ga.worldwind.androidremote.shared.messages.ShakeMessage;
 import au.gov.ga.worldwind.androidremote.shared.messages.finger.DownMessage;
 import au.gov.ga.worldwind.androidremote.shared.messages.finger.Finger;
@@ -92,17 +96,18 @@ public class Remote extends SherlockFragmentActivity implements CommunicatorList
 	private static final int OPTION_EXAGGERATION = 4;
 	private static final int OPTION_FLY_HOME = 5;
 	private static final int OPTION_HELP = 6;
+	private static final int OPTION_SEND_LOCATION = 7;
 
-	private final VelocityTracker velocityTracker = VelocityTracker.obtain();
+	private VelocityTracker velocityTracker;
 	private final ShakeEventListener sensorListener = new ShakeEventListener();
 
 	private ControlFragment controlFragment;
 	private ItemModelFragment datasetsFragment, layersFragment, flatLayersFragment, placesFragment;
 	private Fragment[] tabFragments;
 	private final SparseArray<ItemModelState> itemModelStates = new SparseArray<ItemModelState>();
-	private final SparseArray<ItemModelFragmentMenuProvider> menuProviders =
-			new SparseArray<ItemModelFragmentMenuProvider>();
+	private final SparseArray<ItemModelFragmentMenuProvider> menuProviders = new SparseArray<ItemModelFragmentMenuProvider>();
 	private boolean lockLandscape;
+	private boolean sendLocation;
 	private Fragment currentFragment;
 	private float currentExaggeration;
 
@@ -114,8 +119,8 @@ public class Remote extends SherlockFragmentActivity implements CommunicatorList
 	{
 		super.onCreate(savedInstanceState);
 
-		//Normally one shouldn't instanciate all these objects in the onCreate method,
-		//as onCreate is called everytime a configuration change occurs (orientation,
+		//Normally one shouldn't instantiate all these objects in the onCreate method,
+		//as onCreate is called every time a configuration change occurs (orientation,
 		//keyboard hidden, screen size, etc). But we are handling configuration changes
 		//ourselves.
 
@@ -188,6 +193,36 @@ public class Remote extends SherlockFragmentActivity implements CommunicatorList
 				communicator.sendMessage(new ShakeMessage());
 			}
 		});
+
+		// Acquire a reference to the system Location Manager
+		LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+
+		// Define a listener that responds to location updates
+		LocationListener locationListener = new LocationListener()
+		{
+			public void onLocationChanged(Location location)
+			{
+				if (isSendLocation())
+				{
+					communicator.sendMessage(new LocationMessage(location.getLatitude(), location.getLongitude(), location
+							.getAltitude(), location.getAccuracy(), location.getBearing()));
+				}
+			}
+
+			public void onStatusChanged(String provider, int status, Bundle extras)
+			{
+			}
+
+			public void onProviderEnabled(String provider)
+			{
+			}
+
+			public void onProviderDisabled(String provider)
+			{
+			}
+		};
+		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
+		//locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
 	}
 
 	@Override
@@ -241,6 +276,7 @@ public class Remote extends SherlockFragmentActivity implements CommunicatorList
 			communicator.stop();
 			remoteViewCommunicator.stop();
 		}
+		velocityTracker.recycle();
 		super.onDestroy();
 	}
 
@@ -250,6 +286,7 @@ public class Remote extends SherlockFragmentActivity implements CommunicatorList
 		menu.add(0, OPTION_CONNECT, 0, R.string.connect_menu).setIcon(android.R.drawable.ic_menu_search);
 		menu.add(0, OPTION_EXAGGERATION, 0, R.string.vertical_exaggeration_menu);
 		menu.add(0, OPTION_FLY_HOME, 0, R.string.fly_home);
+		menu.add(0, OPTION_SEND_LOCATION, 0, R.string.send_location);
 		menu.add(0, OPTION_LOCK_LANDSCAPE, 0, R.string.lock_landscape_menu).setIcon(android.R.drawable.ic_menu_rotate);
 		menu.add(0, OPTION_ENABLE_REMOTE_VIEW, 0, R.string.remote_view_menu).setIcon(android.R.drawable.ic_dialog_map);
 		menu.add(0, OPTION_HELP, 0, R.string.help).setIcon(android.R.drawable.ic_menu_help);
@@ -285,6 +322,10 @@ public class Remote extends SherlockFragmentActivity implements CommunicatorList
 			break;
 		case OPTION_FLY_HOME:
 			communicator.sendMessage(new FlyHomeMessage());
+			break;
+		case OPTION_SEND_LOCATION:
+			setSendLocation(!item.isChecked());
+			item.setChecked(isSendLocation());
 			break;
 		case android.R.id.home:
 			getSupportActionBar().selectTab(getSupportActionBar().getTabAt(0));
@@ -526,5 +567,15 @@ public class Remote extends SherlockFragmentActivity implements CommunicatorList
 		this.lockLandscape = lockLandscape;
 		setRequestedOrientation(lockLandscape ? ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
 				: ActivityInfo.SCREEN_ORIENTATION_SENSOR);
+	}
+
+	public boolean isSendLocation()
+	{
+		return sendLocation;
+	}
+	
+	public void setSendLocation(boolean sendLocation)
+	{
+		this.sendLocation = sendLocation;
 	}
 }
