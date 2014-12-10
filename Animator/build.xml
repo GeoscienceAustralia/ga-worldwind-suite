@@ -23,6 +23,7 @@
 	<property name="executable_dir" value="${target_dir}/executable" />
 	<property name="executable_jar_name" value="animator-all-in-one.jar" />
 	<property name="executable_batch_name" value="run.bat" />
+	<property name="executable_console_batch_name" value="console.bat" />
 
 	<property name="webstart_dir" value="${target_dir}/webstart" />
 	<property name="webstart_unsigned_dir" value="${webstart_dir}/unsigned" />
@@ -201,6 +202,7 @@
 		<delete dir="${executable_temp_dir}" />
 
 		<echo file="${executable_dir}/${executable_batch_name}">java -Dsun.java2d.noddraw=true -Xmx1024m -jar ./${executable_jar_name}</echo>
+		<echo file="${executable_dir}/${executable_console_batch_name}">java -Xmx1024m -cp ${executable_jar_name} au.gov.ga.worldwind.animator.application.Console %*</echo>
 	</target>
 
 	<target name="webstart" depends="package">

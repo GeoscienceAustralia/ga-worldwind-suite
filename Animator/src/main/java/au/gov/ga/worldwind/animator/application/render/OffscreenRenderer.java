@@ -60,13 +60,18 @@ public class OffscreenRenderer extends AnimationRendererBase
 	public OffscreenRenderer(WorldWindow wwd, Animator targetApplication)
 	{
 		Validate.notNull(wwd, "A world window is required");
-		Validate.notNull(targetApplication, "An Animator application is required");
+		validateNotNullAnimatorApplication(targetApplication);
 		Validate.isTrue(wwd.getSceneController() instanceof AnimatorSceneController,
 				"SceneController must be an AnimatorSceneController");
 
 		this.wwd = wwd;
 		this.targetApplication = targetApplication;
 		this.animatorSceneController = (AnimatorSceneController) wwd.getSceneController();
+	}
+	
+	protected void validateNotNullAnimatorApplication(Animator targetApplication)
+	{
+		Validate.notNull(targetApplication, "An Animator application is required");
 	}
 
 	@Override
@@ -135,7 +140,7 @@ public class OffscreenRenderer extends AnimationRendererBase
 			targetFile.getParentFile().mkdirs();
 		}
 
-		targetApplication.setSlider(frame);
+		updateSlider(frame);
 		animation.applyFrame(frame);
 
 		//add the pre render task
@@ -152,7 +157,7 @@ public class OffscreenRenderer extends AnimationRendererBase
 		animatorSceneController.addPostPaintTask(postRenderTask);
 
 		//redraw, and then wait for the screenshot to complete 
-		wwd.redraw();
+		wwd.redrawNow();
 		screenshotTask.waitForScreenshot();
 	}
 
@@ -172,8 +177,13 @@ public class OffscreenRenderer extends AnimationRendererBase
 		wwd.redrawNow();
 		resetViewingParameters();
 	}
+	
+	protected void updateSlider(int frame)
+	{
+		targetApplication.setSlider(frame);
+	}
 
-	private void setupForRendering(double detailHint)
+	protected void setupForRendering(double detailHint)
 	{
 		wasImmediate = ImmediateMode.isImmediate();
 		ImmediateMode.setImmediate(true);
@@ -188,7 +198,7 @@ public class OffscreenRenderer extends AnimationRendererBase
 		orbitView.setDetectCollisions(false);
 	}
 
-	private void resetViewingParameters()
+	protected void resetViewingParameters()
 	{
 		targetApplication.reenableUtilityLayers();
 
