@@ -24,7 +24,6 @@ import au.gov.ga.worldwind.animator.animation.RenderParameters;
 import au.gov.ga.worldwind.animator.animation.camera.StereoCamera;
 import au.gov.ga.worldwind.animator.application.Animator;
 import au.gov.ga.worldwind.common.view.delegate.IDelegateView;
-import au.gov.ga.worldwind.common.view.delegate.IViewDelegate;
 import au.gov.ga.worldwind.common.view.stereo.IStereoViewDelegate;
 import au.gov.ga.worldwind.common.view.stereo.IStereoViewDelegate.Eye;
 
