@@ -17,6 +17,7 @@ package au.gov.ga.worldwind.common.newt;
 
 import gov.nasa.worldwind.WorldWindow;
 import gov.nasa.worldwind.WorldWindowGLAutoDrawable;
+import gov.nasa.worldwind.event.RenderingEvent;
 import gov.nasa.worldwind.render.ScreenCreditController;
 import gov.nasa.worldwind.util.Logging;
 import gov.nasa.worldwind.util.dashboard.DashboardController;
@@ -133,5 +134,11 @@ public class WorldWindowNewtAutoDrawable extends WorldWindowGLAutoDrawable imple
 			}
 		}
 		return 0;
+	}
+
+	@Override
+	protected void callRenderingListeners(RenderingEvent event)
+	{
+		super.callRenderingListeners(new RenderingEvent(awtComponent, event.getStage()));
 	}
 }
