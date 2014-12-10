@@ -35,7 +35,7 @@ import au.gov.ga.worldwind.common.layers.tiled.image.delegate.ImageURLRequesterD
  * @author James Navin (james.navin@ga.gov.au)
  * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
-public class ImmediateURLRequesterDelegate extends ImageURLRequesterDelegate
+public class ImmediateImageURLRequesterDelegate extends ImageURLRequesterDelegate
 {
 	@Override
 	public Runnable createRequestTask(DelegatorTextureTile tile, IDelegatorLayer<DelegatorTextureTile> layer)
@@ -56,7 +56,7 @@ public class ImmediateURLRequesterDelegate extends ImageURLRequesterDelegate
 	public IDelegate fromDefinition(String definition, Element layerElement, AVList params)
 	{
 		if (definition.equalsIgnoreCase(DEFINITION_STRING))
-			return new ImmediateURLRequesterDelegate();
+			return new ImmediateImageURLRequesterDelegate();
 		return null;
 	}
 }

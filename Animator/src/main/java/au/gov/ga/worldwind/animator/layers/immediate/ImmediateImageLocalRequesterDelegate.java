@@ -34,7 +34,7 @@ import au.gov.ga.worldwind.common.layers.tiled.image.delegate.ImageLocalRequeste
  * 
  * @author Michael de Hoog (michael.dehoog@ga.gov.au)
  */
-public class ImmediateLocalRequesterDelegate extends ImageLocalRequesterDelegate
+public class ImmediateImageLocalRequesterDelegate extends ImageLocalRequesterDelegate
 {
 	@Override
 	public Runnable createRequestTask(DelegatorTextureTile tile, IDelegatorLayer<DelegatorTextureTile> layer)
@@ -54,7 +54,7 @@ public class ImmediateLocalRequesterDelegate extends ImageLocalRequesterDelegate
 	public IDelegate fromDefinition(String definition, Element layerElement, AVList params)
 	{
 		if (definition.equalsIgnoreCase(DEFINITION_STRING))
-			return new ImmediateLocalRequesterDelegate();
+			return new ImmediateImageLocalRequesterDelegate();
 		return null;
 	}
 }

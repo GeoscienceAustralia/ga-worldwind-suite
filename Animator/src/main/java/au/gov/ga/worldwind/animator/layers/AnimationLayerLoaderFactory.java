@@ -19,8 +19,18 @@ import gov.nasa.worldwind.layers.Layer;
 
 import java.net.URL;
 
-import au.gov.ga.worldwind.animator.layers.immediate.ImmediateLocalRequesterDelegate;
-import au.gov.ga.worldwind.animator.layers.immediate.ImmediateURLRequesterDelegate;
+import au.gov.ga.worldwind.animator.layers.immediate.ImmediateCurtainLocalRequesterDelegate;
+import au.gov.ga.worldwind.animator.layers.immediate.ImmediateCurtainURLRequesterDelegate;
+import au.gov.ga.worldwind.animator.layers.immediate.ImmediateImageLocalRequesterDelegate;
+import au.gov.ga.worldwind.animator.layers.immediate.ImmediateImageURLRequesterDelegate;
+import au.gov.ga.worldwind.animator.layers.immediate.ImmediateMercatorImageLocalRequesterDelegate;
+import au.gov.ga.worldwind.animator.layers.immediate.ImmediateMercatorImageURLRequesterDelegate;
+import au.gov.ga.worldwind.common.layers.curtain.delegate.CurtainDelegateFactory;
+import au.gov.ga.worldwind.common.layers.curtain.delegate.CurtainLocalRequesterDelegate;
+import au.gov.ga.worldwind.common.layers.curtain.delegate.CurtainURLRequesterDelegate;
+import au.gov.ga.worldwind.common.layers.mercator.delegate.MercatorImageDelegateFactory;
+import au.gov.ga.worldwind.common.layers.mercator.delegate.MercatorImageLocalRequesterDelegate;
+import au.gov.ga.worldwind.common.layers.mercator.delegate.MercatorImageURLRequesterDelegate;
 import au.gov.ga.worldwind.common.layers.tiled.image.delegate.ImageDelegateFactory;
 import au.gov.ga.worldwind.common.layers.tiled.image.delegate.ImageLocalRequesterDelegate;
 import au.gov.ga.worldwind.common.layers.tiled.image.delegate.ImageURLRequesterDelegate;
@@ -30,7 +40,6 @@ import au.gov.ga.worldwind.common.layers.tiled.image.delegate.ImageURLRequesterD
  * 
  * @author James Navin (james.navin@ga.gov.au)
  * @author Michael de Hoog (michael.deHoog@ga.gov.au)
- *
  */
 public class AnimationLayerLoaderFactory
 {
@@ -41,13 +50,21 @@ public class AnimationLayerLoaderFactory
 	
 	static
 	{
-		ImageDelegateFactory.get().registerDelegate(ImmediateURLRequesterDelegate.class);
-		ImageDelegateFactory.get().registerDelegate(ImmediateLocalRequesterDelegate.class);
+		ImageDelegateFactory.get().registerDelegate(ImmediateImageURLRequesterDelegate.class);
+		ImageDelegateFactory.get().registerDelegate(ImmediateImageLocalRequesterDelegate.class);
+		MercatorImageDelegateFactory.get().registerDelegate(ImmediateMercatorImageURLRequesterDelegate.class);
+		MercatorImageDelegateFactory.get().registerDelegate(ImmediateMercatorImageLocalRequesterDelegate.class);
+		CurtainDelegateFactory.get().registerDelegate(ImmediateCurtainURLRequesterDelegate.class);
+		CurtainDelegateFactory.get().registerDelegate(ImmediateCurtainLocalRequesterDelegate.class);
 		//Whenever the ImageURLRequesterDelegate and ImageLocalRequesterDelegate is requested,
 		//replace it with the immediate mode version, which will request the textures immediately
 		//when immediate mode is active.
-		ImageDelegateFactory.get().registerReplacementClass(ImageURLRequesterDelegate.class, ImmediateURLRequesterDelegate.class);
-		ImageDelegateFactory.get().registerReplacementClass(ImageLocalRequesterDelegate.class, ImmediateLocalRequesterDelegate.class);
+		ImageDelegateFactory.get().registerReplacementClass(ImageURLRequesterDelegate.class, ImmediateImageURLRequesterDelegate.class);
+		ImageDelegateFactory.get().registerReplacementClass(ImageLocalRequesterDelegate.class, ImmediateImageLocalRequesterDelegate.class);
+		MercatorImageDelegateFactory.get().registerReplacementClass(MercatorImageURLRequesterDelegate.class, ImmediateMercatorImageURLRequesterDelegate.class);
+		MercatorImageDelegateFactory.get().registerReplacementClass(MercatorImageLocalRequesterDelegate.class, ImmediateMercatorImageLocalRequesterDelegate.class);
+		CurtainDelegateFactory.get().registerReplacementClass(CurtainURLRequesterDelegate.class, ImmediateCurtainURLRequesterDelegate.class);
+		CurtainDelegateFactory.get().registerReplacementClass(CurtainLocalRequesterDelegate.class, ImmediateCurtainLocalRequesterDelegate.class);
 	}
 	
 	/**

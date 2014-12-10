@@ -28,13 +28,8 @@ import java.net.URL;
 
 import org.w3c.dom.Element;
 
-import au.gov.ga.worldwind.animator.layers.immediate.ImmediateLocalRequesterDelegate;
-import au.gov.ga.worldwind.animator.layers.immediate.ImmediateURLRequesterDelegate;
 import au.gov.ga.worldwind.animator.util.ExceptionLogger;
 import au.gov.ga.worldwind.common.layers.LayerFactory;
-import au.gov.ga.worldwind.common.layers.tiled.image.delegate.ImageDelegateFactory;
-import au.gov.ga.worldwind.common.layers.tiled.image.delegate.ImageLocalRequesterDelegate;
-import au.gov.ga.worldwind.common.layers.tiled.image.delegate.ImageURLRequesterDelegate;
 import au.gov.ga.worldwind.common.util.AVKeyMore;
 import au.gov.ga.worldwind.common.util.XMLUtil;
 
@@ -54,17 +49,6 @@ public class DefaultAnimationLayerLoader implements AnimationLayerLoader
 	 * Can be overridden with the {@link #setLayerFactory(BasicLayerFactory)} method.
 	 */
 	private static Factory layerFactory;
-	
-	static
-	{
-		ImageDelegateFactory.get().registerDelegate(ImmediateURLRequesterDelegate.class);
-		ImageDelegateFactory.get().registerDelegate(ImmediateLocalRequesterDelegate.class);
-		//Whenever the ImageURLRequesterDelegate and ImageLocalRequesterDelegate is requested,
-		//replace it with the immediate mode version, which will request the textures immediately
-		//when immediate mode is active.
-		ImageDelegateFactory.get().registerReplacementClass(ImageURLRequesterDelegate.class, ImmediateURLRequesterDelegate.class);
-		ImageDelegateFactory.get().registerReplacementClass(ImageLocalRequesterDelegate.class, ImmediateLocalRequesterDelegate.class);
-	}
 	
 	/**
 	 * @return The layer factory instance to use for creating layers
