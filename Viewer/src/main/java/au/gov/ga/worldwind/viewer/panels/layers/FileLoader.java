@@ -97,15 +97,23 @@ public class FileLoader
 			public void run()
 			{
 				//first attempt to load from a known filetype (eg a KML/KMZ file)
-				LoadedLayer loaded = loadKnownFile(file);
-				if (loaded != null)
+				try
 				{
-					listener.loaded(loaded);
+					LoadedLayer loaded = loadKnownFile(file);
+					if (loaded != null)
+					{
+						listener.loaded(loaded);
+						return;
+					}
+				}
+				catch (Exception e)
+				{
+					listener.error(e);
+					e.printStackTrace();
 					return;
 				}
 
 				Document dataConfig = null;
-
 				try
 				{
 					//first attempt loading the file from the WorldWindInstalled cache
@@ -123,7 +131,7 @@ public class FileLoader
 					else
 					{
 						URL sourceUrl = file.toURI().toURL();
-						loaded = LayerLoader.loadFromElement(dataConfig.getDocumentElement(), sourceUrl, null);
+						LoadedLayer loaded = LayerLoader.loadFromElement(dataConfig.getDocumentElement(), sourceUrl, null);
 						listener.loaded(loaded);
 					}
 				}
