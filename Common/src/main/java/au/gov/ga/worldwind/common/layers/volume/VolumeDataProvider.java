@@ -56,11 +56,45 @@ public interface VolumeDataProvider extends DataProvider<VolumeLayer>
 	double getTop();
 
 	/**
+	 * Calculate elevation of the given slice as a percentage of the distance
+	 * between the top and bottom elevation. For volumes that are linearly
+	 * distributed along the z-axis, this is defined as
+	 * <code>slice / (ZSize - 1)</code>.
+	 * 
+	 * @param slice
+	 * @return Elevation of the given slice between the top and bottom of the
+	 *         volume, in the range 0..1 (0 being the top, 1 being the bottom)
+	 */
+	double getSliceElevationPercent(double slice);
+
+	/**
+	 * Calculate the z-slice for the given elevation percentage that represents
+	 * the elevation between the top and bottom volume slice (in range 0..1).
+	 * For volumes that are linearly distributed along the z-axis, this is
+	 * defined as <code>elevationPercent * (ZSize - 1)</code>.
+	 * <p/>
+	 * This is the inverse of {@link #getSliceElevationPercent(double)}.
+	 * 
+	 * @param elevationPercent
+	 *            Elevation value in range 0..1
+	 * @return Slice for given elevation percentage
+	 * @see #getSliceElevationPercent(double)
+	 */
+	double getElevationPercentSlice(double elevationPercent);
+
+	/**
+	 * @return Number of subsamples to use for the z-axis when generating
+	 *         curtain (lat/lon) volume textures (1 means no subsampling)
+	 */
+	int getZSubsamples();
+
+	/**
 	 * The value of the volume data at the given (x,y,z) point.
 	 * <p/>
-	 * Note that the meaning of (x,y,z) will depend on whether the volume is cell-centred or vertex-centred.
-	 * If cell-centred, (x,y,z) will index a cell in the volume. If the volume is vertex-centred the point will
-	 * index a vertex in the volume.
+	 * Note that the meaning of (x,y,z) will depend on whether the volume is
+	 * cell-centred or vertex-centred. If cell-centred, (x,y,z) will index a
+	 * cell in the volume. If the volume is vertex-centred the point will index
+	 * a vertex in the volume.
 	 * 
 	 * @param x
 	 *            x-coordinate
@@ -68,7 +102,7 @@ public interface VolumeDataProvider extends DataProvider<VolumeLayer>
 	 *            y-coordinate
 	 * @param z
 	 *            z-coordinate
-	 *            
+	 * 
 	 * @return The (x,y,z) value of the volume data.
 	 * 
 	 * @see #isCellCentred()
@@ -76,15 +110,17 @@ public interface VolumeDataProvider extends DataProvider<VolumeLayer>
 	float getValue(int x, int y, int z);
 
 	/**
-	 * Returns whether the data in the volume is cell-centred (i.e. data stored per-cell) or 
-	 * vertex-centred (i.e. data stored per-vertex).
+	 * Returns whether the data in the volume is cell-centred (i.e. data stored
+	 * per-cell) or vertex-centred (i.e. data stored per-vertex).
 	 * <p/>
-	 * If the volume is cell-centred the data array will have dimenions <code>(XSize-1)*(YSize-1)*(ZSize-1)</code>
+	 * If the volume is cell-centred the data array will have dimenions
+	 * <code>(XSize-1)*(YSize-1)*(ZSize-1)</code>
 	 * 
-	 * @return <code>true</code> if the volume data is cell-centred; <code>false</code> otherwise.
+	 * @return <code>true</code> if the volume data is cell-centred;
+	 *         <code>false</code> otherwise.
 	 */
 	boolean isCellCentred();
-	
+
 	/**
 	 * @return The minimum value in the volume data.
 	 */
@@ -147,9 +183,10 @@ public interface VolumeDataProvider extends DataProvider<VolumeLayer>
 	 *         volume.
 	 */
 	FastShape createBoundingBox();
-	
+
 	/**
-	 * @return Whether this volume is the special case of a single slice in the x- y- or z-direction.
+	 * @return Whether this volume is the special case of a single slice in the
+	 *         x- y- or z-direction.
 	 */
 	boolean isSingleSliceVolume();
 }

@@ -154,6 +154,24 @@ public abstract class AbstractVolumeDataProvider extends AbstractDataProvider<Vo
 	}
 
 	@Override
+	public double getSliceElevationPercent(double slice)
+	{
+		return slice / Math.max(zSize - 1, 1);
+	}
+
+	@Override
+	public double getElevationPercentSlice(double elevationPercent)
+	{
+		return elevationPercent * Math.max(zSize - 1, 1);
+	}
+
+	@Override
+	public int getZSubsamples()
+	{
+		return 1;
+	}
+
+	@Override
 	public float getValue(int x, int y, int z)
 	{
 		if (reverseX)
