@@ -254,7 +254,7 @@ public abstract class AbstractVolumeDataProvider extends AbstractDataProvider<Vo
 	}
 
 	@Override
-	public TopBottomFastShape createLongitudeCurtain(int x)
+	public TopBottomFastShape createXCurtain(int x)
 	{
 		List<Position> positions = new ArrayList<Position>();
 		float[] textureCoordinateBuffer = new float[ySize * 4];
@@ -280,7 +280,7 @@ public abstract class AbstractVolumeDataProvider extends AbstractDataProvider<Vo
 	}
 
 	@Override
-	public TopBottomFastShape createLatitudeCurtain(int y)
+	public TopBottomFastShape createYCurtain(int y)
 	{
 		List<Position> positions = new ArrayList<Position>();
 		float[] textureCoordinateBuffer = new float[xSize * 4];

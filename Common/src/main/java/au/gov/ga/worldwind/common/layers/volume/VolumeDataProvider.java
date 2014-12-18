@@ -159,24 +159,24 @@ public interface VolumeDataProvider extends DataProvider<VolumeLayer>
 	FastShape createHorizontalSurface(float maxVariance, Rectangle rectangle);
 
 	/**
-	 * Create a curtain along a given longitude. The top and bottom of the
-	 * curtain follows the volume's elevation at that longitude.
+	 * Create a curtain along a given x value. The top and bottom of the curtain
+	 * follows the volume's elevation at that x.
 	 * 
 	 * @param x
 	 *            x-coordinate of the curtain
 	 * @return A {@link TopBottomFastShape} containing a triangle mesh curtain.
 	 */
-	TopBottomFastShape createLongitudeCurtain(int x);
+	TopBottomFastShape createXCurtain(int x);
 
 	/**
-	 * Create a curtain along a given latitude. The top and bottom of the
-	 * curtain follows the volume's elevation at that latitude.
+	 * Create a curtain along a given y value. The top and bottom of the curtain
+	 * follows the volume's elevation at that y.
 	 * 
 	 * @param y
 	 *            y-coordinate of the curtain
 	 * @return A {@link TopBottomFastShape} containing a triangle mesh curtain.
 	 */
-	TopBottomFastShape createLatitudeCurtain(int y);
+	TopBottomFastShape createYCurtain(int y);
 
 	/**
 	 * @return Shape that can be used to visualize the bounding box of the
