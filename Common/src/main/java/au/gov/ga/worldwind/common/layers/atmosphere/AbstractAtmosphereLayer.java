@@ -16,6 +16,7 @@
 package au.gov.ga.worldwind.common.layers.atmosphere;
 
 import gov.nasa.worldwind.View;
+import gov.nasa.worldwind.geom.Matrix;
 import gov.nasa.worldwind.geom.Vec4;
 import gov.nasa.worldwind.layers.AbstractLayer;
 import gov.nasa.worldwind.render.DrawContext;
@@ -24,6 +25,7 @@ import gov.nasa.worldwind.util.OGLStackHandler;
 import javax.media.opengl.GL2;
 
 import au.gov.ga.worldwind.common.sun.SunPositionService;
+import au.gov.ga.worldwind.common.view.delegate.IDelegateView;
 
 /**
  * Layer that renders atmospheric scattering effects.
@@ -66,6 +68,8 @@ public abstract class AbstractAtmosphereLayer extends AbstractLayer
 		OGLStackHandler ogsh = new OGLStackHandler();
 		try
 		{
+			ogsh.pushProjection(gl);
+			loadProjection(dc, outerRadius);
 			ogsh.pushAttrib(gl, GL2.GL_TEXTURE_BIT | GL2.GL_COLOR_BUFFER_BIT | GL2.GL_DEPTH_BUFFER_BIT
 					| GL2.GL_POLYGON_BIT);
 			gl.glColor4f(1f, 1f, 1f, 1f);
@@ -74,6 +78,22 @@ public abstract class AbstractAtmosphereLayer extends AbstractLayer
 		finally
 		{
 			ogsh.pop(gl);
+		}
+	}
+
+	protected void loadProjection(DrawContext dc, float outerRadius)
+	{
+		IDelegateView view = (IDelegateView) dc.getView();
+		double far = view.getEyePoint().getLength3() + view.getGlobe().getRadius() * 0.2;
+		double near = 1000;
+		Matrix projection = view.computeProjection(near, far);
+
+		if (projection != null)
+		{
+			double[] matrixArray = new double[16];
+			GL2 gl = dc.getGL().getGL2();
+			projection.toArray(matrixArray, 0, false);
+			gl.glLoadMatrixd(matrixArray, 0);
 		}
 	}
 
