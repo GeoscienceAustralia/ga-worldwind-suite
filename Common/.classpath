@@ -45,7 +45,7 @@
 			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="Common/lib/package/native/windows-amd64"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="lib/package/jna-4.1.0.jar"/>
+	<classpathentry kind="lib" path="lib/package/jna-4.1.0.jar" sourcepath="lib/src/jna-4.1.0-sources.jar"/>
 	<classpathentry kind="lib" path="lib/package/guava-17.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/package/jcommander-1.35.jar"/>
 	<classpathentry kind="output" path="bin"/>
