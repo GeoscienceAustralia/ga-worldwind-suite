@@ -77,6 +77,12 @@ public class AtmosphereGroundLayer extends AbstractAtmosphereLayer
 		gl.glDepthMask(false);
 		gl.glEnable(GL2.GL_BLEND);
 		gl.glBlendFunc(GL2.GL_ONE, GL2.GL_ONE);
+		gl.glDisable(GL2.GL_CLIP_PLANE0);
+		gl.glDisable(GL2.GL_CLIP_PLANE1);
+		gl.glDisable(GL2.GL_CLIP_PLANE2);
+		gl.glDisable(GL2.GL_CLIP_PLANE3);
+		gl.glDisable(GL2.GL_CLIP_PLANE4);
+		gl.glDisable(GL2.GL_CLIP_PLANE5);
 		FrameBuffer.renderTexturedQuad(gl, frameBuffer.getTexture().getId());
 		gl.glDepthMask(true);
 	}

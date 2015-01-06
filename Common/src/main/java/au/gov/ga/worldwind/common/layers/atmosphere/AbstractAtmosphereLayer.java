@@ -16,7 +16,9 @@
 package au.gov.ga.worldwind.common.layers.atmosphere;
 
 import gov.nasa.worldwind.View;
+import gov.nasa.worldwind.geom.Line;
 import gov.nasa.worldwind.geom.Matrix;
+import gov.nasa.worldwind.geom.Plane;
 import gov.nasa.worldwind.geom.Vec4;
 import gov.nasa.worldwind.layers.AbstractLayer;
 import gov.nasa.worldwind.render.DrawContext;
@@ -25,6 +27,7 @@ import gov.nasa.worldwind.util.OGLStackHandler;
 import javax.media.opengl.GL2;
 
 import au.gov.ga.worldwind.common.sun.SunPositionService;
+import au.gov.ga.worldwind.common.util.GeometryUtil;
 import au.gov.ga.worldwind.common.view.delegate.IDelegateView;
 
 /**
@@ -39,6 +42,7 @@ import au.gov.ga.worldwind.common.view.delegate.IDelegateView;
 public abstract class AbstractAtmosphereLayer extends AbstractLayer
 {
 	private boolean inited = false;
+	private double[] clippingPlane = new double[4];
 
 	@Override
 	protected void doRender(DrawContext dc)
@@ -71,8 +75,9 @@ public abstract class AbstractAtmosphereLayer extends AbstractLayer
 			ogsh.pushProjection(gl);
 			loadProjection(dc, outerRadius);
 			ogsh.pushAttrib(gl, GL2.GL_TEXTURE_BIT | GL2.GL_COLOR_BUFFER_BIT | GL2.GL_DEPTH_BUFFER_BIT
-					| GL2.GL_POLYGON_BIT);
+					| GL2.GL_POLYGON_BIT | GL2.GL_TRANSFORM_BIT);
 			gl.glColor4f(1f, 1f, 1f, 1f);
+			setupClippingPlane(dc);
 			renderAtmosphere(dc, lightDirection, eyePoint, eyeMagnitude, innerRadius, outerRadius);
 		}
 		finally
@@ -84,7 +89,7 @@ public abstract class AbstractAtmosphereLayer extends AbstractLayer
 	protected void loadProjection(DrawContext dc, float outerRadius)
 	{
 		IDelegateView view = (IDelegateView) dc.getView();
-		double far = view.getEyePoint().getLength3() + view.getGlobe().getRadius() * 0.2;
+		double far = view.getEyePoint().getLength3() + view.getGlobe().getRadius();
 		double near = 1000;
 		Matrix projection = view.computeProjection(near, far);
 
@@ -95,6 +100,34 @@ public abstract class AbstractAtmosphereLayer extends AbstractLayer
 			projection.toArray(matrixArray, 0, false);
 			gl.glLoadMatrixd(matrixArray, 0);
 		}
+	}
+
+	protected void setupClippingPlane(DrawContext dc)
+	{
+		View view = dc.getView();
+		Vec4 forward = view.getForwardVector();
+		Vec4 up = view.getUpVector();
+		Vec4 side = forward.cross3(up);
+		Vec4 origin = Vec4.ZERO;
+		double depth = view.getGlobe().getRadius() * 0.5;
+		Vec4 add = forward.multiply3(depth);
+
+		Vec4 v1 = origin.add3(add);
+		Vec4 v2 = up.add3(add);
+		Vec4 v3 = side.add3(add);
+
+		Line l1 = Line.fromSegment(v1, v3);
+		Line l2 = Line.fromSegment(v1, v2);
+		Plane plane = GeometryUtil.createPlaneContainingLines(l1, l2);
+		Vec4 v = plane.getVector();
+		clippingPlane[0] = v.x;
+		clippingPlane[1] = v.y;
+		clippingPlane[2] = v.z;
+		clippingPlane[3] = v.w;
+
+		GL2 gl = dc.getGL().getGL2();
+		gl.glEnable(GL2.GL_CLIP_PLANE5);
+		gl.glClipPlane(GL2.GL_CLIP_PLANE5, clippingPlane, 0);
 	}
 
 	protected abstract void renderAtmosphere(DrawContext dc, Vec4 lightDirection, Vec4 eyePoint, float eyeMagnitude,
