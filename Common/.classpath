@@ -40,9 +40,9 @@
 			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="Common/lib/include"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="lib/package/jovr-0.4.3.1-SNAPSHOT.jar" sourcepath="lib/src/jovr-0.4.3.1-SNAPSHOT-src.zip">
+	<classpathentry kind="lib" path="lib/package/jovr-0.4.4.1-SNAPSHOT.jar" sourcepath="lib/src/jovr-0.4.4.1-SNAPSHOT-src.zip">
 		<attributes>
-			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="Common/lib/package/native/macosx-universal"/>
+			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="Common/lib/package/native/windows-amd64"/>
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="lib" path="lib/package/jna-4.1.0.jar"/>

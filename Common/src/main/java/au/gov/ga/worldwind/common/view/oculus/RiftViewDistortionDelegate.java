@@ -134,7 +134,7 @@ public class RiftViewDistortionDelegate implements IViewDelegate
 		{
 			throw new IllegalStateException("Unable to start the sensor");
 		}
-		hmd.enableHswDisplay(false);
+		//hmd.enableHswDisplay(false);
 	}
 
 	@Override
