@@ -46,6 +46,12 @@ public class AtmosphereSkyLayer extends AbstractAtmosphereLayer
 	}
 
 	@Override
+	protected int attribBitsToPush()
+	{
+		return 0;
+	}
+
+	@Override
 	protected void renderAtmosphere(DrawContext dc, Vec4 lightDirection, Vec4 eyePoint, float eyeMagnitude,
 			float innerRadius, float outerRadius)
 	{

@@ -75,7 +75,7 @@ public abstract class AbstractAtmosphereLayer extends AbstractLayer
 			ogsh.pushProjection(gl);
 			loadProjection(dc, outerRadius);
 			ogsh.pushAttrib(gl, GL2.GL_TEXTURE_BIT | GL2.GL_COLOR_BUFFER_BIT | GL2.GL_DEPTH_BUFFER_BIT
-					| GL2.GL_POLYGON_BIT | GL2.GL_TRANSFORM_BIT);
+					| GL2.GL_POLYGON_BIT | attribBitsToPush());
 			gl.glColor4f(1f, 1f, 1f, 1f);
 			setupClippingPlane(dc);
 			renderAtmosphere(dc, lightDirection, eyePoint, eyeMagnitude, innerRadius, outerRadius);
@@ -129,6 +129,8 @@ public abstract class AbstractAtmosphereLayer extends AbstractLayer
 		gl.glEnable(GL2.GL_CLIP_PLANE5);
 		gl.glClipPlane(GL2.GL_CLIP_PLANE5, clippingPlane, 0);
 	}
+
+	protected abstract int attribBitsToPush();
 
 	protected abstract void renderAtmosphere(DrawContext dc, Vec4 lightDirection, Vec4 eyePoint, float eyeMagnitude,
 			float innerRadius, float outerRadius);

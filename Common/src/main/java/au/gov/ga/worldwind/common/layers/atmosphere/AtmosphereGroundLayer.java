@@ -19,6 +19,8 @@ import gov.nasa.worldwind.geom.Sector;
 import gov.nasa.worldwind.geom.Vec4;
 import gov.nasa.worldwind.render.DrawContext;
 
+import java.awt.Dimension;
+import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 
 import javax.media.opengl.GL2;
@@ -54,13 +56,21 @@ public class AtmosphereGroundLayer extends AbstractAtmosphereLayer
 	}
 
 	@Override
+	protected int attribBitsToPush()
+	{
+		return GL2.GL_TRANSFORM_BIT | GL2.GL_VIEWPORT_BIT;
+	}
+
+	@Override
 	protected void renderAtmosphere(DrawContext dc, Vec4 lightDirection, Vec4 eyePoint, float eyeMagnitude,
 			float innerRadius, float outerRadius)
 	{
 		GL2 gl = dc.getGL().getGL2();
 
-		frameBuffer.resize(gl, dc.getView().getViewport().getSize());
+		Rectangle viewport = dc.getView().getViewport();
+		frameBuffer.resize(gl, viewport.getSize());
 		frameBuffer.bind(gl);
+		gl.glViewport(0, 0, viewport.width, viewport.height);
 		gl.glClear(GL2.GL_COLOR_BUFFER_BIT | GL2.GL_DEPTH_BUFFER_BIT);
 		GroundShader groundShader = eyeMagnitude < outerRadius ? groundFromAtmosphereShader : groundFromSpaceShader;
 		groundShader.use(gl, eyePoint, lightDirection, Atmosphere.INVWAVELENGTH4, eyeMagnitude, innerRadius,
@@ -74,6 +84,7 @@ public class AtmosphereGroundLayer extends AbstractAtmosphereLayer
 		groundShader.unuse(gl);
 		frameBuffer.unbind(gl);
 
+		gl.glViewport(viewport.x, viewport.y, viewport.width, viewport.height);
 		gl.glDepthMask(false);
 		gl.glEnable(GL2.GL_BLEND);
 		gl.glBlendFunc(GL2.GL_ONE, GL2.GL_ONE);
