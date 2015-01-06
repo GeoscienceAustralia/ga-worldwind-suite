@@ -165,6 +165,8 @@ public class Application
 
 	static
 	{
+		System.setProperty("jna.library.path", System.getProperty("java.library.path"));
+
 		if (Configuration.isMacOS())
 		{
 			System.setProperty("apple.laf.useScreenMenuBar", "true");
@@ -1127,7 +1129,7 @@ public class Application
 			this.fullscreen = fullscreen;
 
 			wwdCanvas.getParent().remove(wwdCanvas); //have to explicitly remove, see http://bugs.java.com/view_bug.do?bug_id=8003398
-			
+
 			if (!fullscreen)
 			{
 				splitPane.setRightComponent(wwdCanvas);
@@ -1508,7 +1510,7 @@ public class Application
 		{
 			listener.willQuit();
 		}
-		
+
 		saveSplitLocation();
 		Settings.get().saveThemeProperties(theme);
 		Settings.get().save();
@@ -1524,12 +1526,12 @@ public class Application
 			System.exit(0);
 		}
 	}
-	
+
 	public void addQuitListener(QuitListener listener)
 	{
 		quitListeners.add(listener);
 	}
-	
+
 	public void removeQuitListener(QuitListener listener)
 	{
 		quitListeners.remove(listener);
@@ -1615,10 +1617,11 @@ public class Application
 	{
 		return frame;
 	}
-	
+
 	public static interface QuitListener
 	{
 		boolean shouldQuit();
+
 		void willQuit();
 	}
 }
