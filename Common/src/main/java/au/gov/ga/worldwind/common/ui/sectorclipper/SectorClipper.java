@@ -15,10 +15,14 @@
  ******************************************************************************/
 package au.gov.ga.worldwind.common.ui.sectorclipper;
 
+import gov.nasa.worldwind.Movable;
 import gov.nasa.worldwind.WorldWindow;
+import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.geom.Angle;
 import gov.nasa.worldwind.geom.LatLon;
+import gov.nasa.worldwind.geom.Position;
 import gov.nasa.worldwind.geom.Sector;
+import gov.nasa.worldwind.render.SurfaceSector;
 import gov.nasa.worldwindx.examples.util.SectorSelector;
 
 import java.awt.BorderLayout;
@@ -36,6 +40,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
 
@@ -60,6 +65,8 @@ import au.gov.ga.worldwind.common.util.Util;
  */
 public class SectorClipper
 {
+	//TODO fix sector clipping over the longitude == -180/180 line
+	
 	public static void beginSelection(Frame frame, String title, WorldWindow wwd, BasicAction clipAction,
 			BasicAction clearAction)
 	{
@@ -129,7 +136,7 @@ public class SectorClipper
 		dialog.add(mainPanel, BorderLayout.CENTER);
 
 
-		int s = 5;
+		final int s = 5;
 		int i = 0;
 		JPanel panel;
 		GridBagConstraints c;
@@ -269,7 +276,7 @@ public class SectorClipper
 
 	private void setSector(Sector sector, boolean fromGlobe)
 	{
-		if(sector == null)
+		if (sector == null)
 		{
 			this.sector = sector;
 			bottomleftField.setText("");
@@ -279,7 +286,7 @@ public class SectorClipper
 			selector.enable();
 			return;
 		}
-		
+
 		if (!settingSector)
 		{
 			settingSector = true;
@@ -356,6 +363,8 @@ public class SectorClipper
 		{
 			super(wwd);
 			this.wwd = wwd;
+			getShape().setPathType(AVKey.GREAT_CIRCLE);
+			getBorder().setPathType(AVKey.GREAT_CIRCLE);
 		}
 
 		public void setSector(Sector sector)
@@ -369,6 +378,59 @@ public class SectorClipper
 		{
 			super.disable();
 			setCursor(null);
+		}
+
+		@Override
+		protected int determineAdjustmentSide(Movable dragObject, double factor)
+		{
+			//overridden superclass' method to fix for great circle sectors
+
+			if (dragObject instanceof SurfaceSector)
+			{
+				Position p = this.getWwd().getCurrentPosition();
+				if (p == null)
+				{
+					return NONE;
+				}
+
+				Sector s = ((SurfaceSector) dragObject).getSector();
+
+				double pLat = (p.getLatitude().degrees - s.getMinLatitude().degrees) / s.getDeltaLatDegrees();
+				double pLon = (p.getLongitude().degrees - s.getMinLongitude().degrees) / s.getDeltaLonDegrees();
+
+				LatLon[] corners = s.getCorners(); //SW, SE, NE, NW
+				LatLon west = LatLon.interpolateGreatCircle(pLat, corners[0], corners[3]); //SW, NW
+				LatLon east = LatLon.interpolateGreatCircle(pLat, corners[1], corners[2]); //SE, NE
+				LatLon south = LatLon.interpolateGreatCircle(pLon, corners[0], corners[1]); //SW, SE
+				LatLon north = LatLon.interpolateGreatCircle(pLon, corners[3], corners[2]); //NW, NE
+
+				double dN = Math.abs(north.latitude.subtract(p.latitude).degrees);
+				double dS = Math.abs(south.latitude.subtract(p.latitude).degrees);
+				double dW = Math.abs(west.longitude.subtract(p.longitude).degrees);
+				double dE = Math.abs(east.longitude.subtract(p.longitude).degrees);
+
+				double sLat = factor * s.getDeltaLatDegrees();
+				double sLon = factor * s.getDeltaLonDegrees();
+
+				if (dN < sLat && dW < sLon)
+					return NORTHWEST;
+				if (dN < sLat && dE < sLon)
+					return NORTHEAST;
+				if (dS < sLat && dW < sLon)
+					return SOUTHWEST;
+				if (dS < sLat && dE < sLon)
+					return SOUTHEAST;
+				if (dN < sLat)
+					return NORTH;
+				if (dS < sLat)
+					return SOUTH;
+				if (dW < sLon)
+					return WEST;
+				if (dE < sLon)
+					return EAST;
+			}
+
+			return NONE;
 		}
 
 		@Override
@@ -423,6 +485,22 @@ public class SectorClipper
 			}
 			degrees %= 360.0;
 			return 7 - (int) (degrees / 45.0);
+		}
+
+		protected SurfaceSector getBorder()
+		{
+			//access the border object using reflection, as it's protected in the superclass
+			try
+			{
+				Method method = SectorSelector.RegionShape.class.getDeclaredMethod("getBorder");
+				method.setAccessible(true);
+				return (SurfaceSector) method.invoke(getShape());
+			}
+			catch (Exception e)
+			{
+				e.printStackTrace();
+				return null;
+			}
 		}
 	}
 }
