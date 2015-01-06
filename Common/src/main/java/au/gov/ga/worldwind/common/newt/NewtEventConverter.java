@@ -17,7 +17,6 @@ package au.gov.ga.worldwind.common.newt;
 
 import java.awt.Component;
 import java.awt.Window;
-import java.util.Arrays;
 
 import javax.swing.SwingUtilities;
 
